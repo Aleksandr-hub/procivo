@@ -129,15 +129,15 @@ Organization (tenant)
 - [x] 20 unit тестів (Value Objects + AggregateRoot) — всі зелені
 - [x] PHPStan level 6 — 0 помилок, PHP CS Fixer — 0 помилок
 
-#### Week 3: CI/CD + Dev Tools
-- [ ] GitHub repository init
+#### Week 3: CI/CD + Dev Tools (частково)
+- [x] GitHub repository init (https://github.com/Aleksandr-hub/procivo)
 - [ ] GitHub Actions pipeline:
   - PHP lint (php-cs-fixer)
   - PHPStan level 6 (піднімемо до 8 поступово)
   - PHPUnit tests
   - Docker build test
-- [ ] Налаштувати PHPStan + baseline
-- [ ] Налаштувати PHP CS Fixer
+- [x] Налаштувати PHPStan (level 6, done in Week 2)
+- [x] Налаштувати PHP CS Fixer (Symfony rules, done in Week 2)
 - [ ] Pre-commit hooks (GrumPHP або Captainhook)
 - [ ] Створити .env.example та документацію по запуску
 
