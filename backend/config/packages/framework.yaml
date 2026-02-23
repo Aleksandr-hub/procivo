@@ -1,0 +1,30 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+
+    session:
+        handler_id: '%env(REDIS_URL)%'
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    cache:
+        app: cache.adapter.redis
+        default_redis_provider: '%env(REDIS_URL)%'
+
+    rate_limiter:
+        login:
+            policy: token_bucket
+            limit: 5
+            rate: { interval: '15 minutes', amount: 5 }
+        register:
+            policy: token_bucket
+            limit: 3
+            rate: { interval: '1 hour', amount: 3 }
+
+when@test:
+    framework:
+        test: true
+        session:
+            storage_factory_id: session.storage.factory.mock_file
+        cache:
+            app: cache.adapter.array

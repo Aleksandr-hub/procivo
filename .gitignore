@@ -1,0 +1,43 @@
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Docker ===
+docker-compose.override.yml
+
+# === Backend (Symfony) ===
+/backend/vendor/
+/backend/var/
+/backend/.env.local
+/backend/.env.local.php
+/backend/.env.*.local
+/backend/.php-cs-fixer.cache
+/backend/phpstan-baseline.neon
+
+# Composer cache (Docker volume artifact)
+/backend/.composer/
+
+# JWT keys (SENSITIVE — never commit private keys!)
+/backend/config/jwt/*.pem
+
+# Symfony generated
+/backend/config/reference.php
+
+# === Frontend (Vue/Node) ===
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env.local
+/frontend/.env.*.local
+
+# === Logs ===
+*.log
+
+# === Claude Code ===
+.claude/

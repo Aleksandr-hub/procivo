@@ -1,0 +1,122 @@
+services:
+  php:
+    build:
+      context: ./docker/php
+      args:
+        XDEBUG: "false"
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - procivo
+
+  nginx:
+    image: nginx:1.28-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - procivo
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: procivo
+      POSTGRES_USER: procivo
+      POSTGRES_PASSWORD: procivo
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U procivo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - procivo
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - procivo
+
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: procivo
+      RABBITMQ_DEFAULT_PASS: procivo
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - procivo
+
+  mercure:
+    image: dunglas/mercure:latest
+    environment:
+      SERVER_NAME: ":3000"
+      MERCURE_PUBLISHER_JWT_KEY: "procivo-mercure-secret-key-change-in-production"
+      MERCURE_SUBSCRIBER_JWT_KEY: "procivo-mercure-secret-key-change-in-production"
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins http://localhost:5173 http://localhost:8080
+        anonymous
+    ports:
+      - "3000:3000"
+    networks:
+      - procivo
+
+  localstack:
+    image: localstack/localstack
+    environment:
+      SERVICES: s3
+      DEFAULT_REGION: eu-central-1
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+    networks:
+      - procivo
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8026:8025"
+      - "1026:1025"
+    networks:
+      - procivo
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  localstack_data:
+
+networks:
+  procivo:
+    driver: bridge

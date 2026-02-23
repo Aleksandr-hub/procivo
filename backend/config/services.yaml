@@ -1,0 +1,89 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # === Shared Kernel ===
+    App\Shared\:
+        resource: '../src/Shared/'
+
+    # === Bounded Contexts ===
+    App\Identity\:
+        resource: '../src/Identity/'
+        exclude:
+            - '../src/Identity/Domain/Entity/'
+
+    App\Organization\:
+        resource: '../src/Organization/'
+        exclude:
+            - '../src/Organization/Domain/Entity/'
+
+    App\TaskManager\:
+        resource: '../src/TaskManager/'
+        exclude:
+            - '../src/TaskManager/Domain/Entity/'
+
+    App\Workflow\:
+        resource: '../src/Workflow/'
+        exclude:
+            - '../src/Workflow/Domain/Entity/'
+
+    App\Resource\:
+        resource: '../src/Resource/'
+        exclude:
+            - '../src/Resource/Domain/Entity/'
+
+    App\Directory\:
+        resource: '../src/Directory/'
+        exclude:
+            - '../src/Directory/Domain/Entity/'
+
+    App\Notification\:
+        resource: '../src/Notification/'
+        exclude:
+            - '../src/Notification/Domain/Entity/'
+
+    App\Search\:
+        resource: '../src/Search/'
+
+    # === Bus Interfaces → Implementations ===
+    App\Shared\Application\Bus\CommandBusInterface:
+        alias: App\Shared\Infrastructure\Bus\MessengerCommandBus
+
+    App\Shared\Application\Bus\QueryBusInterface:
+        alias: App\Shared\Infrastructure\Bus\MessengerQueryBus
+
+    # === Bus Wiring (named Messenger buses) ===
+    App\Shared\Infrastructure\Bus\MessengerCommandBus:
+        arguments:
+            $commandBus: '@command.bus'
+
+    App\Shared\Infrastructure\Bus\MessengerQueryBus:
+        arguments:
+            $messageBus: '@query.bus'
+
+    # === Identity Module ===
+    App\Identity\Domain\Repository\UserRepositoryInterface:
+        alias: App\Identity\Infrastructure\Repository\DoctrineUserRepository
+
+    App\Identity\Application\Port\PasswordHasherInterface:
+        alias: App\Identity\Infrastructure\Hashing\SymfonyPasswordHasher
+
+    Redis:
+        class: Redis
+        calls:
+            - connect: ['%env(REDIS_HOST)%', '%env(int:REDIS_PORT)%']
+
+    App\Identity\Infrastructure\Security\RefreshTokenService:
+        arguments:
+            $redis: '@Redis'
+
+    App\Identity\Infrastructure\Security\SecurityUserProvider:
+        arguments:
+            $userRepository: '@App\Identity\Domain\Repository\UserRepositoryInterface'
+
+    App\Identity\Infrastructure\Security\JwtCreatedListener:
+        tags:
+            - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }

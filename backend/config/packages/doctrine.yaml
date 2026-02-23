@@ -1,0 +1,74 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        profiling_collect_backtrace: '%kernel.debug%'
+        types:
+            uuid: Symfony\Bridge\Doctrine\Types\UuidType
+    orm:
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        identity_generation_preferences:
+            Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
+        auto_mapping: false
+        controller_resolver:
+            auto_mapping: false
+        mappings:
+            Identity:
+                type: xml
+                dir: '%kernel.project_dir%/src/Identity/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Identity\Domain\Entity'
+                is_bundle: false
+            Organization:
+                type: xml
+                dir: '%kernel.project_dir%/src/Organization/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Organization\Domain\Entity'
+                is_bundle: false
+            TaskManager:
+                type: xml
+                dir: '%kernel.project_dir%/src/TaskManager/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\TaskManager\Domain\Entity'
+                is_bundle: false
+            Workflow:
+                type: xml
+                dir: '%kernel.project_dir%/src/Workflow/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Workflow\Domain\Entity'
+                is_bundle: false
+            Resource:
+                type: xml
+                dir: '%kernel.project_dir%/src/Resource/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Resource\Domain\Entity'
+                is_bundle: false
+            Directory:
+                type: xml
+                dir: '%kernel.project_dir%/src/Directory/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Directory\Domain\Entity'
+                is_bundle: false
+            Notification:
+                type: xml
+                dir: '%kernel.project_dir%/src/Notification/Infrastructure/Persistence/Doctrine/Mapping'
+                prefix: 'App\Notification\Domain\Entity'
+                is_bundle: false
+
+when@test:
+    doctrine:
+        dbal:
+            # "TEST_TOKEN" is typically set by ParaTest
+            dbname_suffix: '_test%env(default::TEST_TOKEN)%'
+
+when@prod:
+    doctrine:
+        orm:
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system
