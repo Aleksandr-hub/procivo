@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Organization\Domain\Entity\Employee" table="organization_employees">
+
+        <id name="id" type="string" length="36" column="id"/>
+
+        <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="userId" type="string" length="36" column="user_id"/>
+        <field name="positionId" type="string" length="36" column="position_id"/>
+        <field name="departmentId" type="string" length="36" column="department_id"/>
+        <field name="employeeNumber" type="string" length="50" column="employee_number"/>
+        <field name="hiredAt" type="datetime_immutable" column="hired_at"/>
+        <field name="managerId" type="string" length="36" column="manager_id" nullable="true"/>
+        <field name="status" type="string" length="20" column="status"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+        <field name="updatedAt" type="datetime_immutable" column="updated_at" nullable="true"/>
+
+        <indexes>
+            <index name="idx_emp_org_id" columns="organization_id"/>
+            <index name="idx_emp_user_id" columns="user_id"/>
+            <index name="idx_emp_dept_id" columns="department_id"/>
+            <index name="idx_emp_pos_id" columns="position_id"/>
+            <index name="idx_emp_manager_id" columns="manager_id"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uniq_emp_user_org" columns="user_id,organization_id"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

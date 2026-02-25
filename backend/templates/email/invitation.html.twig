@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You've been invited to {{ organizationName }}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; margin: 0; padding: 40px 20px; }
+        .container { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; }
+        .header { background: #0f172a; padding: 32px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 22px; font-weight: 600; }
+        .body { padding: 32px; }
+        .body p { color: #334155; line-height: 1.6; margin: 0 0 16px; }
+        .cta { text-align: center; margin: 28px 0; }
+        .cta a { display: inline-block; background: #0f172a; color: #fff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; }
+        .footer { padding: 20px 32px; border-top: 1px solid #e2e8f0; }
+        .footer p { color: #94a3b8; font-size: 13px; line-height: 1.5; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Procivo</h1>
+        </div>
+        <div class="body">
+            <p>Hello,</p>
+            <p><strong>{{ inviterName }}</strong> has invited you to join <strong>{{ organizationName }}</strong> on Procivo.</p>
+            <p>Click the button below to accept the invitation and set up your account.</p>
+            <div class="cta">
+                <a href="{{ acceptUrl }}">Accept Invitation</a>
+            </div>
+            <p>This invitation expires on <strong>{{ expiresAt|date('F j, Y \\a\\t g:i A') }}</strong>.</p>
+        </div>
+        <div class="footer">
+            <p>If you didn't expect this invitation, you can safely ignore this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -64,3 +64,22 @@ require: ## Composer require (usage: make require p=package/name)
 
 require-dev: ## Composer require --dev (usage: make require-dev p=package/name)
 	$(COMPOSER) require --dev $(p)
+
+# === Frontend ===
+front-install: ## Install frontend dependencies
+	cd frontend && npm install
+
+front-dev: ## Start frontend dev server
+	cd frontend && npm run dev
+
+front-build: ## Build frontend for production
+	cd frontend && npm run build
+
+front-lint: ## Lint frontend code
+	cd frontend && npm run lint
+
+front-test: ## Run frontend tests
+	cd frontend && npm run test:unit
+
+front-type-check: ## Run TypeScript type check
+	cd frontend && npm run type-check

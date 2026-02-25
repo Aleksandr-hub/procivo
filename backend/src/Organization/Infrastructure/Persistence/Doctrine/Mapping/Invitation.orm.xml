@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Organization\Domain\Entity\Invitation" table="organization_invitations">
+
+        <id name="id" type="string" length="36" column="id"/>
+
+        <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="email" type="string" length="255" column="email"/>
+        <field name="departmentId" type="string" length="36" column="department_id"/>
+        <field name="positionId" type="string" length="36" column="position_id"/>
+        <field name="employeeNumber" type="string" length="50" column="employee_number"/>
+        <field name="token" type="string" length="128" column="token"/>
+        <field name="status" type="string" length="20" column="status"/>
+        <field name="invitedByUserId" type="string" length="36" column="invited_by_user_id"/>
+        <field name="expiresAt" type="datetime_immutable" column="expires_at"/>
+        <field name="acceptedAt" type="datetime_immutable" column="accepted_at" nullable="true"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+
+        <indexes>
+            <index name="idx_inv_org_id" columns="organization_id"/>
+            <index name="idx_inv_email" columns="email"/>
+            <index name="idx_inv_status" columns="status"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uniq_inv_token" columns="token"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

@@ -23,6 +23,7 @@ security:
         - { path: ^/api/v1/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/v1/auth/refresh, roles: PUBLIC_ACCESS }
+        - { path: ^/api/v1/invitations, roles: PUBLIC_ACCESS }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: ROLE_USER }
 

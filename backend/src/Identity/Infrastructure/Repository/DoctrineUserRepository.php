@@ -39,4 +39,22 @@ final readonly class DoctrineUserRepository implements UserRepositoryInterface
     {
         return null !== $this->findByEmail($email);
     }
+
+    public function search(string $term, int $limit): array
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('u')
+            ->from(User::class, 'u')
+            ->where('u.status = :status')
+            ->setParameter('status', 'active')
+            ->orderBy('u.firstName', 'ASC')
+            ->setMaxResults($limit);
+
+        if ('' !== $term) {
+            $qb->andWhere('LOWER(u.email) LIKE :term OR LOWER(u.firstName) LIKE :term OR LOWER(u.lastName) LIKE :term')
+                ->setParameter('term', '%'.mb_strtolower($term).'%');
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }

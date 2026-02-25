@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Organization\Domain\Entity\EmployeeRole" table="organization_employee_roles">
+
+        <id name="id" type="string" length="36" column="id"/>
+
+        <field name="employeeId" type="string" length="36" column="employee_id"/>
+        <field name="roleId" type="string" length="36" column="role_id"/>
+        <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="assignedAt" type="datetime_immutable" column="assigned_at"/>
+
+        <indexes>
+            <index name="idx_emp_role_emp_id" columns="employee_id"/>
+            <index name="idx_emp_role_role_id" columns="role_id"/>
+            <index name="idx_emp_role_org_id" columns="organization_id"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uniq_emp_role" columns="employee_id,role_id"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

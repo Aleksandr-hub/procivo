@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Identity\Infrastructure\Security;
 
-final class RefreshTokenService
+use App\Identity\Application\Port\RefreshTokenManagerInterface;
+
+final class RefreshTokenService implements RefreshTokenManagerInterface
 {
     private const string PREFIX = 'refresh_token:';
     private const string USER_TOKENS_PREFIX = 'user_refresh_tokens:';

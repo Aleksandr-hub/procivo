@@ -30,7 +30,7 @@ final readonly class ChangePasswordHandler
         }
 
         if (!$this->passwordHasher->verify($user->password()->value(), $command->currentPassword)) {
-            throw new InvalidCredentialsException();
+            throw InvalidCredentialsException::wrongCurrentPassword();
         }
 
         $user->changePassword(

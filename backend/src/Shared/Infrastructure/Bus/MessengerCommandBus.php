@@ -22,7 +22,7 @@ final readonly class MessengerCommandBus implements CommandBusInterface
             $this->commandBus->dispatch($command);
         } catch (HandlerFailedException $e) {
             /** @var \Throwable $nested */
-            $nested = $e->getWrappedExceptions()[0] ?? $e;
+            $nested = current($e->getWrappedExceptions()) ?: $e;
 
             throw $nested;
         }

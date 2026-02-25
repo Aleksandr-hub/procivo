@@ -17,4 +17,9 @@ interface UserRepositoryInterface
     public function findByEmail(Email $email): ?User;
 
     public function existsByEmail(Email $email): bool;
+
+    /**
+     * @return list<User>
+     */
+    public function search(string $term, int $limit): array;
 }

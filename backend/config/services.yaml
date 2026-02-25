@@ -55,6 +55,9 @@ services:
     App\Shared\Application\Bus\QueryBusInterface:
         alias: App\Shared\Infrastructure\Bus\MessengerQueryBus
 
+    App\Shared\Application\Bus\EventBusInterface:
+        alias: App\Shared\Infrastructure\Bus\MessengerEventBus
+
     # === Bus Wiring (named Messenger buses) ===
     App\Shared\Infrastructure\Bus\MessengerCommandBus:
         arguments:
@@ -64,12 +67,22 @@ services:
         arguments:
             $messageBus: '@query.bus'
 
+    App\Shared\Infrastructure\Bus\MessengerEventBus:
+        arguments:
+            $eventBus: '@event.bus'
+
     # === Identity Module ===
     App\Identity\Domain\Repository\UserRepositoryInterface:
         alias: App\Identity\Infrastructure\Repository\DoctrineUserRepository
 
     App\Identity\Application\Port\PasswordHasherInterface:
         alias: App\Identity\Infrastructure\Hashing\SymfonyPasswordHasher
+
+    App\Identity\Application\Port\JwtTokenManagerInterface:
+        alias: App\Identity\Infrastructure\Security\LexikJwtTokenManager
+
+    App\Identity\Application\Port\RefreshTokenManagerInterface:
+        alias: App\Identity\Infrastructure\Security\RefreshTokenService
 
     Redis:
         class: Redis
@@ -87,3 +100,30 @@ services:
     App\Identity\Infrastructure\Security\JwtCreatedListener:
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
+
+    # === Organization Module ===
+    App\Organization\Domain\Repository\OrganizationRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineOrganizationRepository
+
+    App\Organization\Domain\Repository\DepartmentRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineDepartmentRepository
+
+    App\Organization\Domain\Repository\PositionRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrinePositionRepository
+
+    App\Organization\Domain\Repository\EmployeeRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineEmployeeRepository
+
+    App\Organization\Application\Port\CurrentUserProviderInterface:
+        alias: App\Organization\Infrastructure\Service\SecurityCurrentUserProvider
+
+    App\Organization\Domain\Repository\InvitationRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineInvitationRepository
+
+    App\Organization\Application\Port\InvitationMailerInterface:
+        alias: App\Organization\Infrastructure\Service\SymfonyInvitationMailer
+
+    App\Organization\Infrastructure\Service\SymfonyInvitationMailer:
+        arguments:
+            $frontendUrl: '%env(FRONTEND_URL)%'
+            $fromEmail: '%env(MAILER_FROM)%'
