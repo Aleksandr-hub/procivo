@@ -70,6 +70,12 @@ const router = createRouter({
           props: true,
         },
         {
+          path: 'organizations/:orgId/tasks/:taskId',
+          name: 'task-detail',
+          component: () => import('@/modules/tasks/pages/TaskDetailPage.vue'),
+          props: true,
+        },
+        {
           path: 'organizations/:orgId/boards',
           name: 'boards',
           component: () => import('@/modules/tasks/pages/BoardsPage.vue'),

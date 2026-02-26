@@ -103,7 +103,7 @@ final readonly class ExecuteTaskActionHandler
         $missingFields = [];
         foreach ($formFields as $field) {
             $isRequired = (bool) ($field['required'] ?? false);
-            $fieldKey = \is_string($field['key'] ?? null) ? $field['key'] : '';
+            $fieldKey = \is_string($field['name'] ?? null) ? $field['name'] : '';
 
             if ($isRequired && '' !== $fieldKey) {
                 $value = $formData[$fieldKey] ?? null;

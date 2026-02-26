@@ -1,10 +1,17 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { taskApi } from '@/modules/tasks/api/task.api'
-import type { CreateTaskPayload, TaskDTO, UpdateTaskPayload } from '@/modules/tasks/types/task.types'
+import type {
+  CreateTaskPayload,
+  ExecuteActionPayload,
+  TaskDTO,
+  TaskDetailDTO,
+  UpdateTaskPayload,
+} from '@/modules/tasks/types/task.types'
 
 export const useTaskStore = defineStore('task', () => {
   const tasks = ref<TaskDTO[]>([])
+  const currentTask = ref<TaskDetailDTO | null>(null)
   const loading = ref(false)
 
   async function fetchTasks(orgId: string, status?: string, assigneeId?: string) {
@@ -42,14 +49,36 @@ export const useTaskStore = defineStore('task', () => {
     await fetchTasks(orgId)
   }
 
+  async function fetchTask(orgId: string, taskId: string) {
+    loading.value = true
+    try {
+      currentTask.value = await taskApi.get(orgId, taskId)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function executeAction(orgId: string, taskId: string, data: ExecuteActionPayload) {
+    await taskApi.executeAction(orgId, taskId, data)
+    await fetchTask(orgId, taskId)
+  }
+
+  function clearCurrentTask() {
+    currentTask.value = null
+  }
+
   return {
     tasks,
+    currentTask,
     loading,
     fetchTasks,
+    fetchTask,
     createTask,
     updateTask,
     transitionTask,
     assignTask,
     deleteTask,
+    executeAction,
+    clearCurrentTask,
   }
 })

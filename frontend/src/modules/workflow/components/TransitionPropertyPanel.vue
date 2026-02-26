@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import type { Edge } from '@vue-flow/core'
 import { processDefinitionApi } from '@/modules/workflow/api/process-definition.api'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
+import FormFieldsBuilder from '@/modules/workflow/components/FormFieldsBuilder.vue'
 import type { ProcessDefinitionDetailDTO, FormFieldDefinition } from '@/modules/workflow/types/process-definition.types'
 
 const props = defineProps<{
@@ -24,14 +25,18 @@ const toast = useToast()
 const { t } = useI18n()
 
 const name = ref('')
+const actionKey = ref('')
 const conditionExpression = ref('')
+const formFields = ref<FormFieldDefinition[]>([])
 
 watch(
   () => props.edge,
   (edge) => {
     const tr = props.definition.transitions.find((transition) => transition.id === edge.id)
     name.value = tr?.name || ''
+    actionKey.value = tr?.action_key || ''
     conditionExpression.value = tr?.condition_expression || ''
+    formFields.value = tr?.form_fields ? [...tr.form_fields] : []
   },
   { immediate: true },
 )
@@ -56,7 +61,9 @@ async function save() {
       source_node_id: props.edge.source,
       target_node_id: props.edge.target,
       name: name.value || null,
+      action_key: actionKey.value || null,
       condition_expression: conditionExpression.value || null,
+      form_fields: formFields.value.length > 0 ? formFields.value : undefined,
     })
     emit('update', {
       name: name.value,
@@ -95,6 +102,17 @@ async function remove() {
           :placeholder="t('workflow.transitionNamePlaceholder')"
           class="w-full"
         />
+      </div>
+
+      <div class="form-group">
+        <label>{{ t('workflow.actionKey') }}</label>
+        <InputText
+          v-model="actionKey"
+          :disabled="readonly"
+          :placeholder="t('workflow.actionKeyPlaceholder')"
+          class="w-full"
+        />
+        <small class="help-text">{{ t('workflow.actionKeyHelp') }}</small>
       </div>
 
       <div class="form-group">
@@ -137,6 +155,14 @@ async function remove() {
           {{ t('workflow.transitionNoFormFields') }}
         </small>
       </div>
+
+      <Divider />
+
+      <FormFieldsBuilder
+        :fields="formFields"
+        :readonly="readonly"
+        @update="formFields = $event"
+      />
 
       <div v-if="!readonly" class="panel-actions">
         <Button :label="t('common.save')" size="small" @click="save" />

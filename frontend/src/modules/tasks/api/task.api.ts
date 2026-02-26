@@ -1,6 +1,12 @@
 import httpClient from '@/shared/api/http-client'
 import type { IdResponse, MessageResponse } from '@/shared/types/api.types'
-import type { CreateTaskPayload, TaskDTO, UpdateTaskPayload } from '@/modules/tasks/types/task.types'
+import type {
+  CreateTaskPayload,
+  ExecuteActionPayload,
+  TaskDTO,
+  TaskDetailDTO,
+  UpdateTaskPayload,
+} from '@/modules/tasks/types/task.types'
 
 export const taskApi = {
   list(orgId: string, status?: string, assigneeId?: string): Promise<TaskDTO[]> {
@@ -10,7 +16,7 @@ export const taskApi = {
     return httpClient.get(`/organizations/${orgId}/tasks`, { params }).then((r) => r.data)
   },
 
-  get(orgId: string, taskId: string): Promise<TaskDTO> {
+  get(orgId: string, taskId: string): Promise<TaskDetailDTO> {
     return httpClient.get(`/organizations/${orgId}/tasks/${taskId}`).then((r) => r.data)
   },
 
@@ -36,5 +42,11 @@ export const taskApi = {
 
   delete(orgId: string, taskId: string): Promise<void> {
     return httpClient.delete(`/organizations/${orgId}/tasks/${taskId}`).then(() => undefined)
+  },
+
+  executeAction(orgId: string, taskId: string, data: ExecuteActionPayload): Promise<MessageResponse> {
+    return httpClient
+      .post(`/organizations/${orgId}/tasks/${taskId}/execute-action`, data)
+      .then((r) => r.data)
   },
 }

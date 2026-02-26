@@ -226,7 +226,16 @@ function getTransitionLabel(transition: string): string {
       <template #empty>
         <div class="empty-table">{{ t('tasks.noTasksFound') }}</div>
       </template>
-      <Column field="title" :header="t('tasks.titleColumn')" sortable style="min-width: 200px" />
+      <Column field="title" :header="t('tasks.titleColumn')" sortable style="min-width: 200px">
+        <template #body="{ data }">
+          <router-link
+            :to="{ name: 'task-detail', params: { orgId, taskId: data.id } }"
+            class="task-title-link"
+          >
+            {{ data.title }}
+          </router-link>
+        </template>
+      </Column>
       <Column field="status" :header="t('tasks.statusColumn')" sortable style="width: 140px">
         <template #body="{ data }">
           <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
@@ -346,5 +355,15 @@ function getTransitionLabel(transition: string): string {
   align-items: center;
   gap: 0.25rem;
   flex-wrap: wrap;
+}
+
+.task-title-link {
+  color: var(--p-primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.task-title-link:hover {
+  text-decoration: underline;
 }
 </style>

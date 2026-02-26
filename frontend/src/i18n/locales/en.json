@@ -660,6 +660,9 @@
     "transitionNoFormFields": "The source node has no form fields. Add form fields to the stage before this gateway to use conditions.",
     "transitionUpdated": "Transition updated",
     "transitionDeleted": "Transition deleted",
+    "actionKey": "Action Key",
+    "actionKeyPlaceholder": "e.g. approve, reject",
+    "actionKeyHelp": "Unique identifier for this action. Used in task forms as a button. Leave empty for default transitions.",
 
     "formFields": "Form Fields",
     "formFieldsHelp": "Define the fields that the assignee must fill out to complete this stage.",
@@ -713,6 +716,19 @@
     "gatewayExclusiveExample": "Example: After \"Review\" stage, the reviewer marks Approved or Rejected. Add XOR gateway with two outgoing paths: one with condition \"result == 'approved'\" leading to \"Proceed\", another with \"result == 'rejected'\" leading to \"Rework\". Only ONE path is taken.",
     "gatewayParallelExample": "Example: After hiring a new employee, you need to set up workspace, create accounts, and prepare documents — all at the same time. Add AND gateway that splits into 3 parallel stages. Add another AND gateway to merge them — the process waits until ALL 3 are done before continuing.",
     "gatewayInclusiveExample": "Example: After receiving an order, you might need to check inventory AND/OR arrange delivery depending on item type. OR gateway runs all paths whose conditions match."
+  },
+  "taskDetail": {
+    "dueDate": "Due date",
+    "estimatedHours": "Est. hours",
+    "created": "Created",
+    "workflowInfo": "Workflow Stage",
+    "stageCompleted": "This workflow stage has been completed.",
+    "selectAction": "Select an action to proceed",
+    "submitAction": "Submit: {action}",
+    "actionExecuted": "Action executed successfully",
+    "actionFailed": "Failed to execute action",
+    "sharedFields": "Stage Information",
+    "fieldRequired": "This field is required"
   },
   "templates": {
     "simpleTaskName": "Stage with Review",

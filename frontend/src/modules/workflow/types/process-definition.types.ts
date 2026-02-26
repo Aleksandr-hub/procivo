@@ -50,7 +50,9 @@ export interface TransitionDTO {
   source_node_id: string
   target_node_id: string
   name: string | null
+  action_key: string | null
   condition_expression: string | null
+  form_fields: FormFieldDefinition[]
   sort_order: number
 }
 
@@ -90,7 +92,9 @@ export interface AddTransitionPayload {
   source_node_id: string
   target_node_id: string
   name?: string | null
+  action_key?: string | null
   condition_expression?: string | null
+  form_fields?: FormFieldDefinition[]
   sort_order?: number
 }
 
@@ -98,6 +102,8 @@ export interface UpdateTransitionPayload {
   source_node_id?: string
   target_node_id?: string
   name?: string | null
+  action_key?: string | null
   condition_expression?: string | null
+  form_fields?: FormFieldDefinition[]
   sort_order?: number
 }
