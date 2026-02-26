@@ -1,0 +1,174 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManager\Presentation\Controller;
+
+use App\Organization\Presentation\Security\OrganizationAuthorizer;
+use App\Shared\Application\Bus\CommandBusInterface;
+use App\Shared\Application\Bus\QueryBusInterface;
+use App\TaskManager\Application\Command\AssignTask\AssignTaskCommand;
+use App\TaskManager\Application\Command\CreateTask\CreateTaskCommand;
+use App\TaskManager\Application\Command\DeleteTask\DeleteTaskCommand;
+use App\TaskManager\Application\Command\TransitionTask\TransitionTaskCommand;
+use App\TaskManager\Application\Command\UpdateTask\UpdateTaskCommand;
+use App\TaskManager\Application\Query\GetTask\GetTaskQuery;
+use App\TaskManager\Application\Query\ListTasks\ListTasksQuery;
+use App\TaskManager\Domain\ValueObject\TaskId;
+use App\Workflow\Application\Command\ExecuteTaskAction\ExecuteTaskActionCommand;
+use App\Workflow\Application\Query\GetTaskWorkflowContext\GetTaskWorkflowContextQuery;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/api/v1/organizations/{organizationId}/tasks', name: 'api_v1_tasks_')]
+final readonly class TaskController
+{
+    public function __construct(
+        private CommandBusInterface $commandBus,
+        private QueryBusInterface $queryBus,
+        private OrganizationAuthorizer $authorizer,
+    ) {
+    }
+
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(string $organizationId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_CREATE');
+        $data = $this->decodeJson($request);
+
+        $id = TaskId::generate()->value();
+
+        $this->commandBus->dispatch(new CreateTaskCommand(
+            id: $id,
+            organizationId: $organizationId,
+            title: $data['title'] ?? '',
+            description: $data['description'] ?? null,
+            priority: $data['priority'] ?? 'medium',
+            dueDate: $data['due_date'] ?? null,
+            estimatedHours: isset($data['estimated_hours']) ? (float) $data['estimated_hours'] : null,
+            creatorId: $data['creator_id'] ?? '',
+            assigneeId: isset($data['assignee_id']) && \is_string($data['assignee_id']) ? $data['assignee_id'] : null,
+        ));
+
+        return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
+    }
+
+    #[Route('', name: 'list', methods: ['GET'])]
+    public function list(string $organizationId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_VIEW');
+
+        $status = $request->query->get('status');
+        $assigneeId = $request->query->get('assignee_id');
+
+        $tasks = $this->queryBus->ask(new ListTasksQuery(
+            organizationId: $organizationId,
+            status: \is_string($status) ? $status : null,
+            assigneeId: \is_string($assigneeId) ? $assigneeId : null,
+        ));
+
+        return new JsonResponse($tasks);
+    }
+
+    #[Route('/{taskId}', name: 'show', methods: ['GET'])]
+    public function show(string $organizationId, string $taskId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_VIEW');
+
+        $dto = $this->queryBus->ask(new GetTaskQuery($taskId));
+        $workflowContext = $this->queryBus->ask(new GetTaskWorkflowContextQuery($taskId));
+
+        /** @var array<string, mixed> $taskData */
+        $taskData = json_decode(json_encode($dto, \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR);
+        $taskData['workflow_context'] = $workflowContext;
+
+        return new JsonResponse($taskData);
+    }
+
+    #[Route('/{taskId}/execute-action', name: 'execute_action', methods: ['POST'])]
+    public function executeAction(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        /** @var string $actionKey */
+        $actionKey = $data['action_key'] ?? '';
+        /** @var array<string, mixed> $formData */
+        $formData = isset($data['form_data']) && \is_array($data['form_data']) ? $data['form_data'] : [];
+
+        $this->commandBus->dispatch(new ExecuteTaskActionCommand(
+            taskId: $taskId,
+            actionKey: $actionKey,
+            formData: $formData,
+        ));
+
+        return new JsonResponse(['message' => 'Action executed.']);
+    }
+
+    #[Route('/{taskId}', name: 'update', methods: ['PUT'])]
+    public function update(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new UpdateTaskCommand(
+            taskId: $taskId,
+            title: $data['title'] ?? '',
+            description: $data['description'] ?? null,
+            priority: $data['priority'] ?? 'medium',
+            dueDate: $data['due_date'] ?? null,
+            estimatedHours: isset($data['estimated_hours']) ? (float) $data['estimated_hours'] : null,
+        ));
+
+        return new JsonResponse(['message' => 'Task updated.']);
+    }
+
+    #[Route('/{taskId}/transition', name: 'transition', methods: ['POST'])]
+    public function transition(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new TransitionTaskCommand(
+            taskId: $taskId,
+            transition: $data['transition'] ?? '',
+        ));
+
+        return new JsonResponse(['message' => 'Task status updated.']);
+    }
+
+    #[Route('/{taskId}/assign', name: 'assign', methods: ['PUT'])]
+    public function assign(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new AssignTaskCommand(
+            taskId: $taskId,
+            assigneeId: isset($data['assignee_id']) && \is_string($data['assignee_id']) ? $data['assignee_id'] : null,
+        ));
+
+        return new JsonResponse(['message' => 'Task assignee updated.']);
+    }
+
+    #[Route('/{taskId}', name: 'delete', methods: ['DELETE'])]
+    public function delete(string $organizationId, string $taskId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_DELETE');
+
+        $this->commandBus->dispatch(new DeleteTaskCommand($taskId));
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function decodeJson(Request $request): array
+    {
+        /* @var array<string, mixed> */
+        return json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR) ?? [];
+    }
+}

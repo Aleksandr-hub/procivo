@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\Task" table="task_manager_tasks">
+
+        <id name="id" type="string" length="36" column="id"/>
+
+        <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="title" type="string" length="255" column="title"/>
+        <field name="description" type="text" nullable="true" column="description"/>
+        <field name="status" type="string" length="20" column="status"/>
+        <field name="priority" type="string" length="20" column="priority"/>
+        <field name="dueDate" type="datetime_immutable" nullable="true" column="due_date"/>
+        <field name="estimatedHours" type="float" nullable="true" column="estimated_hours"/>
+        <field name="assigneeId" type="string" length="36" nullable="true" column="assignee_id"/>
+        <field name="creatorId" type="string" length="36" column="creator_id"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+        <field name="updatedAt" type="datetime_immutable" nullable="true" column="updated_at"/>
+
+        <indexes>
+            <index name="idx_task_organization" columns="organization_id"/>
+            <index name="idx_task_status" columns="status"/>
+            <index name="idx_task_assignee" columns="assignee_id"/>
+            <index name="idx_task_due_date" columns="due_date"/>
+            <index name="idx_task_creator" columns="creator_id"/>
+        </indexes>
+
+    </entity>
+
+</doctrine-mapping>

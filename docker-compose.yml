@@ -14,6 +14,23 @@ services:
     networks:
       - procivo
 
+  messenger-worker:
+    build:
+      context: ./docker/php
+      args:
+        XDEBUG: "false"
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      php:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ["php", "bin/console", "messenger:consume", "async", "--time-limit=3600", "--memory-limit=128M", "-vv"]
+    networks:
+      - procivo
+
   nginx:
     image: nginx:1.28-alpine
     ports:

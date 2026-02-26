@@ -24,7 +24,13 @@ framework:
             failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
-        routing: {}
+        routing:
+            # Task events → async (RabbitMQ) for notification processing
+            App\TaskManager\Domain\Event\TaskAssignedEvent: async
+            App\TaskManager\Domain\Event\TaskStatusChangedEvent: async
+            App\TaskManager\Domain\Event\CommentAddedEvent: async
+            # Workflow timer → async (RabbitMQ) with DelayStamp
+            App\Workflow\Infrastructure\Timer\FireTimerMessage: async
 
 when@test:
     framework:

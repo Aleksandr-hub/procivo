@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\BoardColumn"
+            table="task_manager_board_columns">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="boardId" column="board_id" type="string" length="36"/>
+        <field name="name" type="string" length="255"/>
+        <field name="position" type="integer"/>
+        <field name="statusMapping" column="status_mapping" type="string" length="50" nullable="true"/>
+        <field name="wipLimit" column="wip_limit" type="integer" nullable="true"/>
+        <field name="color" type="string" length="7" nullable="true"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+
+        <indexes>
+            <index name="idx_column_board" columns="board_id"/>
+            <index name="idx_column_position" columns="board_id,position"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

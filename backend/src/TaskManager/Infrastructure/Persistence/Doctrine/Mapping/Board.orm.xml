@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\Board"
+            table="task_manager_boards">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="organizationId" column="organization_id" type="string" length="36"/>
+        <field name="name" type="string" length="255"/>
+        <field name="description" type="text" nullable="true"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="updatedAt" column="updated_at" type="datetime_immutable" nullable="true"/>
+
+        <indexes>
+            <index name="idx_board_organization" columns="organization_id"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

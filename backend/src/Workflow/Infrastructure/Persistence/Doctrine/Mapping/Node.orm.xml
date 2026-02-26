@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Workflow\Domain\Entity\Node"
+            table="workflow_nodes">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="processDefinitionId" column="process_definition_id" type="string" length="36"/>
+        <field name="type" type="string" length="30"/>
+        <field name="name" type="string" length="255"/>
+        <field name="description" type="text" nullable="true"/>
+        <field name="config" type="json"/>
+        <field name="positionX" column="position_x" type="float"/>
+        <field name="positionY" column="position_y" type="float"/>
+
+        <indexes>
+            <index name="idx_wf_node_definition" columns="process_definition_id"/>
+            <index name="idx_wf_node_type" columns="process_definition_id,type"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

@@ -127,3 +127,81 @@ services:
         arguments:
             $frontendUrl: '%env(FRONTEND_URL)%'
             $fromEmail: '%env(MAILER_FROM)%'
+
+    # === TaskManager Module ===
+    App\TaskManager\Domain\Repository\TaskRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineTaskRepository
+
+    App\TaskManager\Domain\Repository\BoardRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineBoardRepository
+
+    App\TaskManager\Domain\Repository\BoardColumnRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineBoardColumnRepository
+
+    App\TaskManager\Domain\Repository\CommentRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineCommentRepository
+
+    App\TaskManager\Domain\Repository\LabelRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineLabelRepository
+
+    App\TaskManager\Domain\Repository\TaskAssignmentRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineTaskAssignmentRepository
+
+    App\TaskManager\Domain\Repository\TaskAttachmentRepositoryInterface:
+        alias: App\TaskManager\Infrastructure\Repository\DoctrineTaskAttachmentRepository
+
+    App\TaskManager\Application\Port\FileStorageInterface:
+        alias: App\TaskManager\Infrastructure\Storage\S3FileStorage
+
+    App\TaskManager\Infrastructure\Storage\S3FileStorage:
+        arguments:
+            $endpoint: '%env(AWS_ENDPOINT)%'
+            $region: '%env(AWS_REGION)%'
+            $bucket: '%env(AWS_BUCKET)%'
+            $accessKeyId: '%env(AWS_ACCESS_KEY_ID)%'
+            $secretAccessKey: '%env(AWS_SECRET_ACCESS_KEY)%'
+
+    # === Workflow Module ===
+    App\Workflow\Domain\Repository\ProcessDefinitionRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\DoctrineProcessDefinitionRepository
+
+    App\Workflow\Domain\Repository\NodeRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\DoctrineNodeRepository
+
+    App\Workflow\Domain\Repository\TransitionRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\DoctrineTransitionRepository
+
+    App\Workflow\Domain\Repository\ProcessDefinitionVersionRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\DoctrineProcessDefinitionVersionRepository
+
+    App\Workflow\Domain\Repository\ProcessInstanceRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\EventSourcedProcessInstanceRepository
+
+    App\Workflow\Infrastructure\EventStore\EventStoreInterface:
+        alias: App\Workflow\Infrastructure\EventStore\DoctrineEventStore
+
+    App\Workflow\Domain\Repository\WorkflowTaskLinkRepositoryInterface:
+        alias: App\Workflow\Infrastructure\Repository\DoctrineWorkflowTaskLinkRepository
+
+    App\Workflow\Infrastructure\Timer\TimerServiceInterface:
+        alias: App\Workflow\Infrastructure\Timer\RabbitMqTimerService
+
+    App\Workflow\Infrastructure\Timer\RabbitMqTimerService:
+        arguments:
+            $messageBus: '@messenger.default_bus'
+
+    # === Notification Module ===
+    App\Notification\Domain\Repository\NotificationRepositoryInterface:
+        alias: App\Notification\Infrastructure\Repository\DoctrineNotificationRepository
+
+    App\TaskManager\Application\Command\TransitionTask\TransitionTaskHandler:
+        arguments:
+            $taskStateMachine: '@state_machine.task'
+
+    App\TaskManager\Application\Query\ListTasks\ListTasksHandler:
+        arguments:
+            $taskStateMachine: '@state_machine.task'
+
+    App\TaskManager\Application\Query\GetTask\GetTaskHandler:
+        arguments:
+            $taskStateMachine: '@state_machine.task'

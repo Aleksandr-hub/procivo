@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrganizationStore } from '@/modules/organization/stores/organization.store'
 import { useI18n } from 'vue-i18n'
@@ -12,6 +12,18 @@ const route = useRoute()
 const router = useRouter()
 const orgStore = useOrganizationStore()
 const { t } = useI18n()
+
+const tabRoutes = computed(() => [
+  `/organizations/${props.orgId}/departments`,
+  `/organizations/${props.orgId}/employees`,
+  `/organizations/${props.orgId}/org-chart`,
+  `/organizations/${props.orgId}/roles`,
+])
+
+const activeIndex = computed(() => {
+  const idx = tabRoutes.value.findIndex((r) => route.path.startsWith(r))
+  return idx >= 0 ? idx : 0
+})
 
 onMounted(async () => {
   orgStore.selectOrganization(props.orgId)
@@ -35,20 +47,13 @@ watch(
       <h2>{{ orgStore.currentOrg.name }}</h2>
       <TabMenu
         :model="[
-          { label: t('organizationDetail.departments'), icon: 'pi pi-sitemap', route: `/organizations/${orgId}/departments` },
-          { label: t('organizationDetail.employees'), icon: 'pi pi-users', route: `/organizations/${orgId}/employees` },
-          { label: t('organizationDetail.orgChart'), icon: 'pi pi-share-alt', route: `/organizations/${orgId}/org-chart` },
-          { label: t('organizationDetail.roles'), icon: 'pi pi-shield', route: `/organizations/${orgId}/roles` },
+          { label: t('organizationDetail.departments'), icon: 'pi pi-sitemap' },
+          { label: t('organizationDetail.employees'), icon: 'pi pi-users' },
+          { label: t('organizationDetail.orgChart'), icon: 'pi pi-share-alt' },
+          { label: t('organizationDetail.roles'), icon: 'pi pi-shield' },
         ]"
-        @tab-change="(e: { index: number }) => {
-          const items = [
-            `/organizations/${orgId}/departments`,
-            `/organizations/${orgId}/employees`,
-            `/organizations/${orgId}/org-chart`,
-            `/organizations/${orgId}/roles`,
-          ]
-          router.push(items[e.index])
-        }"
+        :activeIndex="activeIndex"
+        @tab-change="(e: { index: number }) => router.push(tabRoutes[e.index])"
       />
     </div>
     <RouterView />

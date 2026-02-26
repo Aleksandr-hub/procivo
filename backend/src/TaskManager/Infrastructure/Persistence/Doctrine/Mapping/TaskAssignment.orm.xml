@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\TaskAssignment"
+            table="task_manager_task_assignments">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="taskId" column="task_id" type="string" length="36"/>
+        <field name="employeeId" column="employee_id" type="string" length="36"/>
+        <field name="role" type="string" length="20"/>
+        <field name="assignedBy" column="assigned_by" type="string" length="36"/>
+        <field name="assignedAt" column="assigned_at" type="datetime_immutable"/>
+
+        <indexes>
+            <index name="idx_assignment_task" columns="task_id"/>
+            <index name="idx_assignment_employee" columns="employee_id"/>
+            <index name="idx_assignment_unique" columns="task_id,employee_id,role"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

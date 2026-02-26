@@ -21,5 +21,19 @@
     "error.permission_not_found": "Дозвіл з ID \"%id%\" не знайдено.",
     "error.permission_already_exists": "Дозвіл для ресурсу \"%resource%\" та дії \"%action%\" вже існує для ролі \"%roleId%\".",
     "error.invalid_argument": "Невірний аргумент.",
-    "error.wrong_current_password": "Поточний пароль невірний."
+    "error.wrong_current_password": "Поточний пароль невірний.",
+    "error.task_not_found": "Задачу з ID \"%id%\" не знайдено.",
+    "error.invalid_task_transition": "Перехід \"%transition%\" неможливий зі статусу \"%status%\".",
+    "error.board_not_found": "Дошку з ID \"%id%\" не знайдено.",
+    "error.board_column_not_found": "Колонку дошки з ID \"%id%\" не знайдено.",
+    "error.comment_not_found": "Коментар з ID \"%id%\" не знайдено.",
+    "error.label_not_found": "Мітку з ID \"%id%\" не знайдено.",
+    "error.attachment_not_found": "Вкладення з ID \"%id%\" не знайдено.",
+    "error.process_definition_not_found": "Визначення процесу з ID \"%id%\" не знайдено.",
+    "error.process_instance_not_found": "Екземпляр процесу з ID \"%id%\" не знайдено.",
+    "error.invalid_process_graph": "Невалідний граф процесу: %errors%",
+    "error.workflow_token_not_found": "Токен з ID \"%id%\" не знайдено.",
+    "error.workflow_execution_error": "Помилка виконання процесу: %reason%",
+    "error.process_not_running": "Екземпляр процесу \"%id%\" не у стані виконання.",
+    "error.form_fields_required": "Обов'язкові поля форми відсутні: %fields%"
 }

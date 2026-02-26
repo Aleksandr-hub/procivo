@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\Comment"
+            table="task_manager_comments">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="taskId" column="task_id" type="string" length="36"/>
+        <field name="authorId" column="author_id" type="string" length="36"/>
+        <field name="parentId" column="parent_id" type="string" length="36" nullable="true"/>
+        <field name="body" type="text"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="updatedAt" column="updated_at" type="datetime_immutable" nullable="true"/>
+
+        <indexes>
+            <index name="idx_comment_task" columns="task_id"/>
+            <index name="idx_comment_author" columns="author_id"/>
+            <index name="idx_comment_parent" columns="parent_id"/>
+            <index name="idx_comment_created" columns="task_id,created_at"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

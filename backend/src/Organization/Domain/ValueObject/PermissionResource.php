@@ -26,4 +26,10 @@ enum PermissionResource: string
 
     /** Організація — налаштування самої організації */
     case Organization = 'organization';
+
+    /** Задачі — управління задачами */
+    case Task = 'task';
+
+    /** Workflow — управління бізнес-процесами */
+    case Workflow = 'workflow';
 }

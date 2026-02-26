@@ -4,6 +4,7 @@ import { useTheme } from '@/shared/composables/useTheme'
 import { useLocale } from '@/shared/composables/useLocale'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import NotificationBell from '@/modules/notifications/components/NotificationBell.vue'
 
 const emit = defineEmits<{
   toggleSidebar: []
@@ -39,6 +40,7 @@ async function handleLogout() {
       <span v-if="auth.user" class="user-name">
         {{ auth.user.firstName }} {{ auth.user.lastName }}
       </span>
+      <NotificationBell />
       <Button
         :label="currentLocale.toUpperCase()"
         text

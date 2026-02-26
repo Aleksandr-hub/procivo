@@ -19,11 +19,20 @@ final readonly class EmployeeDTO
         public string $hiredAt,
         public string $status,
         public string $createdAt,
+        public ?string $departmentName = null,
+        public ?string $positionName = null,
+        public ?string $userFullName = null,
+        public ?string $userEmail = null,
     ) {
     }
 
-    public static function fromEntity(Employee $employee): self
-    {
+    public static function fromEntity(
+        Employee $employee,
+        ?string $departmentName = null,
+        ?string $positionName = null,
+        ?string $userFullName = null,
+        ?string $userEmail = null,
+    ): self {
         return new self(
             id: $employee->id()->value(),
             organizationId: $employee->organizationId()->value(),
@@ -35,6 +44,10 @@ final readonly class EmployeeDTO
             hiredAt: $employee->hiredAt()->format(\DateTimeInterface::ATOM),
             status: $employee->status()->value,
             createdAt: $employee->createdAt()->value()->format(\DateTimeInterface::ATOM),
+            departmentName: $departmentName,
+            positionName: $positionName,
+            userFullName: $userFullName,
+            userEmail: $userEmail,
         );
     }
 }

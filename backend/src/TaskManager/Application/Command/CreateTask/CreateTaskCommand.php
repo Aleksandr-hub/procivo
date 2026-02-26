@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManager\Application\Command\CreateTask;
+
+use App\Shared\Application\Command\CommandInterface;
+
+final readonly class CreateTaskCommand implements CommandInterface
+{
+    public function __construct(
+        public string $id,
+        public string $organizationId,
+        public string $title,
+        public ?string $description,
+        public string $priority,
+        public ?string $dueDate,
+        public ?float $estimatedHours,
+        public string $creatorId,
+        public ?string $assigneeId = null,
+    ) {
+    }
+}

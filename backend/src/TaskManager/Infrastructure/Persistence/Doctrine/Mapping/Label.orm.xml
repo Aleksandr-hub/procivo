@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\TaskManager\Domain\Entity\Label"
+            table="task_manager_labels">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="organizationId" column="organization_id" type="string" length="36"/>
+        <field name="name" type="string" length="100"/>
+        <field name="color" type="string" length="7"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+
+        <indexes>
+            <index name="idx_label_org" columns="organization_id"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

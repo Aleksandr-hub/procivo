@@ -34,6 +34,21 @@ const menuItems = computed(() => {
         to: `/organizations/${orgId.value}/employees`,
       },
       {
+        label: t('nav.tasks'),
+        icon: 'pi pi-check-square',
+        to: `/organizations/${orgId.value}/tasks`,
+      },
+      {
+        label: t('nav.boards'),
+        icon: 'pi pi-objects-column',
+        to: `/organizations/${orgId.value}/boards`,
+      },
+      {
+        label: t('nav.labels'),
+        icon: 'pi pi-tag',
+        to: `/organizations/${orgId.value}/labels`,
+      },
+      {
         label: t('nav.orgChart'),
         icon: 'pi pi-share-alt',
         to: `/organizations/${orgId.value}/org-chart`,
@@ -42,6 +57,16 @@ const menuItems = computed(() => {
         label: t('nav.roles'),
         icon: 'pi pi-shield',
         to: `/organizations/${orgId.value}/roles`,
+      },
+      {
+        label: t('nav.processes'),
+        icon: 'pi pi-sitemap',
+        to: `/organizations/${orgId.value}/process-definitions`,
+      },
+      {
+        label: t('nav.instances'),
+        icon: 'pi pi-play',
+        to: `/organizations/${orgId.value}/process-instances`,
       },
     )
   }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Workflow\Domain\Entity\WorkflowTaskLink"
+            table="workflow_task_links">
+
+        <id name="id" type="string" length="36"/>
+
+        <field name="processInstanceId" column="process_instance_id" type="string" length="36"/>
+        <field name="tokenId" column="token_id" type="string" length="36"/>
+        <field name="taskId" column="task_id" type="string" length="36"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="completedAt" column="completed_at" type="datetime_immutable" nullable="true"/>
+
+        <indexes>
+            <index name="idx_wf_task_link_task" columns="task_id"/>
+            <index name="idx_wf_task_link_process" columns="process_instance_id,token_id"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

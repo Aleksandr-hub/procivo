@@ -1,0 +1,40 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Workflow\Application\Command\UpdateTransition;
+
+use App\Workflow\Domain\Repository\TransitionRepositoryInterface;
+use App\Workflow\Domain\ValueObject\ConditionExpression;
+use App\Workflow\Domain\ValueObject\TransitionId;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+
+#[AsMessageHandler(bus: 'command.bus')]
+final readonly class UpdateTransitionHandler
+{
+    public function __construct(
+        private TransitionRepositoryInterface $transitionRepository,
+    ) {
+    }
+
+    public function __invoke(UpdateTransitionCommand $command): void
+    {
+        $transition = $this->transitionRepository->findById(TransitionId::fromString($command->transitionId));
+
+        if (null === $transition) {
+            throw new \DomainException(\sprintf('Transition with ID "%s" not found.', $command->transitionId));
+        }
+
+        $transition->update(
+            name: $command->name,
+            actionKey: $command->actionKey,
+            conditionExpression: null !== $command->conditionExpression
+                ? ConditionExpression::fromString($command->conditionExpression)
+                : null,
+            formFields: $command->formFields,
+            sortOrder: $command->sortOrder,
+        );
+
+        $this->transitionRepository->save($transition);
+    }
+}

@@ -21,5 +21,19 @@
     "error.permission_not_found": "Permission with ID \"%id%\" not found.",
     "error.permission_already_exists": "Permission for resource \"%resource%\" and action \"%action%\" already exists for role \"%roleId%\".",
     "error.invalid_argument": "Invalid argument.",
-    "error.wrong_current_password": "Current password is incorrect."
+    "error.wrong_current_password": "Current password is incorrect.",
+    "error.task_not_found": "Task with ID \"%id%\" not found.",
+    "error.invalid_task_transition": "Transition \"%transition%\" is not allowed from status \"%status%\".",
+    "error.board_not_found": "Board with ID \"%id%\" not found.",
+    "error.board_column_not_found": "Board column with ID \"%id%\" not found.",
+    "error.comment_not_found": "Comment with ID \"%id%\" not found.",
+    "error.label_not_found": "Label with ID \"%id%\" not found.",
+    "error.attachment_not_found": "Attachment with ID \"%id%\" not found.",
+    "error.process_definition_not_found": "Process definition with ID \"%id%\" not found.",
+    "error.process_instance_not_found": "Process instance with ID \"%id%\" not found.",
+    "error.invalid_process_graph": "Invalid process graph: %errors%",
+    "error.workflow_token_not_found": "Token with ID \"%id%\" not found.",
+    "error.workflow_execution_error": "Workflow execution error: %reason%",
+    "error.process_not_running": "Process instance \"%id%\" is not in running state.",
+    "error.form_fields_required": "Required form fields missing: %fields%"
 }

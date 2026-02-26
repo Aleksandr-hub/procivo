@@ -178,15 +178,23 @@ const pendingCount = computed(
           <template #empty>
             <div class="empty-table">{{ t('employees.noEmployeesFound') }}</div>
           </template>
-          <Column field="employeeNumber" :header="t('employees.employeeNumber')" sortable style="width: 140px" />
-          <Column field="userId" :header="t('employees.userId')" style="width: 280px">
+          <Column field="employeeNumber" :header="t('employees.employeeNumber')" sortable style="width: 130px" />
+          <Column field="userFullName" :header="t('employees.fullName')" sortable style="min-width: 180px">
             <template #body="{ data }">
-              <span class="truncate">{{ data.userId }}</span>
+              <div>
+                <div>{{ data.userFullName || data.userId }}</div>
+                <div v-if="data.userEmail" class="text-muted text-sm">{{ data.userEmail }}</div>
+              </div>
             </template>
           </Column>
-          <Column field="departmentId" :header="t('employees.department')" style="width: 280px">
+          <Column field="departmentName" :header="t('employees.department')" sortable style="min-width: 160px">
             <template #body="{ data }">
-              <span class="truncate">{{ data.departmentId }}</span>
+              {{ data.departmentName || data.departmentId }}
+            </template>
+          </Column>
+          <Column field="positionName" :header="t('employees.position')" sortable style="min-width: 150px">
+            <template #body="{ data }">
+              {{ data.positionName || '—' }}
             </template>
           </Column>
           <Column field="hiredAt" :header="t('employees.hired')" sortable style="width: 160px">
@@ -301,14 +309,12 @@ const pendingCount = computed(
   margin-left: 0.5rem;
 }
 
-.truncate {
-  display: inline-block;
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.text-muted {
+  color: var(--p-text-muted-color);
+}
+
+.text-sm {
   font-size: 0.8rem;
-  font-family: monospace;
 }
 
 .empty-table {

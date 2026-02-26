@@ -1,0 +1,47 @@
+framework:
+    workflows:
+        task:
+            type: state_machine
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: method
+                property: status
+            supports:
+                - App\TaskManager\Domain\Entity\Task
+            initial_marking: draft
+            places:
+                - draft
+                - open
+                - in_progress
+                - review
+                - done
+                - blocked
+                - cancelled
+            transitions:
+                open:
+                    from: draft
+                    to: open
+                to_progress:
+                    from: [open, blocked]
+                    to: in_progress
+                to_review:
+                    from: in_progress
+                    to: review
+                complete:
+                    from: review
+                    to: done
+                block:
+                    from: [open, in_progress]
+                    to: blocked
+                reopen:
+                    from: done
+                    to: open
+                cancel:
+                    from: [draft, open, in_progress, blocked]
+                    to: cancelled
+                workflow_complete:
+                    from: [draft, open, in_progress, review]
+                    to: done
+                    metadata:
+                        internal: true

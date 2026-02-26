@@ -57,6 +57,10 @@ export interface EmployeeDTO {
   hiredAt: string
   status: string
   createdAt: string
+  departmentName: string | null
+  positionName: string | null
+  userFullName: string | null
+  userEmail: string | null
 }
 
 export interface OrgChartNodeDTO {
@@ -101,6 +105,7 @@ export type PermissionResource =
   | 'role'
   | 'invitation'
   | 'organization'
+  | 'task'
 
 export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'manage'
 
