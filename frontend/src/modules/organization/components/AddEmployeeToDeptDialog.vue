@@ -84,7 +84,8 @@ async function searchUsers(event: { query: string }) {
   }
 }
 
-function formatUserOption(user: UserDTO): string {
+function formatUserOption(item: unknown): string {
+  const user = item as UserDTO
   return `${user.firstName} ${user.lastName} (${user.email})`
 }
 

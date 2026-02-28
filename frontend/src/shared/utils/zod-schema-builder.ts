@@ -52,8 +52,9 @@ export function flattenZodErrors(error: z.ZodError): Record<string, string> {
   const result: Record<string, string> = {}
 
   for (const [key, messages] of Object.entries(flat.fieldErrors)) {
-    if (messages && messages.length > 0) {
-      result[key] = messages[0]
+    const msgs = messages as string[] | undefined
+    if (msgs && msgs.length > 0) {
+      result[key] = msgs[0]!
     }
   }
 

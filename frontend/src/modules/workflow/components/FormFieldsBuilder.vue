@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormFieldDefinition, FormFieldType } from '@/modules/workflow/types/process-definition.types'
 
@@ -13,6 +14,9 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+// Track which names were manually edited (not auto-generated)
+const manualNames = ref<Set<number>>(new Set())
+
 const fieldTypeOptions: { label: string; value: FormFieldType }[] = [
   { label: t('workflow.fieldTypeText'), value: 'text' },
   { label: t('workflow.fieldTypeNumber'), value: 'number' },
@@ -20,7 +24,36 @@ const fieldTypeOptions: { label: string; value: FormFieldType }[] = [
   { label: t('workflow.fieldTypeSelect'), value: 'select' },
   { label: t('workflow.fieldTypeCheckbox'), value: 'checkbox' },
   { label: t('workflow.fieldTypeTextarea'), value: 'textarea' },
+  { label: t('workflow.fieldTypeEmployee'), value: 'employee' },
 ]
+
+const cyrMap: Record<string, string> = {
+  а: 'a', б: 'b', в: 'v', г: 'h', ґ: 'g', д: 'd', е: 'e', є: 'ye',
+  ж: 'zh', з: 'z', и: 'y', і: 'i', ї: 'yi', й: 'y', к: 'k', л: 'l',
+  м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u',
+  ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'shch', ь: '',
+  ю: 'yu', я: 'ya', ё: 'yo', ъ: '', э: 'e', ы: 'y',
+}
+
+function transliterate(text: string): string {
+  return text
+    .toLowerCase()
+    .split('')
+    .map((ch) => cyrMap[ch] ?? ch)
+    .join('')
+}
+
+function toFieldName(text: string): string {
+  const transliterated = transliterate(text)
+  return transliterated
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/_{2,}/g, '_')
+    .replace(/^_|_$/g, '')
+}
+
+function sanitizeFieldName(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9_]/g, '').replace(/_{2,}/g, '_').replace(/^_|_$/g, '')
+}
 
 function addField() {
   const updated = [...props.fields, {
@@ -29,6 +62,28 @@ function addField() {
     type: 'text' as FormFieldType,
     required: false,
   }]
+  emit('update', updated)
+}
+
+function handleFieldNameInput(index: number, event: Event) {
+  const input = event.target as HTMLInputElement
+  const sanitized = sanitizeFieldName(input.value)
+  if (input.value !== sanitized) {
+    const pos = input.selectionStart ?? sanitized.length
+    input.value = sanitized
+    const newPos = Math.min(pos, sanitized.length)
+    input.setSelectionRange(newPos, newPos)
+  }
+  manualNames.value.add(index)
+  const updated = props.fields.map((f, i) => (i === index ? { ...f, name: sanitized } : f))
+  emit('update', updated)
+}
+
+function handleLabelInput(index: number, label: string) {
+  const field = props.fields[index]
+  if (!field) return
+  const autoName = manualNames.value.has(index) ? field.name : toFieldName(label)
+  const updated = props.fields.map((f, i) => (i === index ? { ...f, label, name: autoName } : f))
   emit('update', updated)
 }
 
@@ -68,24 +123,31 @@ function setOptionsFromString(index: number, value: string) {
     <div v-for="(field, index) in fields" :key="index" class="field-card">
       <div class="field-row">
         <div class="field-input">
-          <label>{{ t('workflow.fieldName') }}</label>
-          <InputText
-            :model-value="field.name"
-            :disabled="readonly"
-            :placeholder="t('workflow.fieldNamePlaceholder')"
-            class="w-full"
-            @update:model-value="updateField(index, { name: ($event as string) })"
-          />
-        </div>
-        <div class="field-input">
           <label>{{ t('workflow.fieldLabel') }}</label>
           <InputText
             :model-value="field.label"
             :disabled="readonly"
             :placeholder="t('workflow.fieldLabelPlaceholder')"
             class="w-full"
-            @update:model-value="updateField(index, { label: ($event as string) })"
+            @update:model-value="handleLabelInput(index, ($event as string))"
           />
+        </div>
+        <div class="field-input">
+          <label class="label-with-hint">
+            {{ t('workflow.fieldName') }}
+            <i v-tooltip.top="t('workflow.fieldNameHint')" class="pi pi-question-circle hint-icon" />
+          </label>
+          <InputText
+            :model-value="field.name"
+            :disabled="readonly"
+            :placeholder="t('workflow.fieldNamePlaceholder')"
+            :class="['w-full', { 'field-name-auto': !manualNames.has(index) }]"
+            :invalid="field.label.length > 0 && field.name.length === 0"
+            @input="handleFieldNameInput(index, $event)"
+          />
+          <small v-if="field.label.length > 0 && field.name.length === 0" class="field-error">
+            {{ t('workflow.fieldNameRequired') }}
+          </small>
         </div>
       </div>
 
@@ -198,6 +260,29 @@ function setOptionsFromString(index: number, value: string) {
   margin-bottom: 0.125rem;
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+.label-with-hint {
+  display: flex !important;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.hint-icon {
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+  cursor: help;
+}
+
+.field-name-auto :deep(input) {
+  color: var(--p-text-muted-color);
+}
+
+.field-error {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.7rem;
+  color: var(--p-red-500);
 }
 
 .field-checkbox {

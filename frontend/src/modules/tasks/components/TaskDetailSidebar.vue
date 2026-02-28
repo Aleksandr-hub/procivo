@@ -33,13 +33,14 @@ const priorityLabelKeys: Record<string, string> = {
 
 const creatorName = computed(() => {
   const emp = empStore.employees.find((e) => e.userId === props.task.creatorId || e.id === props.task.creatorId)
-  return emp ? `${emp.firstName} ${emp.lastName}` : props.task.creatorId
+  return emp ? (emp.userFullName ?? props.task.creatorId) : props.task.creatorId
 })
 
 const creatorInitials = computed(() => {
   const emp = empStore.employees.find((e) => e.userId === props.task.creatorId || e.id === props.task.creatorId)
   if (emp) {
-    return `${emp.firstName?.charAt(0) ?? ''}${emp.lastName?.charAt(0) ?? ''}`.toUpperCase()
+    const parts = (emp.userFullName ?? '').split(' ')
+    return `${parts[0]?.charAt(0) ?? ''}${parts[1]?.charAt(0) ?? ''}`.toUpperCase()
   }
   return '?'
 })

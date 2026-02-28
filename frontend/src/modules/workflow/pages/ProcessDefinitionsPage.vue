@@ -92,7 +92,7 @@ async function importTemplate(template: ProcessTemplate) {
 
     const nodeIdMap = new Map<number, string>()
     for (let i = 0; i < template.nodes.length; i++) {
-      const node = template.nodes[i]
+      const node = template.nodes[i]!
       const result = await processDefinitionApi.addNode(orgId.value, defId, {
         type: node.type,
         name: node.nameKey,
@@ -111,7 +111,9 @@ async function importTemplate(template: ProcessTemplate) {
         source_node_id: sourceId,
         target_node_id: targetId,
         name: tr.nameKey ?? null,
+        action_key: tr.action_key ?? null,
         condition_expression: tr.condition_expression ?? null,
+        form_fields: tr.form_fields,
       })
     }
 

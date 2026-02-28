@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, markRaw } from 'vue'
+import { ref, computed, watch, watchEffect, markRaw, type Ref } from 'vue'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -45,12 +45,13 @@ const nodeTypes = markRaw({
   notification: TaskNode,
   webhook: TaskNode,
   sub_process: TaskNode,
-})
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+} as any)
 
 const nodes = ref<Node[]>([])
 const edges = ref<Edge[]>([])
 
-const { validationErrors, orphanNodeIds } = useCanvasValidation(nodes, edges)
+const { validationErrors, orphanNodeIds } = useCanvasValidation(nodes as Ref<Node[]>, edges as Ref<Edge[]>)
 
 const humanErrors = computed(() =>
   validationErrors.value.map((err) => t(`workflow.${err.key}`, err.params ?? {})),
@@ -73,7 +74,7 @@ function syncFromDefinition() {
     type: n.type,
     position: { x: n.position_x, y: n.position_y },
     data: { label: n.name, description: n.description, config: n.config, nodeType: n.type },
-  }))
+  })) as Node[]
 
   edges.value = props.definition.transitions.map((tr) => ({
     id: tr.id,
@@ -81,7 +82,7 @@ function syncFromDefinition() {
     target: tr.target_node_id,
     label: tr.name || tr.condition_expression || '',
     animated: !!tr.condition_expression,
-  }))
+  })) as Edge[]
 }
 
 watch(() => props.definition, syncFromDefinition, { immediate: true })
@@ -171,8 +172,9 @@ async function deleteNode(nodeId: string) {
   if (!isDraft.value) return
   try {
     await processDefinitionApi.removeNode(props.orgId, props.definition.id, nodeId)
-    nodes.value = nodes.value.filter((n) => n.id !== nodeId)
-    edges.value = edges.value.filter((e) => e.source !== nodeId && e.target !== nodeId)
+    // @ts-expect-error vue-flow deep type instantiation with reactive Node[]
+    nodes.value = nodes.value.filter((n: Node) => n.id !== nodeId)
+    edges.value = edges.value.filter((e: Edge) => e.source !== nodeId && e.target !== nodeId)
     selectedNodeId.value = null
   } catch (error: unknown) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.operationFailed')), life: 5000 })
@@ -279,6 +281,7 @@ const selectedEdge = computed(() => edges.value.find((e) => e.id === selectedEdg
     <NodePropertyPanel
       v-if="selectedNode"
       :node="selectedNode"
+      :org-id="orgId"
       :readonly="!isDraft"
       @update="updateNodeData(selectedNode!.id, $event)"
       @delete="deleteNode(selectedNode!.id)"

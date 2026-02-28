@@ -2,13 +2,17 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Node } from '@vue-flow/core'
+import StartNodeConfig from '@/modules/workflow/components/StartNodeConfig.vue'
 import TaskNodeConfig from '@/modules/workflow/components/TaskNodeConfig.vue'
 import TimerNodeConfig from '@/modules/workflow/components/TimerNodeConfig.vue'
 import NotificationNodeConfig from '@/modules/workflow/components/NotificationNodeConfig.vue'
+import WebhookNodeConfig from '@/modules/workflow/components/WebhookNodeConfig.vue'
+import SubProcessNodeConfig from '@/modules/workflow/components/SubProcessNodeConfig.vue'
 import GatewayNodeConfig from '@/modules/workflow/components/GatewayNodeConfig.vue'
 
 const props = defineProps<{
   node: Node
+  orgId: string
   readonly: boolean
 }>()
 
@@ -26,7 +30,7 @@ const config = ref<Record<string, unknown>>({})
 
 const nodeType = computed(() => (props.node.data.nodeType as string) || (props.node.type as string))
 const isGateway = computed(() => ['exclusive_gateway', 'parallel_gateway', 'inclusive_gateway'].includes(nodeType.value))
-const hasConfig = computed(() => ['task', 'timer', 'notification'].includes(nodeType.value) || isGateway.value)
+const hasConfig = computed(() => ['start', 'task', 'timer', 'notification', 'webhook', 'sub_process'].includes(nodeType.value) || isGateway.value)
 
 const nodeTypeKeyMap: Record<string, string> = {
   start: 'nodeTypeStart',
@@ -69,7 +73,7 @@ watch(
   (node) => {
     name.value = (node.data.label as string) || ''
     description.value = (node.data.description as string | null) ?? null
-    config.value = { ...((node.data.config as Record<string, unknown>) ?? {}) }
+    config.value = { ...(node.data.config as Record<string, unknown>) }
   },
   { immediate: true },
 )
@@ -118,9 +122,16 @@ function save() {
 
       <Divider v-if="hasConfig" />
 
+      <StartNodeConfig
+        v-if="nodeType === 'start'"
+        :config="config"
+        :readonly="readonly"
+        @update="onConfigUpdate"
+      />
       <TaskNodeConfig
         v-if="nodeType === 'task'"
         :config="config"
+        :org-id="orgId"
         :readonly="readonly"
         @update="onConfigUpdate"
       />
@@ -133,6 +144,19 @@ function save() {
       <NotificationNodeConfig
         v-if="nodeType === 'notification'"
         :config="config"
+        :readonly="readonly"
+        @update="onConfigUpdate"
+      />
+      <WebhookNodeConfig
+        v-if="nodeType === 'webhook'"
+        :config="config"
+        :readonly="readonly"
+        @update="onConfigUpdate"
+      />
+      <SubProcessNodeConfig
+        v-if="nodeType === 'sub_process'"
+        :config="config"
+        :org-id="orgId"
         :readonly="readonly"
         @update="onConfigUpdate"
       />

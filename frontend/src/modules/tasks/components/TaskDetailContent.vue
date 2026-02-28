@@ -98,8 +98,11 @@ const poolCandidates = computed(() => {
 const candidateAvatars = computed(() => {
   return poolCandidates.value.map((e) => ({
     id: e.id,
-    initials: `${e.firstName?.charAt(0) ?? ''}${e.lastName?.charAt(0) ?? ''}`.toUpperCase(),
-    fullName: e.userFullName ?? `${e.firstName ?? ''} ${e.lastName ?? ''}`.trim(),
+    initials: (() => {
+      const parts = (e.userFullName ?? '').split(' ')
+      return `${parts[0]?.charAt(0) ?? ''}${parts[1]?.charAt(0) ?? ''}`.toUpperCase()
+    })(),
+    fullName: e.userFullName ?? e.userId,
   }))
 })
 
@@ -126,7 +129,7 @@ const priorityLabelKeys: Record<string, string> = {
 const assigneeName = computed(() => {
   if (!task.value?.assigneeId) return null
   const emp = empStore.employees.find((e) => e.id === task.value!.assigneeId)
-  return emp ? `${emp.firstName} ${emp.lastName}` : task.value.assigneeId
+  return emp ? (emp.userFullName ?? task.value.assigneeId) : task.value.assigneeId
 })
 
 // Status dropdown: unified for workflow + regular tasks
@@ -557,19 +560,19 @@ onUnmounted(() => {
 
         <!-- Tabs -->
         <TabView class="detail-tabs">
-          <TabPanel :header="t('comments.title')">
+          <TabPanel value="comments" :header="t('comments.title')">
             <TaskComments :org-id="orgId" :task-id="taskId" />
           </TabPanel>
-          <TabPanel :header="t('attachments.title')">
+          <TabPanel value="attachments" :header="t('attachments.title')">
             <TaskAttachments :org-id="orgId" :task-id="taskId" />
           </TabPanel>
-          <TabPanel :header="t('assignments.title')">
+          <TabPanel value="assignments" :header="t('assignments.title')">
             <TaskAssignments :org-id="orgId" :task-id="taskId" />
           </TabPanel>
-          <TabPanel :header="t('labels.assignedLabels')">
+          <TabPanel value="labels" :header="t('labels.assignedLabels')">
             <TaskLabels :org-id="orgId" :task-id="taskId" />
           </TabPanel>
-          <TabPanel v-if="task.workflow_context" :header="t('history.title')">
+          <TabPanel v-if="task.workflow_context" value="history" :header="t('history.title')">
             <ProcessHistoryTimeline
               :org-id="orgId"
               :process-instance-id="task.workflow_context.process_instance_id"

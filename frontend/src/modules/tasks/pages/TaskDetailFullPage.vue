@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TaskDetailContent from '@/modules/tasks/components/TaskDetailContent.vue'
 
-const props = defineProps<{
+defineProps<{
   taskId: string
 }>()
 
