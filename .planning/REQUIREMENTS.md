@@ -49,9 +49,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [x] **FEND-06**: Pool task banner with claim/assign buttons and candidate list (adapted from Figma prototype)
 - [x] **FEND-07**: Process context badge on task cards in list (process name → current stage)
 - [x] **FEND-08**: Process history timeline tab on task detail page
-- [ ] **FEND-09**: Process Context Card on task detail — compact header with process name, current stage, progress bar (X/Y steps), and "Next step: X" text
-- [ ] **FEND-10**: My Path Stepper — horizontal stepper showing actual token path (completed → current → upcoming steps), adaptive display: full stepper (3-7 steps), scrollable (8-20), compact header + modal (20+)
-- [ ] **FEND-11**: Process navigation — "View Full Process" button linking to ProcessInstanceDetailPage, and "Next step: X" contextual hint
+- [x] **FEND-09**: Process Context Card on task detail — compact header with process name, current stage, progress bar (X/Y steps), and "Next step: X" text
+- [x] **FEND-10**: My Path Stepper — horizontal stepper showing actual token path (completed → current → upcoming steps), adaptive display: full stepper (3-7 steps), scrollable (8-20), compact header + modal (20+)
+- [x] **FEND-11**: Process navigation — "View Full Process" button linking to ProcessInstanceDetailPage, and "Next step: X" contextual hint
 
 ### Designer Configuration
 
@@ -131,9 +131,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEND-06 | Phase 4 | Complete |
 | FEND-07 | Phase 4 | Complete |
 | FEND-08 | Phase 4 | Complete |
-| FEND-09 | Phase 4 | Pending |
-| FEND-10 | Phase 4 | Pending |
-| FEND-11 | Phase 4 | Pending |
+| FEND-09 | Phase 4 | Complete |
+| FEND-10 | Phase 4 | Complete |
+| FEND-11 | Phase 4 | Complete |
 | DSGN-01 | Phase 5 | Pending |
 | DSGN-02 | Phase 5 | Pending |
 | DSGN-03 | Phase 5 | Pending |
