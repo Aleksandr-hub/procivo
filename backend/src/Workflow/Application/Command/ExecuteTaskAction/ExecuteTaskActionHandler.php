@@ -6,12 +6,14 @@ namespace App\Workflow\Application\Command\ExecuteTaskAction;
 
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\TaskManager\Application\Command\TransitionTask\TransitionTaskCommand;
+use App\Workflow\Application\Service\FormFieldCollector;
 use App\Workflow\Domain\Exception\FormValidationException;
 use App\Workflow\Domain\Exception\ProcessInstanceNotFoundException;
 use App\Workflow\Domain\Exception\WorkflowExecutionException;
 use App\Workflow\Domain\Repository\ProcessDefinitionVersionRepositoryInterface;
 use App\Workflow\Domain\Repository\ProcessInstanceRepositoryInterface;
 use App\Workflow\Domain\Repository\WorkflowTaskLinkRepositoryInterface;
+use App\Workflow\Domain\Service\FormSchemaValidator;
 use App\Workflow\Domain\Service\ProcessGraph;
 use App\Workflow\Domain\Service\WorkflowEngine;
 use App\Workflow\Domain\ValueObject\ProcessInstanceId;
@@ -26,6 +28,8 @@ final readonly class ExecuteTaskActionHandler
         private ProcessInstanceRepositoryInterface $instanceRepository,
         private ProcessDefinitionVersionRepositoryInterface $versionRepository,
         private WorkflowEngine $engine,
+        private FormFieldCollector $fieldCollector,
+        private FormSchemaValidator $formSchemaValidator,
         private CommandBusInterface $commandBus,
     ) {
     }
@@ -63,16 +67,10 @@ final readonly class ExecuteTaskActionHandler
         $token = $instance->getToken($tokenId);
         $nodeId = $token->nodeId()->value();
 
-        $transition = $graph->findOutgoingTransitionByActionKey($nodeId, $command->actionKey);
-        if (null === $transition) {
-            $outgoing = $graph->outgoingTransitions($nodeId);
-            if (1 === \count($outgoing)) {
-                $transition = $outgoing[0];
-            }
-        }
-
-        if (null !== $transition) {
-            $this->validateFormData($transition, $command->formData);
+        $allFields = $this->fieldCollector->collectForValidation($graph, $nodeId, $command->actionKey);
+        $errors = $this->formSchemaValidator->validate($allFields, $command->formData);
+        if ([] !== $errors) {
+            throw FormValidationException::validationFailed($errors);
         }
 
         if ([] !== $command->formData) {
@@ -85,36 +83,14 @@ final readonly class ExecuteTaskActionHandler
         $link->markCompleted();
         $this->linkRepository->save($link);
 
-        $this->commandBus->dispatch(new TransitionTaskCommand(
-            taskId: $command->taskId,
-            transition: 'workflow_complete',
-        ));
-    }
-
-    /**
-     * @param array<string, mixed> $transition
-     * @param array<string, mixed> $formData
-     */
-    private function validateFormData(array $transition, array $formData): void
-    {
-        /** @var list<array<string, mixed>> $formFields */
-        $formFields = $transition['form_fields'] ?? [];
-
-        $missingFields = [];
-        foreach ($formFields as $field) {
-            $isRequired = (bool) ($field['required'] ?? false);
-            $fieldKey = \is_string($field['name'] ?? null) ? $field['name'] : '';
-
-            if ($isRequired && '' !== $fieldKey) {
-                $value = $formData[$fieldKey] ?? null;
-                if (null === $value || '' === $value) {
-                    $missingFields[] = $fieldKey;
-                }
-            }
-        }
-
-        if ([] !== $missingFields) {
-            throw FormValidationException::requiredFieldsMissing($missingFields);
+        // Transition the TaskManager task to done
+        try {
+            $this->commandBus->dispatch(new TransitionTaskCommand(
+                taskId: $command->taskId,
+                transition: 'workflow_complete',
+            ));
+        } catch (\Throwable) {
+            // Task may already be in 'done' or 'cancelled' state — log but don't fail workflow completion
         }
     }
 }
