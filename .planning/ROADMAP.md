@@ -61,11 +61,11 @@ Plans:
   2. POST /api/v1/tasks/{id}/claim assigns a pool task to the requesting employee with pessimistic locking to prevent double-claim
   3. POST /api/v1/tasks/{id}/unclaim returns a claimed task to the pool (assigneeId set back to null)
   4. Completing a task at an XOR gateway fork causes the engine to evaluate conditions against the updated variables and route to the correct branch
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md — Completion API: rename /execute-action to /complete, upgrade to FormSchemaValidator, add task status transition to done
+- [ ] 03-02-PLAN.md — Claim/Unclaim API: pessimistic locking via findByIdForUpdate, transaction-wrapped handlers, unit tests
 
 ### Phase 4: Frontend Task Integration
 **Goal**: Users interact with workflow tasks through a polished UI: see dynamic forms per action, submit decisions, view process context with stepper and navigation, and claim pool tasks
