@@ -43,9 +43,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [ ] **FEND-01**: Task detail page renders form_schema as dynamic form using DynamicFormField.vue
 - [ ] **FEND-02**: Action buttons displayed from form_schema.actions (e.g., "Approve", "Reject")
-- [ ] **FEND-03**: ActionFormDialog opens on action click — shows action-specific fields + shared fields + optional comment
-- [ ] **FEND-04**: Frontend form validation with Zod schema built from form_schema field definitions
-- [ ] **FEND-05**: Form submission: action + formData → POST /api/v1/tasks/{id}/complete → workflow advances
+- [x] **FEND-03**: ActionFormDialog opens on action click — shows action-specific fields + shared fields + optional comment
+- [x] **FEND-04**: Frontend form validation with Zod schema built from form_schema field definitions
+- [x] **FEND-05**: Form submission: action + formData → POST /api/v1/tasks/{id}/complete → workflow advances
 - [ ] **FEND-06**: Pool task banner with claim/assign buttons and candidate list (adapted from Figma prototype)
 - [x] **FEND-07**: Process context badge on task cards in list (process name → current stage)
 - [ ] **FEND-08**: Process history timeline tab on task detail page
@@ -125,9 +125,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASGN-07 | Phase 2 | Complete |
 | FEND-01 | Phase 4 | Pending |
 | FEND-02 | Phase 4 | Pending |
-| FEND-03 | Phase 4 | Pending |
-| FEND-04 | Phase 4 | Pending |
-| FEND-05 | Phase 4 | Pending |
+| FEND-03 | Phase 4 | Complete |
+| FEND-04 | Phase 4 | Complete |
+| FEND-05 | Phase 4 | Complete |
 | FEND-06 | Phase 4 | Pending |
 | FEND-07 | Phase 4 | Complete |
 | FEND-08 | Phase 4 | Pending |

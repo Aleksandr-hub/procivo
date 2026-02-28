@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-last_updated: "2026-02-28T13:35:19Z"
+status: unknown
+last_updated: "2026-02-28T13:38:35.632Z"
 progress:
   total_phases: 4
   completed_phases: 3
@@ -53,6 +53,7 @@ Progress: [#######...] 75%
 **Recent Trend:**
 - Last 5 plans: ~2min avg
 - Trend: stable
+| Phase 04 P01 | 2min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Silent catch on TransitionTaskCommand failure -- task may already be done/cancelled, workflow completion must not fail
 - [Phase 04]: CSS color-mix() for dark mode icon backgrounds -- cleaner than separate CSS variables
 - [Phase 04]: Removed border-left priority indicator in favor of priority Tag badge -- matches Figma prototype
+- [Phase 04]: Zod 4 z.flattenError() static API used -- not Zod 3 .flatten() method
+- [Phase 04]: Comment sent as _comment key in formData to avoid collisions with form field names
+- [Phase 04]: hasSubmitted pattern for deferred blur validation -- no errors shown before first submit attempt
 
 ### Pending Todos
 
