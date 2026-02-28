@@ -9,10 +9,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Task Form Schema
 
-- [ ] **FORM-01**: OnTaskNodeActivated builds form_schema from TaskNode config (shared_fields) and outgoing transitions (action-specific fields)
-- [ ] **FORM-02**: form_schema is snapshotted into Task metadata (JSONB) at creation time to prevent schema drift
-- [ ] **FORM-03**: Each action in form_schema has its own set of fields plus shared fields from the task node
-- [ ] **FORM-04**: API GET /api/v1/tasks/{id} returns form_schema alongside task data
+- [x] **FORM-01**: OnTaskNodeActivated builds form_schema from TaskNode config (shared_fields) and outgoing transitions (action-specific fields)
+- [x] **FORM-02**: form_schema is snapshotted into Task metadata (JSONB) at creation time to prevent schema drift
+- [x] **FORM-03**: Each action in form_schema has its own set of fields plus shared fields from the task node
+- [x] **FORM-04**: API GET /api/v1/tasks/{id} returns form_schema alongside task data
 
 ### Task Completion
 
@@ -49,6 +49,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **FEND-06**: Pool task banner with claim/assign buttons and candidate list (adapted from Figma prototype)
 - [ ] **FEND-07**: Process context badge on task cards in list (process name → current stage)
 - [ ] **FEND-08**: Process history timeline tab on task detail page
+- [ ] **FEND-09**: Process Context Card on task detail — compact header with process name, current stage, progress bar (X/Y steps), and "Next step: X" text
+- [ ] **FEND-10**: My Path Stepper — horizontal stepper showing actual token path (completed → current → upcoming steps), adaptive display: full stepper (3-7 steps), scrollable (8-20), compact header + modal (20+)
+- [ ] **FEND-11**: Process navigation — "View Full Process" button linking to ProcessInstanceDetailPage, and "Next step: X" contextual hint
 
 ### Designer Configuration
 
@@ -68,9 +71,17 @@ Deferred to future milestone. Tracked but not in current roadmap.
 
 ### Frontend (Advanced)
 
-- **FEND-V2-01**: Visual process monitor graph on task detail (ProcessMonitorGraph.vue)
+- **FEND-V2-01**: Visual process monitor graph on task detail — full BPMN diagram with highlighted current node (ProcessMonitorGraph.vue)
 - **FEND-V2-02**: Start process dialog with start form schema
 - **FEND-V2-03**: Real-time task updates via Mercure SSE
+- **FEND-V2-04**: Process Data Card — key-value grid of process variables from previous stages with source stage annotation
+- **FEND-V2-05**: SLA/deadline indicators — circular progress with color coding (green/yellow/orange/red), stage SLA hours, overdue alerts
+- **FEND-V2-06**: Subtasks/checklist — progress bar, checkboxes, assignee avatars, inline add
+- **FEND-V2-07**: Activity Stream — unified timeline with filter chips (comments, status changes, actions, files, assignments)
+- **FEND-V2-08**: Watchers — subscribe/unsubscribe to task notifications, overlapping avatar display
+- **FEND-V2-09**: Time Tracking — estimate vs spent, progress bar, start/stop timer
+- **FEND-V2-10**: Related Tasks card — mini task cards from same process with status badges
+- **FEND-V2-11**: Rich text description editor (Markdown or ProseMirror)
 
 ## Out of Scope
 
@@ -92,10 +103,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FORM-01 | Phase 2 | Pending |
-| FORM-02 | Phase 2 | Pending |
-| FORM-03 | Phase 2 | Pending |
-| FORM-04 | Phase 2 | Pending |
+| FORM-01 | Phase 2 | Complete |
+| FORM-02 | Phase 2 | Complete |
+| FORM-03 | Phase 2 | Complete |
+| FORM-04 | Phase 2 | Complete |
 | COMP-01 | Phase 3 | Pending |
 | COMP-02 | Phase 1 | Complete |
 | COMP-03 | Phase 1 | Complete |
@@ -120,15 +131,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEND-06 | Phase 4 | Pending |
 | FEND-07 | Phase 4 | Pending |
 | FEND-08 | Phase 4 | Pending |
+| FEND-09 | Phase 4 | Pending |
+| FEND-10 | Phase 4 | Pending |
+| FEND-11 | Phase 4 | Pending |
 | DSGN-01 | Phase 5 | Pending |
 | DSGN-02 | Phase 5 | Pending |
 | DSGN-03 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 31 total
-- Mapped to phases: 31
+- v1 requirements: 34 total
+- Mapped to phases: 34
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after roadmap creation*
+*Last updated: 2026-02-28 — added FEND-09..11 (process context card, My Path Stepper, navigation) and v2 frontend requirements (FEND-V2-04..11)*

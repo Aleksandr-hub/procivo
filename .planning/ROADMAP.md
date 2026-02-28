@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Backend Foundation** - Variable namespacing, XOR gateway condition evaluation, and form validation architecture
 - [ ] **Phase 2: Form Schema and Assignment** - Task form schema creation-time embedding and assignment strategy resolution
 - [ ] **Phase 3: Completion and Claim APIs** - Task completion endpoint with validation and pool task claim/unclaim
-- [ ] **Phase 4: Frontend Task Integration** - Task detail UI with dynamic forms, action dialogs, pool task banner, and process context
+- [ ] **Phase 4: Frontend Task Integration** - Task detail UI with dynamic forms, action dialogs, pool task banner, process context card, My Path Stepper, and process navigation
 - [ ] **Phase 5: Designer Configuration** - Assignment strategy and per-transition form field configuration in the Workflow Designer
 
 ## Phase Details
@@ -68,15 +68,18 @@ Plans:
 - [ ] 03-02: TBD
 
 ### Phase 4: Frontend Task Integration
-**Goal**: Users interact with workflow tasks through a polished UI: see dynamic forms per action, submit decisions, view process context, and claim pool tasks
+**Goal**: Users interact with workflow tasks through a polished UI: see dynamic forms per action, submit decisions, view process context with stepper and navigation, and claim pool tasks
 **Depends on**: Phase 3
-**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05, FEND-06, FEND-07, FEND-08
+**Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05, FEND-06, FEND-07, FEND-08, FEND-09, FEND-10, FEND-11
 **Success Criteria** (what must be TRUE):
   1. Task detail page renders dynamic form fields from form_schema using DynamicFormField.vue, with action buttons derived from form_schema.actions
   2. Clicking an action button opens ActionFormDialog showing action-specific fields + shared fields + optional comment, with Zod-based frontend validation and field-level error display
   3. Form submission (action + formData) calls POST /tasks/{id}/complete and the task disappears from the user's active list as the workflow advances
   4. Pool tasks display a banner with "Claim" / "Unclaim" buttons and candidate context (role/department members)
   5. Task cards in the list show process context badge (process name and current stage name), and the task detail includes a process history timeline tab
+  6. Process Context Card displays process name, current stage, progress bar (X/Y steps), and "Next step: X" text on workflow task detail
+  7. My Path Stepper renders horizontal stepper of the actual token path (completed/current/upcoming), with adaptive display: full (3-7 steps), scrollable (8-20), compact header + modal (20+)
+  8. "View Full Process" button navigates to ProcessInstanceDetailPage; contextual hint shows next step name
 **Plans**: TBD
 
 Plans:

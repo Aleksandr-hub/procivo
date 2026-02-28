@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-02-28T10:11:04.764Z"
+status: in-progress
+last_updated: "2026-02-28T11:03:15Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 5
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Users can execute BPMN processes end-to-end with interactive task forms, conditional branching, and proper task assignment
-**Current focus:** Phase 1: Backend Foundation
+**Current focus:** Phase 2: Form Schema and Assignment
 
 ## Current Position
 
-Phase: 1 of 5 (Backend Foundation)
-Plan: 3 of 3 in current phase
-Status: All plans complete — pending verification
-Last activity: 2026-02-28 — Completed 01-03-PLAN.md
+Phase: 2 of 5 (Form Schema and Assignment)
+Plan: 1 of 2 in current phase
+Status: Plan 02-01 complete, continuing to 02-02
+Last activity: 2026-02-28 — Completed 02-01-PLAN.md
 
-Progress: [##########] 100%
+Progress: [########--] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 3min
-- Total execution time: 3min
+- Total plans completed: 4
+- Average duration: 4min
+- Total execution time: 15min
 
 **By Phase:**
 
@@ -43,6 +43,7 @@ Progress: [##########] 100%
 | 01 | P01 | 4min | 2 | 4 |
 | 01 | P02 | 3min | 2 | 4 |
 | 01 | P03 | 5min | 2 | 5 |
+| 02 | P01 | 3min | 2 | 8 |
 
 **Recent Trend:**
 - Last 5 plans: ~4min avg
@@ -63,6 +64,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Custom validation loop over Symfony Validator -- simpler for dynamic JSON schema
 - [Phase 01]: Iterative dependency resolution (max 10 iterations) for cascading field visibility
 - [Phase 01]: createStub vs createMock in PHPUnit 13: stubs for happy-path, mocks only for behavior verification
+- [Phase 02]: FormSchemaBuilder extracted from handler as dedicated Application service for reusability
+- [Phase 02]: formSchema stored as nullable JSONB -- null for manual (non-workflow) tasks
 
 ### Pending Todos
 
@@ -77,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Completed all Phase 01 plans (01-01, 01-02, 01-03) — pending verification
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
