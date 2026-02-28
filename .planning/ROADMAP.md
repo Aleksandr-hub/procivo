@@ -29,11 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. When a condition references an undefined variable, a structured warning is logged and the gateway does not silently mis-route (default/else branch taken)
   3. ProcessInstance.mergeVariables namespaces all form data by node ID, preventing key collisions between stages
   4. FormSchemaValidator validates field data against schema definitions (required, type, min/max, regex, field dependencies) and returns structured errors
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
+- [ ] 01-01-PLAN.md — ExpressionEvaluator enhancement (Throwable catch, structured logging) + ProcessInstance namespaced variable merging (TDD)
+- [ ] 01-02-PLAN.md — FormSchemaValidator with type, constraint, regex, and field dependency validation (TDD)
+- [ ] 01-03-PLAN.md — Design-time expression lint, ProcessGraphValidator expression validation, XOR gateway default branch hardening
 
 ### Phase 2: Form Schema and Assignment
 **Goal**: When a process reaches a Task node, OnTaskNodeActivated builds and snapshots the full form_schema into the created Task, resolves assignment strategy, and the API returns form_schema to callers
