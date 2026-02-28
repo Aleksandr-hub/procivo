@@ -17,6 +17,11 @@ import TaskAttachments from '@/modules/tasks/components/TaskAttachments.vue'
 import TaskLabels from '@/modules/tasks/components/TaskLabels.vue'
 import PoolTaskBanner from '@/modules/tasks/components/PoolTaskBanner.vue'
 import TaskDetailSidebar from '@/modules/tasks/components/TaskDetailSidebar.vue'
+import ProcessContextCard from '@/modules/tasks/components/ProcessContextCard.vue'
+import MyPathStepper from '@/modules/tasks/components/MyPathStepper.vue'
+import ProcessDataCard from '@/modules/tasks/components/ProcessDataCard.vue'
+import { processInstanceApi } from '@/modules/workflow/api/process-instance.api'
+import type { ProcessEventDTO, ProcessInstanceGraphDTO } from '@/modules/workflow/types/process-instance.types'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 import { taskStatusSeverity, taskPrioritySeverity } from '@/shared/utils/status-severity'
 import { formatDate, isOverdue } from '@/shared/utils/date-format'
@@ -187,6 +192,98 @@ const historyFieldLabels = computed<Record<string, string>>(() => {
   return map
 })
 
+// Process context data
+const processEvents = ref<ProcessEventDTO[]>([])
+const processGraph = ref<ProcessInstanceGraphDTO | null>(null)
+const processContextLoading = ref(false)
+
+async function fetchProcessContext(processInstanceId: string) {
+  processContextLoading.value = true
+  try {
+    const [events, graph] = await Promise.all([
+      processInstanceApi.history(props.orgId, processInstanceId),
+      processInstanceApi.graph(props.orgId, processInstanceId),
+    ])
+    processEvents.value = events
+    processGraph.value = graph
+  } catch {
+    // Non-critical — process context is informational
+  } finally {
+    processContextLoading.value = false
+  }
+}
+
+const stepperSteps = computed(() => {
+  if (!processEvents.value.length || !task.value?.workflow_context) return []
+
+  const activatedEvents = processEvents.value
+    .filter(e => e.event_type === 'workflow.task_node.activated')
+    .sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime())
+
+  const completedNodeIds = new Set(
+    processEvents.value
+      .filter(e => e.event_type === 'workflow.token.completed')
+      .map(e => e.payload.node_id as string)
+  )
+
+  const currentNodeId = task.value.workflow_context.node_id
+
+  return activatedEvents.map(event => {
+    const nodeId = event.payload.node_id as string
+    const isCurrent = nodeId === currentNodeId && !completedNodeIds.has(nodeId)
+    return {
+      nodeId,
+      nodeName: (event.payload.node_name as string) ?? (event.payload.nodeName as string) ?? nodeId,
+      status: isCurrent ? 'current' as const : 'completed' as const,
+      completedAt: isCurrent ? undefined : event.occurred_at,
+    }
+  })
+})
+
+const processVariables = computed(() => {
+  if (!processEvents.value.length) return []
+
+  const nodeNameMap = new Map<string, string>()
+  if (processGraph.value) {
+    for (const node of processGraph.value.nodes) {
+      nodeNameMap.set(node.id, node.name)
+    }
+  }
+
+  const vars: Array<{ key: string; label: string; value: unknown; sourceStageName: string }> = []
+  const mergeEvents = processEvents.value
+    .filter(e => e.event_type === 'workflow.process.variables.merged')
+    .sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime())
+
+  for (const event of mergeEvents) {
+    const mergedData = (event.payload.mergedData ?? event.payload.merged_data) as Record<string, unknown> | undefined
+    const nodeId = event.payload.node_id as string
+    const stageName = nodeNameMap.get(nodeId) ?? nodeId
+
+    if (mergedData) {
+      for (const [key, value] of Object.entries(mergedData)) {
+        if (!key.startsWith('_')) {
+          const label = historyFieldLabels.value[key] ?? key
+          vars.push({ key, label, value, sourceStageName: stageName })
+        }
+      }
+    }
+  }
+
+  return vars
+})
+
+const completedStepCount = computed(() =>
+  stepperSteps.value.filter(s => s.status === 'completed').length + 1
+)
+
+const processInstanceUrl = computed(() => {
+  if (!task.value?.workflow_context) return ''
+  const orgId = props.orgId
+  const instanceId = task.value.workflow_context.process_instance_id
+  return `/organizations/${orgId}/process-instances/${instanceId}`
+})
+
 function onActionSelected(action: StatusAction) {
   if (action.type === 'workflow' && (action.formFields.length > 0 || sharedFields.value.length > 0)) {
     selectedAction.value = action
@@ -299,18 +396,26 @@ async function handleUnclaim() {
   }
 }
 
-onMounted(() => {
-  taskStore.fetchTask(props.orgId, props.taskId)
+onMounted(async () => {
+  await taskStore.fetchTask(props.orgId, props.taskId)
   if (empStore.employees.length === 0) empStore.fetchEmployees(props.orgId)
   if (roleStore.roles.length === 0) roleStore.fetchRoles(props.orgId)
   if (deptStore.tree.length === 0) deptStore.fetchTree(props.orgId)
+  if (task.value?.workflow_context) {
+    fetchProcessContext(task.value.workflow_context.process_instance_id)
+  }
 })
 
 watch(
   () => props.taskId,
-  (newId, oldId) => {
+  async (newId, oldId) => {
     if (newId && newId !== oldId) {
-      taskStore.fetchTask(props.orgId, newId)
+      processEvents.value = []
+      processGraph.value = null
+      await taskStore.fetchTask(props.orgId, newId)
+      if (task.value?.workflow_context) {
+        fetchProcessContext(task.value.workflow_context.process_instance_id)
+      }
     }
   },
 )
@@ -405,6 +510,25 @@ onUnmounted(() => {
           @claim="handleClaim"
           @unclaim="handleUnclaim"
           @assign="handleAssignCandidate"
+        />
+
+        <!-- Process Context (full mode only, workflow tasks) -->
+        <ProcessContextCard
+          v-if="task.workflow_context && mode === 'full'"
+          :process-name="task.workflow_context.process_name"
+          :current-stage-name="task.workflow_context.node_name"
+          :completed-step-count="completedStepCount"
+          :process-instance-url="processInstanceUrl"
+        />
+
+        <MyPathStepper
+          v-if="task.workflow_context && mode === 'full' && stepperSteps.length > 0"
+          :steps="stepperSteps"
+        />
+
+        <ProcessDataCard
+          v-if="processVariables.length > 0 && mode === 'full'"
+          :variables="processVariables"
         />
 
         <!-- Panel mode: compact properties display (no sidebar) -->
