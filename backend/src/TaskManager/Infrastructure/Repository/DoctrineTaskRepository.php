@@ -8,6 +8,7 @@ use App\TaskManager\Domain\Entity\Task;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
 use App\TaskManager\Domain\ValueObject\TaskId;
 use App\TaskManager\Domain\ValueObject\TaskStatus;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineTaskRepository implements TaskRepositoryInterface
@@ -34,6 +35,15 @@ final readonly class DoctrineTaskRepository implements TaskRepositoryInterface
         return $this->entityManager->find(Task::class, $id->value());
     }
 
+    public function findByIdForUpdate(TaskId $id): ?Task
+    {
+        return $this->entityManager->find(
+            Task::class,
+            $id->value(),
+            LockMode::PESSIMISTIC_WRITE,
+        );
+    }
+
     /**
      * @return list<Task>
      */
@@ -55,6 +65,42 @@ final readonly class DoctrineTaskRepository implements TaskRepositoryInterface
             $qb->andWhere('t.assigneeId = :assigneeId')
                 ->setParameter('assigneeId', $assigneeId);
         }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @param list<string> $roleIds
+     *
+     * @return list<Task>
+     */
+    public function findAvailableForEmployee(string $organizationId, array $roleIds, ?string $departmentId): array
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('t')
+            ->from(Task::class, 't')
+            ->where('t.organizationId = :orgId')
+            ->andWhere('t.assigneeId IS NULL')
+            ->setParameter('orgId', $organizationId)
+            ->orderBy('t.createdAt', 'DESC');
+
+        $conditions = [];
+
+        if ([] !== $roleIds) {
+            $conditions[] = $qb->expr()->in('t.candidateRoleId', ':roleIds');
+            $qb->setParameter('roleIds', $roleIds);
+        }
+
+        if (null !== $departmentId) {
+            $conditions[] = $qb->expr()->eq('t.candidateDepartmentId', ':deptId');
+            $qb->setParameter('deptId', $departmentId);
+        }
+
+        if ([] === $conditions) {
+            return [];
+        }
+
+        $qb->andWhere($qb->expr()->orX(...$conditions));
 
         return $qb->getQuery()->getResult();
     }

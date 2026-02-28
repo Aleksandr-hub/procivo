@@ -20,4 +20,17 @@ interface TaskRepositoryInterface
      * @return list<Task>
      */
     public function findByOrganizationId(string $organizationId, ?TaskStatus $status = null, ?string $assigneeId = null): array;
+
+    /**
+     * Find task by ID with pessimistic write lock (SELECT ... FOR UPDATE).
+     * Must be called inside an active transaction.
+     */
+    public function findByIdForUpdate(TaskId $id): ?Task;
+
+    /**
+     * @param list<string> $roleIds
+     *
+     * @return list<Task>
+     */
+    public function findAvailableForEmployee(string $organizationId, array $roleIds, ?string $departmentId): array;
 }
