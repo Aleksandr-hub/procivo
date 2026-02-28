@@ -17,10 +17,10 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Task Completion
 
 - [ ] **COMP-01**: API POST /api/v1/tasks/{id}/complete accepts { action, formData }
-- [ ] **COMP-02**: Backend validates formData against form_schema (required, type, min/max, regex patterns)
+- [x] **COMP-02**: Backend validates formData against form_schema (required, type, min/max, regex patterns)
 - [ ] **COMP-03**: Backend merges validated formData into ProcessInstance.variables with namespace prefix to prevent collisions
 - [ ] **COMP-04**: After merge, workflow engine advances — token moves to next node via the selected action's transition
-- [ ] **COMP-05**: Field dependency validation — show/require field X only when field Y has specific value
+- [x] **COMP-05**: Field dependency validation — show/require field X only when field Y has specific value
 
 ### Gateway Conditions
 
@@ -97,10 +97,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FORM-03 | Phase 2 | Pending |
 | FORM-04 | Phase 2 | Pending |
 | COMP-01 | Phase 3 | Pending |
-| COMP-02 | Phase 1 | Pending |
+| COMP-02 | Phase 1 | Complete |
 | COMP-03 | Phase 1 | Pending |
 | COMP-04 | Phase 3 | Pending |
-| COMP-05 | Phase 1 | Pending |
+| COMP-05 | Phase 1 | Complete |
 | GATE-01 | Phase 1 | Pending |
 | GATE-02 | Phase 1 | Pending |
 | GATE-03 | Phase 1 | Pending |
