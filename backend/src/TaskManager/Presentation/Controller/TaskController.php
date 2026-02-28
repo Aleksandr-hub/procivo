@@ -8,14 +8,19 @@ use App\Organization\Presentation\Security\OrganizationAuthorizer;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
 use App\TaskManager\Application\Command\AssignTask\AssignTaskCommand;
+use App\TaskManager\Application\Command\ClaimTask\ClaimTaskCommand;
 use App\TaskManager\Application\Command\CreateTask\CreateTaskCommand;
 use App\TaskManager\Application\Command\DeleteTask\DeleteTaskCommand;
 use App\TaskManager\Application\Command\TransitionTask\TransitionTaskCommand;
+use App\TaskManager\Application\Command\UnclaimTask\UnclaimTaskCommand;
 use App\TaskManager\Application\Command\UpdateTask\UpdateTaskCommand;
 use App\TaskManager\Application\Query\GetTask\GetTaskQuery;
 use App\TaskManager\Application\Query\ListTasks\ListTasksQuery;
 use App\TaskManager\Domain\ValueObject\TaskId;
+use App\TaskManager\Application\DTO\TaskDTO;
 use App\Workflow\Application\Command\ExecuteTaskAction\ExecuteTaskActionCommand;
+use App\Workflow\Application\DTO\TaskWorkflowSummaryDTO;
+use App\Workflow\Application\Query\BatchTaskWorkflowSummary\BatchTaskWorkflowSummaryQuery;
 use App\Workflow\Application\Query\GetTaskWorkflowContext\GetTaskWorkflowContextQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -50,6 +55,10 @@ final readonly class TaskController
             estimatedHours: isset($data['estimated_hours']) ? (float) $data['estimated_hours'] : null,
             creatorId: $data['creator_id'] ?? '',
             assigneeId: isset($data['assignee_id']) && \is_string($data['assignee_id']) ? $data['assignee_id'] : null,
+            assignmentStrategy: isset($data['assignment_strategy']) && \is_string($data['assignment_strategy']) ? $data['assignment_strategy'] : 'unassigned',
+            assigneeEmployeeId: isset($data['assignee_employee_id']) && \is_string($data['assignee_employee_id']) ? $data['assignee_employee_id'] : null,
+            assigneeRoleId: isset($data['assignee_role_id']) && \is_string($data['assignee_role_id']) ? $data['assignee_role_id'] : null,
+            assigneeDepartmentId: isset($data['assignee_department_id']) && \is_string($data['assignee_department_id']) ? $data['assignee_department_id'] : null,
         ));
 
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
@@ -62,14 +71,30 @@ final readonly class TaskController
 
         $status = $request->query->get('status');
         $assigneeId = $request->query->get('assignee_id');
+        $candidateEmployeeId = $request->query->get('candidate_employee_id');
 
+        /** @var list<TaskDTO> $tasks */
         $tasks = $this->queryBus->ask(new ListTasksQuery(
             organizationId: $organizationId,
             status: \is_string($status) ? $status : null,
             assigneeId: \is_string($assigneeId) ? $assigneeId : null,
+            candidateEmployeeId: \is_string($candidateEmployeeId) ? $candidateEmployeeId : null,
         ));
 
-        return new JsonResponse($tasks);
+        $taskIds = array_map(static fn (TaskDTO $t) => $t->id, $tasks);
+
+        /** @var array<string, TaskWorkflowSummaryDTO> $summaries */
+        $summaries = $this->queryBus->ask(new BatchTaskWorkflowSummaryQuery($taskIds));
+
+        $result = array_map(static function (TaskDTO $t) use ($summaries): array {
+            /** @var array<string, mixed> $data */
+            $data = json_decode(json_encode($t, \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR);
+            $data['workflow_summary'] = $summaries[$t->id] ?? null;
+
+            return $data;
+        }, $tasks);
+
+        return new JsonResponse($result);
     }
 
     #[Route('/{taskId}', name: 'show', methods: ['GET'])]
@@ -87,8 +112,8 @@ final readonly class TaskController
         return new JsonResponse($taskData);
     }
 
-    #[Route('/{taskId}/execute-action', name: 'execute_action', methods: ['POST'])]
-    public function executeAction(string $organizationId, string $taskId, Request $request): JsonResponse
+    #[Route('/{taskId}/complete', name: 'complete', methods: ['POST'])]
+    public function complete(string $organizationId, string $taskId, Request $request): JsonResponse
     {
         $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
         $data = $this->decodeJson($request);
@@ -104,7 +129,7 @@ final readonly class TaskController
             formData: $formData,
         ));
 
-        return new JsonResponse(['message' => 'Action executed.']);
+        return new JsonResponse(['message' => 'Task completed.']);
     }
 
     #[Route('/{taskId}', name: 'update', methods: ['PUT'])]
@@ -151,6 +176,34 @@ final readonly class TaskController
         ));
 
         return new JsonResponse(['message' => 'Task assignee updated.']);
+    }
+
+    #[Route('/{taskId}/claim', name: 'claim', methods: ['POST'])]
+    public function claim(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new ClaimTaskCommand(
+            taskId: $taskId,
+            employeeId: isset($data['employee_id']) && \is_string($data['employee_id']) ? $data['employee_id'] : '',
+        ));
+
+        return new JsonResponse(['message' => 'Task claimed.']);
+    }
+
+    #[Route('/{taskId}/unclaim', name: 'unclaim', methods: ['POST'])]
+    public function unclaim(string $organizationId, string $taskId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_UPDATE');
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new UnclaimTaskCommand(
+            taskId: $taskId,
+            employeeId: isset($data['employee_id']) && \is_string($data['employee_id']) ? $data['employee_id'] : '',
+        ));
+
+        return new JsonResponse(['message' => 'Task returned to queue.']);
     }
 
     #[Route('/{taskId}', name: 'delete', methods: ['DELETE'])]
