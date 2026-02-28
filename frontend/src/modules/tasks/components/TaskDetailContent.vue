@@ -15,6 +15,8 @@ import TaskComments from '@/modules/tasks/components/TaskComments.vue'
 import TaskAssignments from '@/modules/tasks/components/TaskAssignments.vue'
 import TaskAttachments from '@/modules/tasks/components/TaskAttachments.vue'
 import TaskLabels from '@/modules/tasks/components/TaskLabels.vue'
+import PoolTaskBanner from '@/modules/tasks/components/PoolTaskBanner.vue'
+import TaskDetailSidebar from '@/modules/tasks/components/TaskDetailSidebar.vue'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 import { taskStatusSeverity, taskPrioritySeverity } from '@/shared/utils/status-severity'
 import { formatDate, isOverdue } from '@/shared/utils/date-format'
@@ -78,7 +80,6 @@ function findDeptName(deptId: string): string | null {
 }
 
 const claimLoading = ref(false)
-const selectedCandidateId = ref<string | null>(null)
 
 const poolCandidates = computed(() => {
   if (!task.value?.isPoolTask || task.value.assigneeId) return []
@@ -87,6 +88,14 @@ const poolCandidates = computed(() => {
     if (task.value!.candidateDepartmentId) return e.departmentId === task.value!.candidateDepartmentId
     return true
   })
+})
+
+const candidateAvatars = computed(() => {
+  return poolCandidates.value.map((e) => ({
+    id: e.id,
+    initials: `${e.firstName?.charAt(0) ?? ''}${e.lastName?.charAt(0) ?? ''}`.toUpperCase(),
+    fullName: e.userFullName ?? `${e.firstName ?? ''} ${e.lastName ?? ''}`.trim(),
+  }))
 })
 
 const showActionDialog = ref(false)
@@ -255,12 +264,10 @@ async function handleClaim() {
   }
 }
 
-async function handleAssignCandidate() {
-  if (!selectedCandidateId.value) return
+async function handleAssignCandidate(employeeId: string) {
   claimLoading.value = true
   try {
-    await taskStore.claimTask(props.orgId, props.taskId, selectedCandidateId.value)
-    selectedCandidateId.value = null
+    await taskStore.claimTask(props.orgId, props.taskId, employeeId)
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('tasks.taskAssigned'), life: 3000 })
   } catch (error: unknown) {
     toast.add({
@@ -314,182 +321,144 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="task-detail-content" :class="mode">
+  <div class="task-detail" :class="{ 'two-column': mode === 'full' }">
     <ProgressSpinner v-if="taskStore.loading && !task" class="loading-spinner" />
 
     <template v-if="task">
-      <!-- Header -->
-      <div class="detail-header">
-        <div class="header-top">
-          <Button
-            v-if="mode === 'full'"
-            icon="pi pi-arrow-left"
-            text
-            rounded
-            size="small"
-            v-tooltip="t('tasks.backToList')"
-            @click="emit('close')"
-          />
-          <h3 class="detail-title">{{ task.title }}</h3>
-          <div class="header-actions">
+      <!-- Main content area -->
+      <main class="main-content">
+        <!-- Header -->
+        <div class="detail-header">
+          <div class="header-top">
             <Button
-              v-if="mode === 'panel'"
-              icon="pi pi-window-maximize"
+              v-if="mode === 'full'"
+              icon="pi pi-arrow-left"
               text
               rounded
               size="small"
-              v-tooltip="t('tasks.expandToFullPage')"
-              @click="emit('expand')"
-            />
-            <Button
-              v-if="mode === 'panel'"
-              icon="pi pi-times"
-              text
-              rounded
-              size="small"
-              v-tooltip="t('tasks.closeDetail')"
+              v-tooltip="t('tasks.backToList')"
               @click="emit('close')"
             />
-          </div>
-        </div>
-
-        <!-- Process breadcrumb -->
-        <div v-if="task.workflow_context" class="process-breadcrumb">
-          <i class="pi pi-sitemap" />
-          <span>{{ task.workflow_context.process_name }}</span>
-          <i class="pi pi-chevron-right" style="font-size: 0.65rem" />
-          <Tag :value="task.workflow_context.node_name" severity="info" size="small" />
-        </div>
-
-        <div class="header-tags">
-          <StatusDropdownButton
-            :status-label="currentStatusLabel"
-            :status-severity="currentStatusSeverity"
-            :actions="availableActions"
-            :disabled="task.workflow_context?.is_completed"
-            @action="onActionSelected"
-          />
-          <Tag :value="t(priorityLabelKeys[task.priority] ?? task.priority)" :severity="taskPrioritySeverity(task.priority)" />
-          <span v-if="task.dueDate" class="due-date-badge" :class="{ overdue: isOverdue(task.dueDate) }">
-            <i class="pi pi-calendar" />
-            {{ formatDate(task.dueDate) }}
-          </span>
-        </div>
-
-        <!-- Workflow completed message -->
-        <Message v-if="task.workflow_context?.is_completed" severity="success" :closable="false" class="completed-message">
-          {{ t('taskDetail.stageCompleted') }}
-        </Message>
-      </div>
-
-      <Divider />
-
-      <!-- Properties grid -->
-      <div class="section properties-grid">
-        <div class="prop-row">
-          <span class="prop-label">{{ t('tasks.assignee') }}</span>
-          <div class="prop-value assignee-value">
-            <template v-if="task.assigneeId">
-              <span>{{ assigneeName }}</span>
+            <h3 class="detail-title">{{ task.title }}</h3>
+            <div class="header-actions">
               <Button
-                v-if="task.isPoolTask && isCurrentAssignee"
-                :label="t('tasks.returnToQueue')"
-                icon="pi pi-undo"
+                v-if="mode === 'panel'"
+                icon="pi pi-window-maximize"
                 text
+                rounded
                 size="small"
-                :loading="claimLoading"
-                @click="handleUnclaim"
+                v-tooltip="t('tasks.expandToFullPage')"
+                @click="emit('expand')"
               />
-            </template>
-            <template v-else-if="task.isPoolTask">
-              <span class="pool-info">
-                <i class="pi pi-users" />
-                {{ t('tasks.poolTask') }}
-                <span v-if="poolDescription" class="pool-description">· {{ poolDescription }}</span>
-              </span>
-              <div class="pool-actions">
-                <Button
-                  v-if="currentEmployeeId"
-                  :label="t('tasks.claimTask')"
-                  icon="pi pi-user-plus"
-                  size="small"
-                  :loading="claimLoading"
-                  @click="handleClaim"
-                />
-                <div v-if="poolCandidates.length > 0" class="assign-picker">
-                  <Select
-                    v-model="selectedCandidateId"
-                    :options="poolCandidates"
-                    :option-label="(e: typeof poolCandidates.value[0]) => e.userFullName ?? `${e.userId}`"
-                    option-value="id"
-                    :placeholder="t('tasks.selectEmployee')"
-                    size="small"
-                    class="assign-select"
-                  />
-                  <Button
-                    :label="t('tasks.assign')"
-                    icon="pi pi-check"
-                    size="small"
-                    :disabled="!selectedCandidateId"
-                    :loading="claimLoading"
-                    @click="handleAssignCandidate"
-                  />
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              <span>{{ t('tasks.unassigned') }}</span>
-            </template>
+              <Button
+                v-if="mode === 'panel'"
+                icon="pi pi-times"
+                text
+                rounded
+                size="small"
+                v-tooltip="t('tasks.closeDetail')"
+                @click="emit('close')"
+              />
+            </div>
+          </div>
+
+          <!-- Process breadcrumb -->
+          <div v-if="task.workflow_context" class="process-breadcrumb">
+            <i class="pi pi-sitemap" />
+            <span>{{ task.workflow_context.process_name }}</span>
+            <i class="pi pi-chevron-right" style="font-size: 0.65rem" />
+            <Tag :value="task.workflow_context.node_name" severity="info" size="small" />
+          </div>
+
+          <div class="header-tags">
+            <StatusDropdownButton
+              :status-label="currentStatusLabel"
+              :status-severity="currentStatusSeverity"
+              :actions="availableActions"
+              :disabled="task.workflow_context?.is_completed"
+              @action="onActionSelected"
+            />
+            <Tag :value="t(priorityLabelKeys[task.priority] ?? task.priority)" :severity="taskPrioritySeverity(task.priority)" />
+            <span v-if="task.dueDate" class="due-date-badge" :class="{ overdue: isOverdue(task.dueDate) }">
+              <i class="pi pi-calendar" />
+              {{ formatDate(task.dueDate) }}
+            </span>
+          </div>
+
+          <!-- Workflow completed message -->
+          <Message v-if="task.workflow_context?.is_completed" severity="success" :closable="false" class="completed-message">
+            {{ t('taskDetail.stageCompleted') }}
+          </Message>
+        </div>
+
+        <Divider />
+
+        <!-- Pool Task Banner (conditional) -->
+        <PoolTaskBanner
+          v-if="task.isPoolTask"
+          :pool-description="poolDescription"
+          :candidate-count="poolCandidates.length"
+          :candidates="candidateAvatars"
+          :is-current-assignee="isCurrentAssignee"
+          :assignee-id="task.assigneeId"
+          :claim-loading="claimLoading"
+          @claim="handleClaim"
+          @unclaim="handleUnclaim"
+          @assign="handleAssignCandidate"
+        />
+
+        <!-- Panel mode: compact properties display (no sidebar) -->
+        <div v-if="mode === 'panel'" class="section properties-compact">
+          <div class="prop-inline">
+            <span class="prop-label">{{ t('tasks.assignee') }}</span>
+            <span class="prop-value">{{ assigneeName ?? t('tasks.unassigned') }}</span>
+          </div>
+          <div v-if="task.dueDate" class="prop-inline">
+            <span class="prop-label">{{ t('taskDetail.dueDate') }}</span>
+            <span class="prop-value" :class="{ overdue: isOverdue(task.dueDate) }">{{ formatDate(task.dueDate) }}</span>
+          </div>
+          <div class="prop-inline">
+            <span class="prop-label">{{ t('taskDetail.created') }}</span>
+            <span class="prop-value">{{ formatDate(task.createdAt) }}</span>
           </div>
         </div>
-        <div class="prop-row">
-          <span class="prop-label">{{ t('tasks.priorityLabel') }}</span>
-          <Tag :value="t(priorityLabelKeys[task.priority] ?? task.priority)" :severity="taskPrioritySeverity(task.priority)" />
-        </div>
-        <div v-if="task.dueDate" class="prop-row">
-          <span class="prop-label">{{ t('taskDetail.dueDate') }}</span>
-          <span class="prop-value" :class="{ overdue: isOverdue(task.dueDate) }">{{ formatDate(task.dueDate) }}</span>
-        </div>
-        <div v-if="task.estimatedHours" class="prop-row">
-          <span class="prop-label">{{ t('taskDetail.estimatedHours') }}</span>
-          <span class="prop-value">{{ task.estimatedHours }}h</span>
-        </div>
-        <div class="prop-row">
-          <span class="prop-label">{{ t('taskDetail.created') }}</span>
-          <span class="prop-value">{{ formatDate(task.createdAt) }}</span>
-        </div>
-      </div>
 
-      <!-- Description -->
-      <div v-if="task.description" class="section">
-        <h4>{{ t('tasks.description') }}</h4>
-        <p class="description-text">{{ task.description }}</p>
-      </div>
+        <!-- Description -->
+        <div v-if="task.description" class="section">
+          <h4>{{ t('tasks.description') }}</h4>
+          <p class="description-text">{{ task.description }}</p>
+        </div>
 
-      <Divider />
+        <Divider />
 
-      <!-- Tabs -->
-      <TabView class="detail-tabs">
-        <TabPanel :header="t('comments.title')">
-          <TaskComments :org-id="orgId" :task-id="taskId" />
-        </TabPanel>
-        <TabPanel :header="t('attachments.title')">
-          <TaskAttachments :org-id="orgId" :task-id="taskId" />
-        </TabPanel>
-        <TabPanel :header="t('assignments.title')">
-          <TaskAssignments :org-id="orgId" :task-id="taskId" />
-        </TabPanel>
-        <TabPanel :header="t('labels.assignedLabels')">
-          <TaskLabels :org-id="orgId" :task-id="taskId" />
-        </TabPanel>
-        <TabPanel v-if="task.workflow_context" :header="t('history.title')">
-          <ProcessHistoryTimeline
-            :org-id="orgId"
-            :process-instance-id="task.workflow_context.process_instance_id"
-            :field-labels="historyFieldLabels"
-          />
-        </TabPanel>
-      </TabView>
+        <!-- Tabs -->
+        <TabView class="detail-tabs">
+          <TabPanel :header="t('comments.title')">
+            <TaskComments :org-id="orgId" :task-id="taskId" />
+          </TabPanel>
+          <TabPanel :header="t('attachments.title')">
+            <TaskAttachments :org-id="orgId" :task-id="taskId" />
+          </TabPanel>
+          <TabPanel :header="t('assignments.title')">
+            <TaskAssignments :org-id="orgId" :task-id="taskId" />
+          </TabPanel>
+          <TabPanel :header="t('labels.assignedLabels')">
+            <TaskLabels :org-id="orgId" :task-id="taskId" />
+          </TabPanel>
+          <TabPanel v-if="task.workflow_context" :header="t('history.title')">
+            <ProcessHistoryTimeline
+              :org-id="orgId"
+              :process-instance-id="task.workflow_context.process_instance_id"
+              :field-labels="historyFieldLabels"
+            />
+          </TabPanel>
+        </TabView>
+      </main>
+
+      <!-- Sidebar (full mode only) -->
+      <aside v-if="mode === 'full'" class="sidebar">
+        <TaskDetailSidebar :task="task" :assignee-name="assigneeName" />
+      </aside>
     </template>
 
     <!-- Action form dialog -->
@@ -504,19 +473,37 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.task-detail-content {
+.task-detail {
   max-width: 900px;
 }
 
-.task-detail-content.full {
-  max-width: 1000px;
+.task-detail.two-column {
+  max-width: 1200px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.main-content {
+  min-width: 0;
+}
+
+.sidebar {
+  position: sticky;
+  top: 1.5rem;
+  background: var(--p-surface-card);
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 1rem;
 }
 
 .loading-spinner {
   display: flex;
   justify-content: center;
   margin-top: 3rem;
+  grid-column: 1 / -1;
 }
 
 .detail-header {
@@ -585,20 +572,18 @@ onUnmounted(() => {
   color: var(--p-text-muted-color);
 }
 
-.properties-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 1rem;
-  padding: 0.75rem;
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
+/* Panel mode compact properties */
+.properties-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  padding: 0.5rem 0;
 }
 
-.prop-row {
+.prop-inline {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .prop-label {
@@ -609,49 +594,12 @@ onUnmounted(() => {
 }
 
 .prop-value {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
 }
 
 .prop-value.overdue {
   color: var(--p-red-500);
   font-weight: 500;
-}
-
-.assignee-value {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.pool-info {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.pool-description {
-  font-size: 0.8rem;
-}
-
-.pool-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-}
-
-.assign-picker {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.assign-select {
-  flex: 1;
-  min-width: 140px;
 }
 
 .description-text {
@@ -665,9 +613,13 @@ onUnmounted(() => {
   margin-top: 0.5rem;
 }
 
-@media (max-width: 768px) {
-  .properties-grid {
+@media (max-width: 1024px) {
+  .task-detail.two-column {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
   }
 }
 </style>
