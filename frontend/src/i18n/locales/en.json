@@ -421,7 +421,10 @@
     "taskAssigned": "Task assigned successfully",
     "assign": "Assign",
     "selectEmployee": "Select employee…",
-    "poolTaskBadge": "Pool Task"
+    "poolTaskBadge": "Pool Task",
+    "candidates": "candidates",
+    "assignTo": "Assign",
+    "takeToWork": "Take to work"
   },
   "boards": {
     "title": "Boards",
@@ -832,6 +835,20 @@
     "processCompleted": "Process completed",
     "processCancelled": "Process cancelled",
     "stageCompleted": "Stage completed"
+  },
+  "sidebar": {
+    "assignment": "Assignment",
+    "statusAndPriority": "Status & Priority",
+    "dates": "Dates",
+    "timeTracking": "Time Tracking",
+    "estimate": "Estimate:",
+    "spent": "Spent:",
+    "startTimer": "Start timer",
+    "watchers": "Watchers",
+    "watchersHelp": "Watchers receive notifications about task changes",
+    "subscribe": "Subscribe",
+    "creator": "Creator",
+    "sla": "SLA"
   },
   "organizationDetail": {
     "departments": "Departments",

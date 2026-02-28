@@ -1,0 +1,296 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
+import { taskStatusSeverity, taskPrioritySeverity } from '@/shared/utils/status-severity'
+import { formatDate, isOverdue } from '@/shared/utils/date-format'
+import type { TaskDetailDTO } from '@/modules/tasks/types/task.types'
+
+const props = defineProps<{
+  task: TaskDetailDTO
+  assigneeName: string | null
+}>()
+
+const { t } = useI18n()
+const empStore = useEmployeeStore()
+
+const statusLabelKeys: Record<string, string> = {
+  draft: 'tasks.statusDraft',
+  open: 'tasks.statusOpen',
+  in_progress: 'tasks.statusInProgress',
+  review: 'tasks.statusReview',
+  done: 'tasks.statusDone',
+  blocked: 'tasks.statusBlocked',
+  cancelled: 'tasks.statusCancelled',
+}
+
+const priorityLabelKeys: Record<string, string> = {
+  low: 'tasks.priorityLow',
+  medium: 'tasks.priorityMedium',
+  high: 'tasks.priorityHigh',
+  critical: 'tasks.priorityCritical',
+}
+
+const creatorName = computed(() => {
+  const emp = empStore.employees.find((e) => e.userId === props.task.creatorId || e.id === props.task.creatorId)
+  return emp ? `${emp.firstName} ${emp.lastName}` : props.task.creatorId
+})
+
+const creatorInitials = computed(() => {
+  const emp = empStore.employees.find((e) => e.userId === props.task.creatorId || e.id === props.task.creatorId)
+  if (emp) {
+    return `${emp.firstName?.charAt(0) ?? ''}${emp.lastName?.charAt(0) ?? ''}`.toUpperCase()
+  }
+  return '?'
+})
+</script>
+
+<template>
+  <div class="sidebar-cards">
+    <!-- Assignment Card -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.assignment') }}</div>
+      <div class="card-content">
+        <template v-if="assigneeName">
+          <div class="assignee-row">
+            <Avatar :label="assigneeName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)" shape="circle" size="small" />
+            <span>{{ assigneeName }}</span>
+          </div>
+        </template>
+        <template v-else-if="task.isPoolTask">
+          <div class="pool-info-compact">
+            <i class="pi pi-users" />
+            <span>{{ t('tasks.poolTask') }}</span>
+          </div>
+        </template>
+        <template v-else>
+          <span class="muted-text">{{ t('tasks.unassigned') }}</span>
+        </template>
+      </div>
+    </div>
+
+    <!-- Status & Priority Card -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.statusAndPriority') }}</div>
+      <div class="card-content tags-row">
+        <Tag
+          :value="t(statusLabelKeys[task.status] ?? task.status)"
+          :severity="taskStatusSeverity(task.status)"
+          size="small"
+        />
+        <Tag
+          :value="t(priorityLabelKeys[task.priority] ?? task.priority)"
+          :severity="taskPrioritySeverity(task.priority)"
+          size="small"
+        />
+      </div>
+    </div>
+
+    <!-- Dates Card -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.dates') }}</div>
+      <div class="card-content dates-list">
+        <div class="date-row">
+          <span class="date-label">{{ t('taskDetail.created') }}</span>
+          <span class="date-value">{{ formatDate(task.createdAt) }}</span>
+        </div>
+        <div v-if="task.dueDate" class="date-row">
+          <span class="date-label">{{ t('taskDetail.dueDate') }}</span>
+          <span class="date-value" :class="{ overdue: isOverdue(task.dueDate) }">
+            <i v-if="isOverdue(task.dueDate)" class="pi pi-exclamation-triangle overdue-icon" />
+            {{ formatDate(task.dueDate) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Tracking Card (placeholder) -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.timeTracking') }}</div>
+      <div class="card-content time-tracking">
+        <div class="time-row">
+          <span class="time-label">{{ t('sidebar.estimate') }}</span>
+          <span class="time-value">{{ task.estimatedHours ? `${task.estimatedHours}h` : '\u2014' }}</span>
+        </div>
+        <div class="time-row">
+          <span class="time-label">{{ t('sidebar.spent') }}</span>
+          <span class="time-value muted-text">&mdash;</span>
+        </div>
+        <Button
+          :label="t('sidebar.startTimer')"
+          icon="pi pi-stopwatch"
+          text
+          size="small"
+          disabled
+          class="timer-btn"
+        />
+      </div>
+    </div>
+
+    <!-- Watchers Card (placeholder) -->
+    <div class="sidebar-card">
+      <div class="card-label">
+        {{ t('sidebar.watchers') }}
+        <i class="pi pi-question-circle help-icon" v-tooltip="t('sidebar.watchersHelp')" />
+      </div>
+      <div class="card-content watchers">
+        <Avatar :label="creatorInitials" shape="circle" size="small" />
+        <Button
+          :label="t('sidebar.subscribe')"
+          icon="pi pi-eye"
+          text
+          size="small"
+          disabled
+        />
+      </div>
+    </div>
+
+    <!-- Creator Card -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.creator') }}</div>
+      <div class="card-content">
+        <div class="creator-row">
+          <Avatar :label="creatorInitials" shape="circle" size="small" />
+          <span>{{ creatorName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Labels Card -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('labels.assignedLabels') }}</div>
+      <div class="card-content">
+        <span class="muted-text">&mdash;</span>
+      </div>
+    </div>
+
+    <!-- SLA Card (placeholder) -->
+    <div class="sidebar-card">
+      <div class="card-label">{{ t('sidebar.sla') }}</div>
+      <div class="card-content">
+        <template v-if="task.dueDate">
+          <span class="date-value" :class="{ overdue: isOverdue(task.dueDate) }">
+            {{ formatDate(task.dueDate) }}
+          </span>
+        </template>
+        <template v-else>
+          <span class="muted-text">&mdash;</span>
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.sidebar-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sidebar-card {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--p-surface-border);
+}
+
+.sidebar-card:first-child {
+  padding-top: 0;
+}
+
+.sidebar-card:last-child {
+  border-bottom: none;
+}
+
+.card-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--p-text-muted-color);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.card-content {
+  font-size: 0.875rem;
+}
+
+.muted-text {
+  color: var(--p-text-muted-color);
+}
+
+.tags-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.assignee-row,
+.creator-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pool-info-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--p-text-muted-color);
+  font-size: 0.85rem;
+}
+
+.dates-list,
+.time-tracking {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.date-row,
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-label,
+.time-label {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.date-value,
+.time-value {
+  font-size: 0.85rem;
+}
+
+.date-value.overdue {
+  color: var(--p-red-500);
+  font-weight: 500;
+}
+
+.overdue-icon {
+  font-size: 0.75rem;
+  margin-right: 0.2rem;
+}
+
+.timer-btn {
+  margin-top: 0.3rem;
+  align-self: flex-start;
+}
+
+.watchers {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-icon {
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+  cursor: help;
+}
+</style>

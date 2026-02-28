@@ -421,7 +421,10 @@
     "taskAssigned": "Задачу успішно призначено",
     "assign": "Призначити",
     "selectEmployee": "Оберіть працівника…",
-    "poolTaskBadge": "Pool Task"
+    "poolTaskBadge": "Pool Task",
+    "candidates": "кандидатiв",
+    "assignTo": "Призначити",
+    "takeToWork": "Взяти в роботу"
   },
   "boards": {
     "title": "Дошки",
@@ -832,6 +835,20 @@
     "processCompleted": "Процес завершено",
     "processCancelled": "Процес скасовано",
     "stageCompleted": "Етап завершено"
+  },
+  "sidebar": {
+    "assignment": "Призначення",
+    "statusAndPriority": "Статус i прiоритет",
+    "dates": "Дати",
+    "timeTracking": "Облiк часу",
+    "estimate": "Оцiнка:",
+    "spent": "Витрачено:",
+    "startTimer": "Почати таймер",
+    "watchers": "Спостерiгачi",
+    "watchersHelp": "Спостерiгачi отримують сповiщення про змiни задачi",
+    "subscribe": "Пiдписатись",
+    "creator": "Створив",
+    "sla": "SLA"
   },
   "organizationDetail": {
     "departments": "Департаменти",
