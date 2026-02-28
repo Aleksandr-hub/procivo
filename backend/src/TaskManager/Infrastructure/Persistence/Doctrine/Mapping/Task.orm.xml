@@ -16,6 +16,10 @@
         <field name="dueDate" type="datetime_immutable" nullable="true" column="due_date"/>
         <field name="estimatedHours" type="float" nullable="true" column="estimated_hours"/>
         <field name="assigneeId" type="string" length="36" nullable="true" column="assignee_id"/>
+        <field name="assignmentStrategy" type="string" length="30" column="assignment_strategy"/>
+        <field name="candidateRoleId" type="string" length="36" nullable="true" column="candidate_role_id"/>
+        <field name="candidateDepartmentId" type="string" length="36" nullable="true" column="candidate_department_id"/>
+        <field name="formSchema" type="json" nullable="true" column="form_schema"/>
         <field name="creatorId" type="string" length="36" column="creator_id"/>
         <field name="createdAt" type="datetime_immutable" column="created_at"/>
         <field name="updatedAt" type="datetime_immutable" nullable="true" column="updated_at"/>
@@ -26,6 +30,8 @@
             <index name="idx_task_assignee" columns="assignee_id"/>
             <index name="idx_task_due_date" columns="due_date"/>
             <index name="idx_task_creator" columns="creator_id"/>
+            <index name="idx_task_candidate_role" columns="candidate_role_id"/>
+            <index name="idx_task_candidate_dept" columns="candidate_department_id"/>
         </indexes>
 
     </entity>

@@ -9,6 +9,7 @@ use App\TaskManager\Domain\Entity\Task;
 final readonly class TaskDTO
 {
     /**
+     * @param array<string, mixed>|null $formSchema
      * @param list<string> $availableTransitions
      */
     public function __construct(
@@ -21,9 +22,14 @@ final readonly class TaskDTO
         public ?string $dueDate,
         public ?float $estimatedHours,
         public ?string $assigneeId,
+        public string $assignmentStrategy,
+        public ?string $candidateRoleId,
+        public ?string $candidateDepartmentId,
+        public bool $isPoolTask,
         public string $creatorId,
         public string $createdAt,
         public ?string $updatedAt,
+        public ?array $formSchema = null,
         public array $availableTransitions = [],
     ) {
     }
@@ -43,9 +49,14 @@ final readonly class TaskDTO
             dueDate: $task->dueDate()?->format(\DateTimeInterface::ATOM),
             estimatedHours: $task->estimatedHours(),
             assigneeId: $task->assigneeId(),
+            assignmentStrategy: $task->assignmentStrategy()->value,
+            candidateRoleId: $task->candidateRoleId(),
+            candidateDepartmentId: $task->candidateDepartmentId(),
+            isPoolTask: $task->isPoolTask(),
             creatorId: $task->creatorId(),
             createdAt: $task->createdAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $task->updatedAt()?->format(\DateTimeInterface::ATOM),
+            formSchema: $task->formSchema(),
             availableTransitions: $availableTransitions,
         );
     }

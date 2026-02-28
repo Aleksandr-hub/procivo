@@ -18,6 +18,12 @@ final readonly class CreateTaskCommand implements CommandInterface
         public ?float $estimatedHours,
         public string $creatorId,
         public ?string $assigneeId = null,
+        public string $assignmentStrategy = 'unassigned',
+        public ?string $assigneeEmployeeId = null,
+        public ?string $assigneeRoleId = null,
+        public ?string $assigneeDepartmentId = null,
+        /** @var array<string, mixed>|null */
+        public ?array $formSchema = null,
     ) {
     }
 }

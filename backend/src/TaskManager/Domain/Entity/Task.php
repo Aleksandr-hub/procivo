@@ -6,9 +6,13 @@ namespace App\TaskManager\Domain\Entity;
 
 use App\Shared\Domain\AggregateRoot;
 use App\TaskManager\Domain\Event\TaskAssignedEvent;
+use App\TaskManager\Domain\Event\TaskClaimedEvent;
 use App\TaskManager\Domain\Event\TaskCreatedEvent;
 use App\TaskManager\Domain\Event\TaskDeletedEvent;
 use App\TaskManager\Domain\Event\TaskStatusChangedEvent;
+use App\TaskManager\Domain\Event\TaskUnclaimedEvent;
+use App\TaskManager\Domain\Exception\TaskClaimException;
+use App\TaskManager\Domain\ValueObject\AssignmentStrategy;
 use App\TaskManager\Domain\ValueObject\TaskId;
 use App\TaskManager\Domain\ValueObject\TaskPriority;
 use App\TaskManager\Domain\ValueObject\TaskStatus;
@@ -24,6 +28,11 @@ class Task extends AggregateRoot
     private ?\DateTimeImmutable $dueDate;
     private ?float $estimatedHours;
     private ?string $assigneeId;
+    private string $assignmentStrategy;
+    private ?string $candidateRoleId;
+    private ?string $candidateDepartmentId;
+    /** @var array<string, mixed>|null */
+    private ?array $formSchema = null;
     private string $creatorId;
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
@@ -42,6 +51,10 @@ class Task extends AggregateRoot
         ?float $estimatedHours,
         string $creatorId,
         ?string $assigneeId = null,
+        AssignmentStrategy $assignmentStrategy = AssignmentStrategy::Unassigned,
+        ?string $candidateRoleId = null,
+        ?string $candidateDepartmentId = null,
+        ?array $formSchema = null,
     ): self {
         $task = new self();
         $task->id = $id->value();
@@ -53,6 +66,10 @@ class Task extends AggregateRoot
         $task->dueDate = $dueDate;
         $task->estimatedHours = $estimatedHours;
         $task->assigneeId = $assigneeId;
+        $task->assignmentStrategy = $assignmentStrategy->value;
+        $task->candidateRoleId = $candidateRoleId;
+        $task->candidateDepartmentId = $candidateDepartmentId;
+        $task->formSchema = $formSchema;
         $task->creatorId = $creatorId;
         $task->createdAt = new \DateTimeImmutable();
         $task->updatedAt = null;
@@ -82,6 +99,38 @@ class Task extends AggregateRoot
         $this->assigneeId = $assigneeId;
         $this->updatedAt = new \DateTimeImmutable();
         $this->recordEvent(new TaskAssignedEvent($this->id, $assigneeId));
+    }
+
+    public function claim(string $employeeId): void
+    {
+        if (!$this->isPoolTask()) {
+            throw TaskClaimException::notAPoolTask($this->id);
+        }
+
+        if (null !== $this->assigneeId) {
+            throw TaskClaimException::alreadyClaimed($this->id);
+        }
+
+        $this->assigneeId = $employeeId;
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->recordEvent(new TaskClaimedEvent($this->id, $employeeId));
+    }
+
+    public function unclaim(): void
+    {
+        if (null === $this->assigneeId) {
+            throw TaskClaimException::notClaimed($this->id);
+        }
+
+        $previousAssigneeId = $this->assigneeId;
+        $this->assigneeId = null;
+        $this->updatedAt = new \DateTimeImmutable();
+        $this->recordEvent(new TaskUnclaimedEvent($this->id, $previousAssigneeId));
+    }
+
+    public function isPoolTask(): bool
+    {
+        return null !== $this->candidateRoleId || null !== $this->candidateDepartmentId;
     }
 
     public function markDeleted(): void
@@ -151,6 +200,29 @@ class Task extends AggregateRoot
     public function assigneeId(): ?string
     {
         return $this->assigneeId;
+    }
+
+    public function assignmentStrategy(): AssignmentStrategy
+    {
+        return AssignmentStrategy::from($this->assignmentStrategy);
+    }
+
+    public function candidateRoleId(): ?string
+    {
+        return $this->candidateRoleId;
+    }
+
+    public function candidateDepartmentId(): ?string
+    {
+        return $this->candidateDepartmentId;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function formSchema(): ?array
+    {
+        return $this->formSchema;
     }
 
     public function creatorId(): string
