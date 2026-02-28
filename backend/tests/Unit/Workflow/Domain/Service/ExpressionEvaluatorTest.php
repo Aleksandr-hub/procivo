@@ -11,19 +11,27 @@ use Psr\Log\LoggerInterface;
 
 final class ExpressionEvaluatorTest extends TestCase
 {
-    private LoggerInterface $logger;
-    private ExpressionEvaluator $evaluator;
-
-    protected function setUp(): void
+    private function createEvaluatorWithStub(): ExpressionEvaluator
     {
-        $this->logger = $this->createMock(LoggerInterface::class);
-        $this->evaluator = new ExpressionEvaluator($this->logger);
+        return new ExpressionEvaluator($this->createStub(LoggerInterface::class));
+    }
+
+    /**
+     * @return array{LoggerInterface&\PHPUnit\Framework\MockObject\MockObject, ExpressionEvaluator}
+     */
+    private function createEvaluatorWithMock(): array
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+
+        return [$logger, new ExpressionEvaluator($logger)];
     }
 
     #[Test]
     public function itEvaluatesSimpleEquality(): void
     {
-        $result = $this->evaluator->evaluate("status == 'approved'", ['status' => 'approved']);
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $result = $evaluator->evaluate("status == 'approved'", ['status' => 'approved']);
 
         self::assertTrue($result);
     }
@@ -31,27 +39,35 @@ final class ExpressionEvaluatorTest extends TestCase
     #[Test]
     public function itEvaluatesNumericComparisons(): void
     {
-        self::assertTrue($this->evaluator->evaluate('amount > 1000', ['amount' => 1500]));
-        self::assertFalse($this->evaluator->evaluate('amount > 1000', ['amount' => 500]));
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertTrue($evaluator->evaluate('amount > 1000', ['amount' => 1500]));
+        self::assertFalse($evaluator->evaluate('amount > 1000', ['amount' => 500]));
     }
 
     #[Test]
     public function itEvaluatesInOperator(): void
     {
-        self::assertTrue($this->evaluator->evaluate("role in ['admin', 'manager']", ['role' => 'admin']));
-        self::assertFalse($this->evaluator->evaluate("role in ['admin', 'manager']", ['role' => 'user']));
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertTrue($evaluator->evaluate("role in ['admin', 'manager']", ['role' => 'admin']));
+        self::assertFalse($evaluator->evaluate("role in ['admin', 'manager']", ['role' => 'user']));
     }
 
     #[Test]
     public function itEvaluatesNotInOperator(): void
     {
-        self::assertTrue($this->evaluator->evaluate("status not in ['blocked', 'deleted']", ['status' => 'active']));
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertTrue($evaluator->evaluate("status not in ['blocked', 'deleted']", ['status' => 'active']));
     }
 
     #[Test]
     public function itEvaluatesLogicalOperators(): void
     {
-        self::assertTrue($this->evaluator->evaluate(
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertTrue($evaluator->evaluate(
             'approved and amount > 100',
             ['approved' => true, 'amount' => 200],
         ));
@@ -60,14 +76,18 @@ final class ExpressionEvaluatorTest extends TestCase
     #[Test]
     public function itEvaluatesNullCoalescing(): void
     {
-        self::assertSame('pending', $this->evaluator->evaluate("status ?? 'pending'", []));
-        self::assertSame('active', $this->evaluator->evaluate("status ?? 'pending'", ['status' => 'active']));
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertSame('pending', $evaluator->evaluate("status ?? 'pending'", []));
+        self::assertSame('active', $evaluator->evaluate("status ?? 'pending'", ['status' => 'active']));
     }
 
     #[Test]
     public function itReturnsFalseOnUndefinedVariable(): void
     {
-        $result = $this->evaluator->evaluate("decision == 'Done'", []);
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $result = $evaluator->evaluate("decision == 'Done'", []);
 
         self::assertFalse($result);
     }
@@ -75,7 +95,9 @@ final class ExpressionEvaluatorTest extends TestCase
     #[Test]
     public function itLogsWarningOnUndefinedVariable(): void
     {
-        $this->logger->expects(self::once())
+        [$logger, $evaluator] = $this->createEvaluatorWithMock();
+
+        $logger->expects(self::once())
             ->method('warning')
             ->with(
                 'Expression evaluation failed',
@@ -88,14 +110,16 @@ final class ExpressionEvaluatorTest extends TestCase
                 }),
             );
 
-        $this->evaluator->evaluate("decision == 'Done'", []);
+        $evaluator->evaluate("decision == 'Done'", []);
     }
 
     #[Test]
     public function itReturnsFalseOnTypeMismatch(): void
     {
-        // Comparing an array to a string triggers a type error in ExpressionLanguage
-        $result = $this->evaluator->evaluate("status == 'active'", ['status' => ['nested' => 'value']]);
+        $evaluator = $this->createEvaluatorWithStub();
+
+        // Math on a string triggers a TypeError in ExpressionLanguage
+        $result = $evaluator->evaluate('amount + 10', ['amount' => 'not_a_number']);
 
         self::assertFalse($result);
     }
@@ -103,26 +127,30 @@ final class ExpressionEvaluatorTest extends TestCase
     #[Test]
     public function itLogsWarningOnTypeMismatch(): void
     {
-        $this->logger->expects(self::once())
+        [$logger, $evaluator] = $this->createEvaluatorWithMock();
+
+        $logger->expects(self::once())
             ->method('warning')
             ->with(
                 'Expression evaluation failed',
                 self::callback(static function (array $context): bool {
                     return isset($context['expression'], $context['error'], $context['error_class'], $context['variable_keys'])
-                        && $context['expression'] === "status == 'active'"
+                        && $context['expression'] === 'amount + 10'
                         && \is_string($context['error'])
-                        && \is_string($context['error_class'])
-                        && $context['variable_keys'] === ['status'];
+                        && $context['error_class'] === \TypeError::class
+                        && $context['variable_keys'] === ['amount'];
                 }),
             );
 
-        $this->evaluator->evaluate("status == 'active'", ['status' => ['nested' => 'value']]);
+        $evaluator->evaluate('amount + 10', ['amount' => 'not_a_number']);
     }
 
     #[Test]
     public function itReturnsFalseOnSyntaxError(): void
     {
-        $result = $this->evaluator->evaluate('invalid !! expression', []);
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $result = $evaluator->evaluate('invalid !! expression', []);
 
         self::assertFalse($result);
     }
@@ -130,18 +158,22 @@ final class ExpressionEvaluatorTest extends TestCase
     #[Test]
     public function itEvaluatesNotEqualOperator(): void
     {
-        self::assertTrue($this->evaluator->evaluate("status != 'rejected'", ['status' => 'approved']));
+        $evaluator = $this->createEvaluatorWithStub();
+
+        self::assertTrue($evaluator->evaluate("status != 'rejected'", ['status' => 'approved']));
     }
 
     #[Test]
     public function itEvaluatesComparisonOperators(): void
     {
-        self::assertTrue($this->evaluator->evaluate('amount >= 100', ['amount' => 100]));
-        self::assertTrue($this->evaluator->evaluate('amount >= 100', ['amount' => 150]));
-        self::assertFalse($this->evaluator->evaluate('amount >= 100', ['amount' => 99]));
+        $evaluator = $this->createEvaluatorWithStub();
 
-        self::assertTrue($this->evaluator->evaluate('amount <= 100', ['amount' => 100]));
-        self::assertTrue($this->evaluator->evaluate('amount <= 100', ['amount' => 50]));
-        self::assertFalse($this->evaluator->evaluate('amount <= 100', ['amount' => 101]));
+        self::assertTrue($evaluator->evaluate('amount >= 100', ['amount' => 100]));
+        self::assertTrue($evaluator->evaluate('amount >= 100', ['amount' => 150]));
+        self::assertFalse($evaluator->evaluate('amount >= 100', ['amount' => 99]));
+
+        self::assertTrue($evaluator->evaluate('amount <= 100', ['amount' => 100]));
+        self::assertTrue($evaluator->evaluate('amount <= 100', ['amount' => 50]));
+        self::assertFalse($evaluator->evaluate('amount <= 100', ['amount' => 101]));
     }
 }
