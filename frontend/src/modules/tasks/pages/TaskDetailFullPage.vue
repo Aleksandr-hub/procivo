@@ -13,7 +13,12 @@ const router = useRouter()
 const orgId = computed(() => route.params.orgId as string)
 
 function onClose() {
-  router.push({ name: 'tasks', params: { orgId: orgId.value } })
+  // Try browser back first for natural navigation, fallback to tasks list
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push({ name: 'tasks', params: { orgId: orgId.value } })
+  }
 }
 </script>
 

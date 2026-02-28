@@ -72,7 +72,7 @@ const router = createRouter({
         {
           path: 'organizations/:orgId/tasks/:taskId',
           name: 'task-detail',
-          component: () => import('@/modules/tasks/pages/TaskDetailPage.vue'),
+          component: () => import('@/modules/tasks/pages/TaskDetailFullPage.vue'),
           props: true,
         },
         {

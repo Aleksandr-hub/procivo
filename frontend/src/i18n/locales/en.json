@@ -424,7 +424,11 @@
     "poolTaskBadge": "Pool Task",
     "candidates": "candidates",
     "assignTo": "Assign",
-    "takeToWork": "Take to work"
+    "takeToWork": "Take to work",
+    "tasksCount": "tasks",
+    "filters": "Filters",
+    "deadlineIn": "Deadline: {date}",
+    "deadlineOverdue": "Overdue"
   },
   "boards": {
     "title": "Boards",
@@ -808,7 +812,13 @@
     "confirmAction": "Execute action: {action}?",
     "comment": "Comment",
     "commentPlaceholder": "Enter comment...",
-    "fillFormForAction": "Fill the form to complete action"
+    "fillFormForAction": "Fill the form to complete action",
+    "nextExecutor": "Next Executor",
+    "specificPerson": "Specific person",
+    "byDepartment": "Department",
+    "selectPerson": "Select person",
+    "selectDepartment": "Select department",
+    "poolTaskHint": "Will become a pool task for selection"
   },
   "templates": {
     "simpleTaskName": "Stage with Review",

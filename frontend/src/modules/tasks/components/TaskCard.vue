@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
 import type { TaskDTO } from '@/modules/tasks/types/task.types'
 import { taskStatusSeverity, taskPrioritySeverity } from '@/shared/utils/status-severity'
 import { formatDate, isOverdue } from '@/shared/utils/date-format'
 
-defineProps<{
+const props = defineProps<{
   task: TaskDTO
   active: boolean
 }>()
@@ -14,6 +16,7 @@ defineEmits<{
 }>()
 
 const { t } = useI18n()
+const empStore = useEmployeeStore()
 
 const statusLabelKeys: Record<string, string> = {
   draft: 'tasks.statusDraft',
@@ -31,6 +34,19 @@ const priorityLabelKeys: Record<string, string> = {
   high: 'tasks.priorityHigh',
   critical: 'tasks.priorityCritical',
 }
+
+const isWorkflow = computed(() => !!props.task.workflow_summary)
+
+const assigneeName = computed(() => {
+  if (!props.task.assigneeId) return null
+  const emp = empStore.employees.find((e) => e.id === props.task.assigneeId)
+  return emp?.userFullName ?? null
+})
+
+const deadlineText = computed(() => {
+  if (!props.task.dueDate) return null
+  return formatDate(props.task.dueDate)
+})
 </script>
 
 <template>
@@ -39,52 +55,52 @@ const priorityLabelKeys: Record<string, string> = {
     :class="{ active }"
     @click="$emit('click')"
   >
-    <!-- Top row: type icon + process context + badges -->
-    <div class="task-card-header">
-      <div class="task-card-type-icon" :class="task.workflow_summary ? 'workflow' : 'regular'">
-        <i :class="task.workflow_summary ? 'pi pi-sitemap' : 'pi pi-list'" />
-      </div>
-
-      <div class="task-card-header-content">
-        <!-- Process context line (workflow tasks only) -->
-        <div v-if="task.workflow_summary" class="task-card-process">
-          <span>{{ task.workflow_summary.process_name }}</span>
-          <span class="process-separator">&rarr;</span>
-          <span>{{ task.workflow_summary.node_name }}</span>
+    <!-- Top line: icon + process context + badges -->
+    <div class="card-top-line">
+      <div class="card-top-left">
+        <div class="type-icon" :class="isWorkflow ? 'workflow' : 'regular'">
+          <i :class="isWorkflow ? 'pi pi-sitemap' : 'pi pi-list'" />
         </div>
-
-        <!-- Task title -->
-        <div class="task-card-title">{{ task.title }}</div>
-
-        <!-- Description (one line, truncated) -->
-        <div v-if="task.description" class="task-card-description">
-          {{ task.description }}
-        </div>
+        <span v-if="task.workflow_summary" class="process-context">
+          {{ task.workflow_summary.process_name }}
+          <span class="process-arrow">&rarr;</span>
+          {{ task.workflow_summary.node_name }}
+        </span>
       </div>
-    </div>
-
-    <!-- Bottom row: status + pool badge + priority + due date -->
-    <div class="task-card-meta">
-      <div class="task-card-meta-left">
-        <Tag
-          :value="t(statusLabelKeys[task.status] ?? task.status)"
-          :severity="taskStatusSeverity(task.status)"
-        />
-        <Tag
-          v-if="task.isPoolTask && !task.assigneeId"
-          :value="t('tasks.poolTaskBadge')"
-          severity="info"
-          class="pool-badge"
-        />
-      </div>
-      <div class="task-card-meta-right">
+      <div class="card-top-right">
         <Tag
           :value="t(priorityLabelKeys[task.priority] ?? task.priority)"
           :severity="taskPrioritySeverity(task.priority)"
         />
-        <span v-if="task.dueDate" class="task-card-date" :class="{ overdue: isOverdue(task.dueDate) }">
-          <i class="pi pi-calendar" />
-          {{ formatDate(task.dueDate) }}
+        <Tag
+          :value="t(statusLabelKeys[task.status] ?? task.status)"
+          :severity="taskStatusSeverity(task.status)"
+        />
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div class="card-title">{{ task.title }}</div>
+
+    <!-- Description -->
+    <div v-if="task.description" class="card-description">{{ task.description }}</div>
+
+    <!-- Bottom line: assignee + labels + pool badge + deadline -->
+    <div class="card-bottom-line">
+      <div class="card-bottom-left">
+        <span v-if="assigneeName" class="assignee-chip">
+          <i class="pi pi-user" />
+          {{ assigneeName }}
+        </span>
+        <Tag
+          v-if="task.isPoolTask && !task.assigneeId"
+          :value="t('tasks.poolTaskBadge')"
+          severity="info"
+        />
+      </div>
+      <div class="card-bottom-right">
+        <span v-if="deadlineText" class="deadline" :class="{ overdue: isOverdue(task.dueDate) }">
+          {{ t('tasks.deadlineIn', { date: deadlineText }) }}
         </span>
       </div>
     </div>
@@ -93,136 +109,159 @@ const priorityLabelKeys: Record<string, string> = {
 
 <style scoped>
 .task-card {
-  padding: 0.75rem 1rem;
+  padding: 1rem 1.25rem;
   cursor: pointer;
-  transition: background-color 0.15s;
-  border-bottom: 1px solid var(--p-surface-border);
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  background: var(--p-surface-card);
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
 
 .task-card:hover {
-  background: var(--p-surface-hover);
+  border-color: var(--p-primary-200);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+:root.p-dark .task-card:hover {
+  border-color: var(--p-primary-800);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .task-card.active {
-  background: var(--p-highlight-background);
+  border-color: var(--p-primary-color);
 }
 
-.task-card-header {
+/* Top line */
+.card-top-line {
   display: flex;
-  gap: 0.6rem;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
-.task-card-type-icon {
+.card-top-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.type-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  min-width: 1.75rem;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
   border-radius: 50%;
-  font-size: 0.75rem;
-  margin-top: 0.1rem;
+  font-size: 0.8rem;
 }
 
-.task-card-type-icon.workflow {
+.type-icon.workflow {
   background: var(--p-purple-100);
   color: var(--p-purple-600);
 }
 
-:root.p-dark .task-card-type-icon.workflow {
+:root.p-dark .type-icon.workflow {
   background: color-mix(in srgb, var(--p-purple-400) 20%, transparent);
   color: var(--p-purple-300);
 }
 
-.task-card-type-icon.regular {
+.type-icon.regular {
   background: var(--p-blue-100);
   color: var(--p-blue-600);
 }
 
-:root.p-dark .task-card-type-icon.regular {
+:root.p-dark .type-icon.regular {
   background: color-mix(in srgb, var(--p-blue-400) 20%, transparent);
   color: var(--p-blue-300);
 }
 
-.task-card-header-content {
-  flex: 1;
-  min-width: 0;
+.process-context {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.task-card-process {
+.process-arrow {
+  opacity: 0.5;
+  margin: 0 0.15rem;
+}
+
+.card-top-right {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  font-size: 0.7rem;
-  color: var(--p-purple-600);
-  margin-bottom: 0.15rem;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
-:root.p-dark .task-card-process {
-  color: var(--p-purple-300);
-}
-
-.process-separator {
-  opacity: 0.6;
-  font-size: 0.65rem;
-}
-
-.task-card-title {
+/* Title */
+.card-title {
+  font-size: 1.05rem;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.2rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
 }
 
-.task-card-description {
-  font-size: 0.75rem;
+/* Description */
+.card-description {
+  font-size: 0.85rem;
   color: var(--p-text-muted-color);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
 }
 
-.task-card-meta {
+/* Bottom line */
+.card-bottom-line {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   margin-top: 0.4rem;
-  padding-left: 2.35rem;
 }
 
-.task-card-meta-left {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.task-card-meta-right {
+.card-bottom-left {
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-.pool-badge {
-  font-size: 0.65rem;
+.assignee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--p-text-color);
+  background: var(--p-surface-100);
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  border: 1px solid var(--p-surface-border);
 }
 
-.task-card-date {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--p-text-muted-color);
+:root.p-dark .assignee-chip {
+  background: var(--p-surface-700);
+}
+
+.assignee-chip i {
   font-size: 0.7rem;
 }
 
-.task-card-date.overdue {
+.card-bottom-right {
+  flex-shrink: 0;
+}
+
+.deadline {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.deadline.overdue {
   color: var(--p-red-500);
   font-weight: 500;
 }

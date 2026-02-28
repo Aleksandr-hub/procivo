@@ -593,6 +593,7 @@ onUnmounted(() => {
       :visible="showActionDialog"
       :action="selectedAction"
       :shared-fields="sharedFields"
+      :show-next-executor="!!task?.workflow_context && !task.workflow_context.is_completed"
       @hide="showActionDialog = false"
       @submit="onActionFormSubmit"
     />

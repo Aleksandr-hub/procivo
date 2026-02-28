@@ -424,7 +424,11 @@
     "poolTaskBadge": "Pool Task",
     "candidates": "кандидатiв",
     "assignTo": "Призначити",
-    "takeToWork": "Взяти в роботу"
+    "takeToWork": "Взяти в роботу",
+    "tasksCount": "задач",
+    "filters": "Фільтри",
+    "deadlineIn": "Дедлайн: {date}",
+    "deadlineOverdue": "Прострочено"
   },
   "boards": {
     "title": "Дошки",
@@ -808,7 +812,13 @@
     "confirmAction": "Виконати дію: {action}?",
     "comment": "Коментар",
     "commentPlaceholder": "Введіть коментар...",
-    "fillFormForAction": "Заповніть форму для виконання дії"
+    "fillFormForAction": "Заповніть форму для виконання дії",
+    "nextExecutor": "Наступний виконавець",
+    "specificPerson": "Конкретна людина",
+    "byDepartment": "Департамент",
+    "selectPerson": "Оберіть людину",
+    "selectDepartment": "Оберіть департамент",
+    "poolTaskHint": "Стане pool task для вибору"
   },
   "templates": {
     "simpleTaskName": "Етап з перевіркою",
