@@ -9,10 +9,11 @@ import type {
 } from '@/modules/tasks/types/task.types'
 
 export const taskApi = {
-  list(orgId: string, status?: string, assigneeId?: string): Promise<TaskDTO[]> {
+  list(orgId: string, status?: string, assigneeId?: string, candidateEmployeeId?: string): Promise<TaskDTO[]> {
     const params: Record<string, string> = {}
     if (status) params.status = status
     if (assigneeId) params.assignee_id = assigneeId
+    if (candidateEmployeeId) params.candidate_employee_id = candidateEmployeeId
     return httpClient.get(`/organizations/${orgId}/tasks`, { params }).then((r) => r.data)
   },
 
@@ -44,9 +45,21 @@ export const taskApi = {
     return httpClient.delete(`/organizations/${orgId}/tasks/${taskId}`).then(() => undefined)
   },
 
-  executeAction(orgId: string, taskId: string, data: ExecuteActionPayload): Promise<MessageResponse> {
+  completeTask(orgId: string, taskId: string, data: ExecuteActionPayload): Promise<MessageResponse> {
     return httpClient
-      .post(`/organizations/${orgId}/tasks/${taskId}/execute-action`, data)
+      .post(`/organizations/${orgId}/tasks/${taskId}/complete`, data)
+      .then((r) => r.data)
+  },
+
+  claim(orgId: string, taskId: string, employeeId: string): Promise<MessageResponse> {
+    return httpClient
+      .post(`/organizations/${orgId}/tasks/${taskId}/claim`, { employee_id: employeeId })
+      .then((r) => r.data)
+  },
+
+  unclaim(orgId: string, taskId: string, employeeId: string): Promise<MessageResponse> {
+    return httpClient
+      .post(`/organizations/${orgId}/tasks/${taskId}/unclaim`, { employee_id: employeeId })
       .then((r) => r.data)
   },
 }

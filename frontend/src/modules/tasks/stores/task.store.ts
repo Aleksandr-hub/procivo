@@ -13,6 +13,11 @@ export const useTaskStore = defineStore('task', () => {
   const tasks = ref<TaskDTO[]>([])
   const currentTask = ref<TaskDetailDTO | null>(null)
   const loading = ref(false)
+  const selectedTaskId = ref<string | null>(null)
+
+  function selectTask(taskId: string | null) {
+    selectedTaskId.value = taskId
+  }
 
   async function fetchTasks(orgId: string, status?: string, assigneeId?: string) {
     loading.value = true
@@ -58,9 +63,19 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
-  async function executeAction(orgId: string, taskId: string, data: ExecuteActionPayload) {
-    await taskApi.executeAction(orgId, taskId, data)
-    await fetchTask(orgId, taskId)
+  async function completeTask(orgId: string, taskId: string, data: ExecuteActionPayload) {
+    await taskApi.completeTask(orgId, taskId, data)
+    await Promise.all([fetchTask(orgId, taskId), fetchTasks(orgId)])
+  }
+
+  async function claimTask(orgId: string, taskId: string, employeeId: string) {
+    await taskApi.claim(orgId, taskId, employeeId)
+    await Promise.all([fetchTask(orgId, taskId), fetchTasks(orgId)])
+  }
+
+  async function unclaimTask(orgId: string, taskId: string, employeeId: string) {
+    await taskApi.unclaim(orgId, taskId, employeeId)
+    await Promise.all([fetchTask(orgId, taskId), fetchTasks(orgId)])
   }
 
   function clearCurrentTask() {
@@ -71,6 +86,8 @@ export const useTaskStore = defineStore('task', () => {
     tasks,
     currentTask,
     loading,
+    selectedTaskId,
+    selectTask,
     fetchTasks,
     fetchTask,
     createTask,
@@ -78,7 +95,9 @@ export const useTaskStore = defineStore('task', () => {
     transitionTask,
     assignTask,
     deleteTask,
-    executeAction,
+    completeTask,
+    claimTask,
+    unclaimTask,
     clearCurrentTask,
   }
 })
