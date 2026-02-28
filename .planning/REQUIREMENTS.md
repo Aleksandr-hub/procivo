@@ -18,15 +18,15 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [ ] **COMP-01**: API POST /api/v1/tasks/{id}/complete accepts { action, formData }
 - [x] **COMP-02**: Backend validates formData against form_schema (required, type, min/max, regex patterns)
-- [ ] **COMP-03**: Backend merges validated formData into ProcessInstance.variables with namespace prefix to prevent collisions
+- [x] **COMP-03**: Backend merges validated formData into ProcessInstance.variables with namespace prefix to prevent collisions
 - [ ] **COMP-04**: After merge, workflow engine advances — token moves to next node via the selected action's transition
 - [x] **COMP-05**: Field dependency validation — show/require field X only when field Y has specific value
 
 ### Gateway Conditions
 
-- [ ] **GATE-01**: ExpressionEvaluator integrated with XOR gateway — evaluates conditions against ProcessInstance.variables
-- [ ] **GATE-02**: Full Symfony ExpressionLanguage support (operators, functions, arrays, null-coalescing)
-- [ ] **GATE-03**: Undefined variables in expressions log warnings and evaluate safely (no silent mis-routing)
+- [x] **GATE-01**: ExpressionEvaluator integrated with XOR gateway — evaluates conditions against ProcessInstance.variables
+- [x] **GATE-02**: Full Symfony ExpressionLanguage support (operators, functions, arrays, null-coalescing)
+- [x] **GATE-03**: Undefined variables in expressions log warnings and evaluate safely (no silent mis-routing)
 - [ ] **GATE-04**: Default/else branch on XOR gateway when no condition matches
 
 ### Task Assignment
@@ -98,12 +98,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FORM-04 | Phase 2 | Pending |
 | COMP-01 | Phase 3 | Pending |
 | COMP-02 | Phase 1 | Complete |
-| COMP-03 | Phase 1 | Pending |
+| COMP-03 | Phase 1 | Complete |
 | COMP-04 | Phase 3 | Pending |
 | COMP-05 | Phase 1 | Complete |
-| GATE-01 | Phase 1 | Pending |
-| GATE-02 | Phase 1 | Pending |
-| GATE-03 | Phase 1 | Pending |
+| GATE-01 | Phase 1 | Complete |
+| GATE-02 | Phase 1 | Complete |
+| GATE-03 | Phase 1 | Complete |
 | GATE-04 | Phase 1 | Pending |
 | ASGN-01 | Phase 2 | Pending |
 | ASGN-02 | Phase 2 | Pending |
