@@ -850,6 +850,20 @@
     "creator": "Створив",
     "sla": "SLA"
   },
+  "process": {
+    "processLabel": "Процес",
+    "currentStage": "Поточний етап",
+    "step": "Крок {n}",
+    "viewProcess": "Переглянути процес",
+    "processData": "Дані процесу",
+    "fromStage": "з етапу: {stage}",
+    "showAll": "Показати все ({count})",
+    "collapse": "Згорнути"
+  },
+  "stepper": {
+    "completedAt": "Завершено: {time}",
+    "action": "Дія: {action}"
+  },
   "organizationDetail": {
     "departments": "Департаменти",
     "employees": "Працівники",

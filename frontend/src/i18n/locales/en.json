@@ -850,6 +850,20 @@
     "creator": "Creator",
     "sla": "SLA"
   },
+  "process": {
+    "processLabel": "Process",
+    "currentStage": "Current Stage",
+    "step": "Step {n}",
+    "viewProcess": "View Process",
+    "processData": "Process Data",
+    "fromStage": "from stage: {stage}",
+    "showAll": "Show all ({count})",
+    "collapse": "Collapse"
+  },
+  "stepper": {
+    "completedAt": "Completed: {time}",
+    "action": "Action: {action}"
+  },
   "organizationDetail": {
     "departments": "Departments",
     "employees": "Employees",
