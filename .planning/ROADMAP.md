@@ -81,11 +81,14 @@ Plans:
   6. Process Context Card displays process name, current stage, progress bar (X/Y steps), and "Next step: X" text on workflow task detail
   7. My Path Stepper renders horizontal stepper of the actual token path (completed/current/upcoming), with adaptive display: full (3-7 steps), scrollable (8-20), compact header + modal (20+)
   8. "View Full Process" button navigates to ProcessInstanceDetailPage; contextual hint shows next step name
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md — API endpoint fix (execute-action -> complete), Zod schema builder utility, ActionFormDialog enhancement with Zod validation + comment + action-typed buttons
+- [ ] 04-02-PLAN.md — TaskCard process context badges (purple icon, process name -> stage, Pool Task badge)
+- [ ] 04-03-PLAN.md — TaskDetailContent 2-column restructure, PoolTaskBanner component, TaskDetailSidebar with info cards
+- [ ] 04-04-PLAN.md — ProcessContextCard, MyPathStepper, ProcessDataCard components wired into task detail
+- [ ] 04-05-PLAN.md — Build verification + visual/functional checkpoint for all FEND requirements
 
 ### Phase 5: Designer Configuration
 **Goal**: Process designers can configure assignment strategies and per-action form fields directly in the Workflow Designer UI, closing the full design-to-execution loop
