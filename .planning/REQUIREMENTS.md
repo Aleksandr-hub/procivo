@@ -31,13 +31,13 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Task Assignment
 
-- [ ] **ASGN-01**: Assignment strategies: unassigned, specific_employee, by_role, by_department
-- [ ] **ASGN-02**: OnTaskNodeActivated resolves assignment strategy from node config and creates task with correct assignee/candidates
-- [ ] **ASGN-03**: Pool tasks (by_role, by_department) — task created with candidateRoleId/candidateDepartmentId, assigneeId = null
-- [ ] **ASGN-04**: Auto-assign when single candidate in pool
+- [x] **ASGN-01**: Assignment strategies: unassigned, specific_employee, by_role, by_department
+- [x] **ASGN-02**: OnTaskNodeActivated resolves assignment strategy from node config and creates task with correct assignee/candidates
+- [x] **ASGN-03**: Pool tasks (by_role, by_department) — task created with candidateRoleId/candidateDepartmentId, assigneeId = null
+- [x] **ASGN-04**: Auto-assign when single candidate in pool
 - [ ] **ASGN-05**: API POST /api/v1/tasks/{id}/claim — employee claims pool task (with pessimistic locking)
 - [ ] **ASGN-06**: API POST /api/v1/tasks/{id}/unclaim — employee returns task to pool
-- [ ] **ASGN-07**: OrganizationQueryPort anti-corruption layer — TaskManager queries Organization module for role/department members
+- [x] **ASGN-07**: OrganizationQueryPort anti-corruption layer — TaskManager queries Organization module for role/department members
 
 ### Frontend: Task Detail
 
@@ -116,13 +116,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GATE-02 | Phase 1 | Complete |
 | GATE-03 | Phase 1 | Complete |
 | GATE-04 | Phase 1 | Pending |
-| ASGN-01 | Phase 2 | Pending |
-| ASGN-02 | Phase 2 | Pending |
-| ASGN-03 | Phase 2 | Pending |
-| ASGN-04 | Phase 2 | Pending |
+| ASGN-01 | Phase 2 | Complete |
+| ASGN-02 | Phase 2 | Complete |
+| ASGN-03 | Phase 2 | Complete |
+| ASGN-04 | Phase 2 | Complete |
 | ASGN-05 | Phase 3 | Pending |
 | ASGN-06 | Phase 3 | Pending |
-| ASGN-07 | Phase 2 | Pending |
+| ASGN-07 | Phase 2 | Complete |
 | FEND-01 | Phase 4 | Pending |
 | FEND-02 | Phase 4 | Pending |
 | FEND-03 | Phase 4 | Pending |
