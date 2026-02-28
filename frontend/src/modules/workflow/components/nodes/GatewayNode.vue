@@ -2,7 +2,7 @@
 import { Handle, Position } from '@vue-flow/core'
 
 defineProps<{
-  data: { label: string; nodeType?: string; isOrphan?: boolean }
+  data: { label: string; nodeType?: string; isOrphan?: boolean; tokenStatus?: string | null }
 }>()
 
 function gatewaySymbol(type?: string) {
@@ -16,7 +16,7 @@ function gatewaySymbol(type?: string) {
 </script>
 
 <template>
-  <div class="gateway-node" :class="{ orphan: data.isOrphan }">
+  <div class="gateway-node" :class="{ orphan: data.isOrphan, 'token-active': data.tokenStatus === 'active', 'token-completed': data.tokenStatus === 'completed' }">
     <Handle type="target" :position="Position.Left" />
     <div class="diamond">
       <span class="symbol">{{ gatewaySymbol(data.nodeType) }}</span>
@@ -60,5 +60,16 @@ function gatewaySymbol(type?: string) {
 @keyframes pulse-border {
   0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
   50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+}
+
+.gateway-node.token-active .diamond {
+  border-color: #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+}
+
+.gateway-node.token-completed .diamond {
+  opacity: 0.6;
+  border-color: #9ca3af;
+  background: #6b7280;
 }
 </style>

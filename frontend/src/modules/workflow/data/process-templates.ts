@@ -1,4 +1,4 @@
-import type { NodeType } from '@/modules/workflow/types/process-definition.types'
+import type { NodeType, FormFieldDefinition } from '@/modules/workflow/types/process-definition.types'
 
 export interface TemplateNode {
   type: NodeType
@@ -12,7 +12,9 @@ export interface TemplateTransition {
   sourceIndex: number
   targetIndex: number
   nameKey?: string
+  action_key?: string
   condition_expression?: string
+  form_fields?: FormFieldDefinition[]
 }
 
 export interface ProcessTemplate {
@@ -246,6 +248,55 @@ export const processTemplates: ProcessTemplate[] = [
       { sourceIndex: 6, targetIndex: 4, nameKey: 'Changes needed', condition_expression: "review_result == 'Changes needed'" },
       { sourceIndex: 7, targetIndex: 8 },
       { sourceIndex: 9, targetIndex: 10 },
+    ],
+  },
+
+  // ── General: Request Processing (user-driven, no gateways) ─
+  // Start → Нова → В роботу → Виконання → На перевірці → Ініціатору → End
+  // Будь-який етап може відправити на Уточнення, яке повертається до Нова
+  {
+    id: 'request-processing',
+    nameKey: 'templates.requestProcessingName',
+    descriptionKey: 'templates.requestProcessingDesc',
+    category: 'general',
+    icon: 'pi pi-list-check',
+    nodes: [
+      /* 0 */ { type: 'start', nameKey: 'Start', position_x: 80, position_y: 300 },
+      /* 1 */ { type: 'task', nameKey: 'Нова', position_x: 300, position_y: 300, config: { task_title_template: 'Нова заявка', priority: 'medium' } },
+      /* 2 */ { type: 'task', nameKey: 'На уточненні', position_x: 300, position_y: 550, config: { task_title_template: 'Уточнення заявки', priority: 'medium' } },
+      /* 3 */ { type: 'task', nameKey: 'В роботу', position_x: 550, position_y: 300, config: { task_title_template: 'Планування роботи', priority: 'medium' } },
+      /* 4 */ { type: 'task', nameKey: 'Виконання', position_x: 800, position_y: 300, config: { task_title_template: 'Виконання заявки', priority: 'high' } },
+      /* 5 */ { type: 'task', nameKey: 'На перевірці', position_x: 1050, position_y: 300, config: { task_title_template: 'Перевірка виконаної роботи', priority: 'high' } },
+      /* 6 */ { type: 'task', nameKey: 'Перевірка ініціатором', position_x: 1300, position_y: 300, config: { task_title_template: 'Фінальна перевірка ініціатором', priority: 'medium' } },
+      /* 7 */ { type: 'end', nameKey: 'Закрито', position_x: 1550, position_y: 300 },
+    ],
+    transitions: [
+      // Start → Нова
+      { sourceIndex: 0, targetIndex: 1 },
+      // Нова → На уточнення
+      { sourceIndex: 1, targetIndex: 2, nameKey: 'На уточнення', action_key: 'clarify', form_fields: [{ name: 'details', label: 'Деталі уточнення', type: 'textarea', required: true }] },
+      // Нова → В роботу
+      { sourceIndex: 1, targetIndex: 3, nameKey: 'В роботу', action_key: 'to_work', form_fields: [{ name: 'deadline', label: 'Дедлайн', type: 'date', required: true }, { name: 'category', label: 'Категорія', type: 'select', required: true, options: ['Розробка', 'Дизайн'] }, { name: 'notes', label: 'Примітки', type: 'textarea', required: false }] },
+      // На уточненні → Нова
+      { sourceIndex: 2, targetIndex: 1, nameKey: 'Відповісти', action_key: 'respond', form_fields: [{ name: 'response', label: 'Відповідь', type: 'textarea', required: true }] },
+      // В роботу → На уточнення
+      { sourceIndex: 3, targetIndex: 2, nameKey: 'На уточнення', action_key: 'clarify', form_fields: [{ name: 'details', label: 'Деталі уточнення', type: 'textarea', required: true }] },
+      // В роботу → Виконання (призначити)
+      { sourceIndex: 3, targetIndex: 4, nameKey: 'Призначити виконавця', action_key: 'assign', form_fields: [{ name: 'executor', label: 'Виконавець', type: 'text', required: true }, { name: 'comment', label: 'Коментар', type: 'textarea', required: false }] },
+      // В роботу → Виконання (самому)
+      { sourceIndex: 3, targetIndex: 4, nameKey: 'Зробити самому', action_key: 'self_assign', form_fields: [{ name: 'comment', label: 'Коментар', type: 'textarea', required: false }] },
+      // Виконання → На уточнення
+      { sourceIndex: 4, targetIndex: 2, nameKey: 'На уточнення', action_key: 'clarify', form_fields: [{ name: 'details', label: 'Деталі уточнення', type: 'textarea', required: true }] },
+      // Виконання → На перевірку
+      { sourceIndex: 4, targetIndex: 5, nameKey: 'На перевірку', action_key: 'to_review', form_fields: [{ name: 'result', label: 'Результат роботи', type: 'textarea', required: false }, { name: 'notes', label: 'Примітки', type: 'textarea', required: false }] },
+      // На перевірці → На доопрацювання
+      { sourceIndex: 5, targetIndex: 4, nameKey: 'На доопрацювання', action_key: 'rework', form_fields: [{ name: 'comment', label: 'Коментар', type: 'textarea', required: true }] },
+      // На перевірці → Ініціатору
+      { sourceIndex: 5, targetIndex: 6, nameKey: 'Ініціатору на перевірку', action_key: 'to_initiator' },
+      // Перевірка ініціатором → На доопрацювання
+      { sourceIndex: 6, targetIndex: 4, nameKey: 'На доопрацювання', action_key: 'rework', form_fields: [{ name: 'comment', label: 'Коментар', type: 'textarea', required: true }] },
+      // Перевірка ініціатором → Закрити
+      { sourceIndex: 6, targetIndex: 7, nameKey: 'Закрити задачу', action_key: 'close', form_fields: [{ name: 'resolution', label: 'Підсумок', type: 'textarea', required: false }] },
     ],
   },
 ]

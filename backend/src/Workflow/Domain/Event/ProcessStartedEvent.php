@@ -18,6 +18,8 @@ final readonly class ProcessStartedEvent implements DomainEvent
         public string $organizationId,
         public string $startedBy,
         public array $variables,
+        public ?string $parentProcessInstanceId = null,
+        public ?string $parentTokenId = null,
         private \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
     }

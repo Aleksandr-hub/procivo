@@ -27,7 +27,43 @@ final readonly class DoctrineWorkflowTaskLinkRepository implements WorkflowTaskL
             ->select('l')
             ->from(WorkflowTaskLink::class, 'l')
             ->where('l.taskId = :taskId')
+            ->andWhere('l.completedAt IS NULL')
             ->setParameter('taskId', $taskId)
+            ->orderBy('l.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @param list<string> $taskIds
+     *
+     * @return list<WorkflowTaskLink>
+     */
+    public function findByTaskIds(array $taskIds): array
+    {
+        if ([] === $taskIds) {
+            return [];
+        }
+
+        return $this->entityManager->createQueryBuilder()
+            ->select('l')
+            ->from(WorkflowTaskLink::class, 'l')
+            ->where('l.taskId IN (:taskIds)')
+            ->setParameter('taskIds', $taskIds)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findLatestByProcessInstanceId(string $processInstanceId): ?WorkflowTaskLink
+    {
+        return $this->entityManager->createQueryBuilder()
+            ->select('l')
+            ->from(WorkflowTaskLink::class, 'l')
+            ->where('l.processInstanceId = :pid')
+            ->setParameter('pid', $processInstanceId)
+            ->orderBy('l.createdAt', 'DESC')
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

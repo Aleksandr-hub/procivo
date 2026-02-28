@@ -35,5 +35,9 @@
     "error.workflow_token_not_found": "Токен з ID \"%id%\" не знайдено.",
     "error.workflow_execution_error": "Помилка виконання процесу: %reason%",
     "error.process_not_running": "Екземпляр процесу \"%id%\" не у стані виконання.",
-    "error.form_fields_required": "Обов'язкові поля форми відсутні: %fields%"
+    "error.form_fields_required": "Обов'язкові поля форми відсутні: %fields%",
+    "error.task_claim_not_pool": "Задача \"%id%\" не є груповою і не може бути взята.",
+    "error.task_claim_already_claimed": "Задача \"%id%\" вже зайнята іншим працівником.",
+    "error.task_claim_not_claimed": "Задача \"%id%\" наразі ні за ким не закріплена.",
+    "error.task_claim_not_eligible": "Ви не маєте права взяти задачу \"%taskId%\"."
 }

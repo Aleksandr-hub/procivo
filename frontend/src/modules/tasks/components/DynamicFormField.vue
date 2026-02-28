@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { FormFieldDefinition } from '@/modules/workflow/types/process-definition.types'
+import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
 
 defineProps<{
   field: FormFieldDefinition
@@ -9,7 +12,20 @@ defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: unknown]
+  'blur': []
 }>()
+
+const { t } = useI18n()
+const empStore = useEmployeeStore()
+
+const employeeOptions = computed(() =>
+  empStore.employees
+    .filter((e) => e.status === 'active')
+    .map((e) => ({
+      label: e.userFullName || e.employeeNumber,
+      value: e.id,
+    })),
+)
 
 function onUpdate(value: unknown) {
   emit('update:modelValue', value)
@@ -20,7 +36,7 @@ function onUpdate(value: unknown) {
   <div class="dynamic-field">
     <label>
       {{ field.label }}
-      <span v-if="field.required" class="required-mark">*</span>
+      <Tag v-if="field.required" :value="t('form.required')" severity="secondary" class="required-badge" />
     </label>
 
     <InputText
@@ -28,6 +44,7 @@ function onUpdate(value: unknown) {
       :model-value="(modelValue as string) ?? ''"
       class="w-full"
       @update:model-value="onUpdate"
+      @blur="emit('blur')"
     />
 
     <InputNumber
@@ -35,6 +52,7 @@ function onUpdate(value: unknown) {
       :model-value="(modelValue as number) ?? null"
       class="w-full"
       @update:model-value="onUpdate"
+      @blur="emit('blur')"
     />
 
     <DatePicker
@@ -44,6 +62,7 @@ function onUpdate(value: unknown) {
       date-format="yy-mm-dd"
       show-icon
       @update:model-value="onUpdate"
+      @blur="emit('blur')"
     />
 
     <Select
@@ -52,6 +71,7 @@ function onUpdate(value: unknown) {
       :options="field.options ?? []"
       class="w-full"
       @update:model-value="onUpdate"
+      @blur="emit('blur')"
     />
 
     <Checkbox
@@ -61,6 +81,19 @@ function onUpdate(value: unknown) {
       @update:model-value="onUpdate"
     />
 
+    <Select
+      v-else-if="field.type === 'employee'"
+      :model-value="(modelValue as string) ?? null"
+      :options="employeeOptions"
+      option-label="label"
+      option-value="value"
+      filter
+      :loading="empStore.loading"
+      class="w-full"
+      @update:model-value="onUpdate"
+      @blur="emit('blur')"
+    />
+
     <Textarea
       v-else-if="field.type === 'textarea'"
       :model-value="(modelValue as string) ?? ''"
@@ -68,6 +101,7 @@ function onUpdate(value: unknown) {
       :rows="3"
       auto-resize
       @update:model-value="onUpdate"
+      @blur="emit('blur')"
     />
 
     <small v-if="error" class="p-error">{{ error }}</small>
@@ -80,13 +114,16 @@ function onUpdate(value: unknown) {
 }
 
 .dynamic-field label {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
   font-weight: 500;
 }
 
-.required-mark {
-  color: var(--p-red-500);
+.required-badge {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
 }
 </style>

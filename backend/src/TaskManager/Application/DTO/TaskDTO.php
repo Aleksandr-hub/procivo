@@ -11,9 +11,11 @@ final readonly class TaskDTO
     /**
      * @param array<string, mixed>|null $formSchema
      * @param list<string> $availableTransitions
+     * @param list<array{name: string, color: string}> $labels
      */
     public function __construct(
         public string $id,
+        public int $sequenceNumber,
         public string $organizationId,
         public string $title,
         public ?string $description,
@@ -31,16 +33,19 @@ final readonly class TaskDTO
         public ?string $updatedAt,
         public ?array $formSchema = null,
         public array $availableTransitions = [],
+        public array $labels = [],
     ) {
     }
 
     /**
      * @param list<string> $availableTransitions
+     * @param list<array{name: string, color: string}> $labels
      */
-    public static function fromEntity(Task $task, array $availableTransitions = []): self
+    public static function fromEntity(Task $task, array $availableTransitions = [], array $labels = []): self
     {
         return new self(
             id: $task->id()->value(),
+            sequenceNumber: $task->sequenceNumber(),
             organizationId: $task->organizationId(),
             title: $task->title(),
             description: $task->description(),
@@ -58,6 +63,7 @@ final readonly class TaskDTO
             updatedAt: $task->updatedAt()?->format(\DateTimeInterface::ATOM),
             formSchema: $task->formSchema(),
             availableTransitions: $availableTransitions,
+            labels: $labels,
         );
     }
 }

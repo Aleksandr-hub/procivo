@@ -25,3 +25,18 @@ export function definitionStatusSeverity(status: string): string {
     default: return 'info'
   }
 }
+
+export function taskStatusSeverity(status: string): string {
+  const map: Record<string, string> = {
+    draft: 'secondary', open: 'info', in_progress: 'warn',
+    review: 'info', done: 'success', blocked: 'danger', cancelled: 'secondary',
+  }
+  return map[status] ?? 'info'
+}
+
+export function taskPrioritySeverity(priority: string): string {
+  const map: Record<string, string> = {
+    low: 'secondary', medium: 'info', high: 'warn', critical: 'danger',
+  }
+  return map[priority] ?? 'info'
+}

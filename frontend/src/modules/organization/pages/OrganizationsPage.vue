@@ -13,8 +13,11 @@ const orgStore = useOrganizationStore()
 const showCreateDialog = ref(false)
 const { t } = useI18n()
 
-onMounted(() => {
-  orgStore.fetchOrganizations()
+onMounted(async () => {
+  await orgStore.fetchOrganizations()
+  if (orgStore.organizations.length === 1) {
+    openOrg(orgStore.organizations[0].id)
+  }
 })
 
 function openOrg(orgId: string) {

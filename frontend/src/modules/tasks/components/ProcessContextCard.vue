@@ -6,6 +6,7 @@ defineProps<{
   currentStageName: string
   completedStepCount: number
   processInstanceUrl: string
+  nextStepName?: string
 }>()
 
 const { t } = useI18n()
@@ -38,16 +39,17 @@ const { t } = useI18n()
           :show-value="false"
           class="step-progress"
         />
+        <span v-if="nextStepName" class="next-step-text">
+          {{ t('process.nextStep') }}: {{ nextStepName }}
+        </span>
       </div>
-      <a
-        :href="processInstanceUrl"
-        target="_blank"
-        rel="noopener"
+      <router-link
+        :to="processInstanceUrl"
         class="view-process-link"
       >
         <i class="pi pi-external-link" />
         {{ t('process.viewProcess') }}
-      </a>
+      </router-link>
     </div>
   </div>
 </template>
@@ -57,11 +59,24 @@ const { t } = useI18n()
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, var(--p-primary-50) 0%, var(--p-purple-50) 100%);
-  border: 1px solid var(--p-primary-100);
-  border-radius: var(--p-border-radius);
+  padding: 1.25rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--p-purple-500) 5%, transparent) 0%,
+    color-mix(in srgb, var(--p-blue-500) 5%, transparent) 100%
+  );
+  border: 1px solid color-mix(in srgb, var(--p-purple-500) 20%, transparent);
+  border-radius: 0.75rem;
   margin-bottom: 1rem;
+}
+
+:root.p-dark .process-context-card {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--p-purple-400) 8%, transparent) 0%,
+    color-mix(in srgb, var(--p-blue-400) 8%, transparent) 100%
+  );
+  border-color: color-mix(in srgb, var(--p-purple-400) 25%, transparent);
 }
 
 .context-section {
@@ -73,19 +88,28 @@ const { t } = useI18n()
 .context-section--right {
   margin-left: auto;
   flex-shrink: 0;
-  gap: 1rem;
+  min-width: 200px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
 .context-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--p-primary-color) 12%, transparent);
-  color: var(--p-primary-color);
-  font-size: 0.9rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--p-purple-500) 12%, transparent);
+  color: var(--p-purple-600);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+:root.p-dark .context-icon {
+  background: color-mix(in srgb, var(--p-purple-400) 20%, transparent);
+  color: var(--p-purple-300);
 }
 
 .context-info {
@@ -107,11 +131,16 @@ const { t } = useI18n()
 }
 
 .current-stage {
-  color: var(--p-primary-color);
+  color: var(--p-purple-600);
+}
+
+:root.p-dark .current-stage {
+  color: var(--p-purple-300);
 }
 
 .step-info {
-  min-width: 80px;
+  min-width: 120px;
+  align-items: flex-end;
 }
 
 .step-text {
@@ -123,6 +152,13 @@ const { t } = useI18n()
 .step-progress {
   height: 4px;
   margin-top: 0.25rem;
+  width: 100%;
+}
+
+.next-step-text {
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+  margin-top: 0.15rem;
 }
 
 .view-process-link {
@@ -130,10 +166,14 @@ const { t } = useI18n()
   align-items: center;
   gap: 0.3rem;
   font-size: 0.8rem;
-  color: var(--p-primary-color);
+  color: var(--p-purple-600);
   text-decoration: none;
   white-space: nowrap;
   font-weight: 500;
+}
+
+:root.p-dark .view-process-link {
+  color: var(--p-purple-300);
 }
 
 .view-process-link:hover {
@@ -150,7 +190,7 @@ const { t } = useI18n()
   .context-section--right {
     margin-left: 0;
     width: 100%;
-    justify-content: space-between;
+    align-items: flex-start;
   }
 }
 </style>

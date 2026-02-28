@@ -6,6 +6,7 @@ namespace App\Workflow\Infrastructure\EventStore;
 
 use App\Shared\Domain\DomainEvent;
 use App\Workflow\Domain\Event\GatewayEvaluatedEvent;
+use App\Workflow\Domain\Event\NotificationNodeActivatedEvent;
 use App\Workflow\Domain\Event\ProcessCancelledEvent;
 use App\Workflow\Domain\Event\ProcessCompletedEvent;
 use App\Workflow\Domain\Event\ProcessStartedEvent;
@@ -16,6 +17,10 @@ use App\Workflow\Domain\Event\TokenCompletedEvent;
 use App\Workflow\Domain\Event\TokenCreatedEvent;
 use App\Workflow\Domain\Event\TokenMovedEvent;
 use App\Workflow\Domain\Event\VariablesMergedEvent;
+use App\Workflow\Domain\Event\SubProcessCompletedEvent;
+use App\Workflow\Domain\Event\SubProcessNodeActivatedEvent;
+use App\Workflow\Domain\Event\WebhookFiredEvent;
+use App\Workflow\Domain\Event\WebhookNodeActivatedEvent;
 
 final class EventSerializer
 {
@@ -26,14 +31,16 @@ final class EventSerializer
     {
         $eventType = $event->eventName();
         $payload = match (true) {
-            $event instanceof ProcessStartedEvent => [
+            $event instanceof ProcessStartedEvent => array_filter([
                 'process_instance_id' => $event->processInstanceId,
                 'process_definition_id' => $event->processDefinitionId,
                 'version_id' => $event->versionId,
                 'organization_id' => $event->organizationId,
                 'started_by' => $event->startedBy,
                 'variables' => $event->variables,
-            ],
+                'parent_process_instance_id' => $event->parentProcessInstanceId,
+                'parent_token_id' => $event->parentTokenId,
+            ], static fn (mixed $v): bool => null !== $v),
             $event instanceof TokenCreatedEvent => [
                 'process_instance_id' => $event->processInstanceId,
                 'token_id' => $event->tokenId,
@@ -90,6 +97,43 @@ final class EventSerializer
                 'cancelled_by' => $event->cancelledBy,
                 'reason' => $event->reason,
             ],
+            $event instanceof NotificationNodeActivatedEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'organization_id' => $event->organizationId,
+                'node_id' => $event->nodeId,
+                'token_id' => $event->tokenId,
+                'notification_config' => $event->notificationConfig,
+                'variables' => $event->variables,
+                'started_by' => $event->startedBy,
+            ],
+            $event instanceof WebhookNodeActivatedEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'organization_id' => $event->organizationId,
+                'node_id' => $event->nodeId,
+                'token_id' => $event->tokenId,
+                'webhook_config' => $event->webhookConfig,
+                'variables' => $event->variables,
+            ],
+            $event instanceof WebhookFiredEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'node_id' => $event->nodeId,
+                'token_id' => $event->tokenId,
+            ],
+            $event instanceof SubProcessNodeActivatedEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'organization_id' => $event->organizationId,
+                'node_id' => $event->nodeId,
+                'token_id' => $event->tokenId,
+                'sub_process_config' => $event->subProcessConfig,
+                'variables' => $event->variables,
+                'started_by' => $event->startedBy,
+            ],
+            $event instanceof SubProcessCompletedEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'node_id' => $event->nodeId,
+                'token_id' => $event->tokenId,
+                'child_process_instance_id' => $event->childProcessInstanceId,
+            ],
             default => throw new \RuntimeException(\sprintf('Unknown event type: %s', $event::class)),
         };
 
@@ -109,6 +153,8 @@ final class EventSerializer
                 organizationId: $payload['organization_id'],
                 startedBy: $payload['started_by'],
                 variables: $payload['variables'] ?? [],
+                parentProcessInstanceId: $payload['parent_process_instance_id'] ?? null,
+                parentTokenId: $payload['parent_token_id'] ?? null,
                 occurredAt: $occurredAt,
             ),
             'workflow.token.created' => new TokenCreatedEvent(
@@ -175,6 +221,48 @@ final class EventSerializer
                 processInstanceId: $payload['process_instance_id'],
                 cancelledBy: $payload['cancelled_by'],
                 reason: $payload['reason'] ?? null,
+                occurredAt: $occurredAt,
+            ),
+            'workflow.notification_node.activated' => new NotificationNodeActivatedEvent(
+                processInstanceId: $payload['process_instance_id'],
+                organizationId: $payload['organization_id'],
+                nodeId: $payload['node_id'],
+                tokenId: $payload['token_id'],
+                notificationConfig: $payload['notification_config'] ?? [],
+                variables: $payload['variables'] ?? [],
+                startedBy: $payload['started_by'] ?? '',
+                occurredAt: $occurredAt,
+            ),
+            'workflow.webhook_node.activated' => new WebhookNodeActivatedEvent(
+                processInstanceId: $payload['process_instance_id'],
+                organizationId: $payload['organization_id'],
+                nodeId: $payload['node_id'],
+                tokenId: $payload['token_id'],
+                webhookConfig: $payload['webhook_config'] ?? [],
+                variables: $payload['variables'] ?? [],
+                occurredAt: $occurredAt,
+            ),
+            'workflow.webhook.fired' => new WebhookFiredEvent(
+                processInstanceId: $payload['process_instance_id'],
+                nodeId: $payload['node_id'],
+                tokenId: $payload['token_id'],
+                occurredAt: $occurredAt,
+            ),
+            'workflow.sub_process_node.activated' => new SubProcessNodeActivatedEvent(
+                processInstanceId: $payload['process_instance_id'],
+                organizationId: $payload['organization_id'],
+                nodeId: $payload['node_id'],
+                tokenId: $payload['token_id'],
+                subProcessConfig: $payload['sub_process_config'] ?? [],
+                variables: $payload['variables'] ?? [],
+                startedBy: $payload['started_by'] ?? '',
+                occurredAt: $occurredAt,
+            ),
+            'workflow.sub_process.completed' => new SubProcessCompletedEvent(
+                processInstanceId: $payload['process_instance_id'],
+                nodeId: $payload['node_id'],
+                tokenId: $payload['token_id'],
+                childProcessInstanceId: $payload['child_process_instance_id'],
                 occurredAt: $occurredAt,
             ),
             default => throw new \RuntimeException(\sprintf('Unknown event type: %s', $eventType)),

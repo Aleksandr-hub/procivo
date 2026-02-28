@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { processInstanceApi } from '@/modules/workflow/api/process-instance.api'
 import type {
   ProcessInstanceDTO,
+  ProcessInstanceGraphDTO,
   ProcessEventDTO,
 } from '@/modules/workflow/types/process-instance.types'
 
@@ -10,6 +11,7 @@ export const useProcessInstanceStore = defineStore('processInstance', () => {
   const instances = ref<ProcessInstanceDTO[]>([])
   const currentInstance = ref<ProcessInstanceDTO | null>(null)
   const history = ref<ProcessEventDTO[]>([])
+  const graph = ref<ProcessInstanceGraphDTO | null>(null)
   const loading = ref(false)
 
   async function fetchInstances(orgId: string, status?: string) {
@@ -34,6 +36,10 @@ export const useProcessInstanceStore = defineStore('processInstance', () => {
     history.value = await processInstanceApi.history(orgId, id)
   }
 
+  async function fetchGraph(orgId: string, id: string) {
+    graph.value = await processInstanceApi.graph(orgId, id)
+  }
+
   async function startProcess(orgId: string, definitionId: string, variables: Record<string, unknown> = {}) {
     const result = await processInstanceApi.start(orgId, {
       process_definition_id: definitionId,
@@ -52,10 +58,12 @@ export const useProcessInstanceStore = defineStore('processInstance', () => {
     instances,
     currentInstance,
     history,
+    graph,
     loading,
     fetchInstances,
     fetchInstance,
     fetchHistory,
+    fetchGraph,
     startProcess,
     cancelProcess,
   }

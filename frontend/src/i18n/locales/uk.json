@@ -818,7 +818,15 @@
     "byDepartment": "Департамент",
     "selectPerson": "Оберіть людину",
     "selectDepartment": "Оберіть департамент",
-    "poolTaskHint": "Стане pool task для вибору"
+    "poolTaskHint": "Стане pool task для вибору",
+    "byRole": "За роллю",
+    "byPosition": "За посадою",
+    "selectRole": "Оберіть роль",
+    "selectPosition": "Оберіть посаду",
+    "userAssignmentHint": "Задача буде призначена конкретній людині",
+    "roleAssignmentHint": "Задача стане pool task для всіх з цією роллю",
+    "departmentAssignmentHint": "Задача стане pool task для всього департаменту",
+    "positionAssignmentHint": "Задача буде призначена носію цієї посади"
   },
   "templates": {
     "simpleTaskName": "Етап з перевіркою",
@@ -868,7 +876,11 @@
     "processData": "Дані процесу",
     "fromStage": "з етапу: {stage}",
     "showAll": "Показати все ({count})",
-    "collapse": "Згорнути"
+    "collapse": "Згорнути",
+    "nextStep": "Наступний крок"
+  },
+  "form": {
+    "required": "Обов'язково"
   },
   "stepper": {
     "completedAt": "Завершено: {time}",

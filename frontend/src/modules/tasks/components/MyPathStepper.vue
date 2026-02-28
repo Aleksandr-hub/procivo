@@ -29,44 +29,61 @@ function buildTooltip(step: StepperStep): string {
 </script>
 
 <template>
-  <div class="stepper-container">
-    <div class="stepper-track">
-      <div
-        v-for="(step, index) in steps"
-        :key="step.nodeId"
-        class="stepper-step"
-      >
-        <!-- Connector line (not before first step) -->
+  <div class="stepper-card">
+    <div class="stepper-container">
+      <div class="stepper-track">
         <div
-          v-if="index > 0"
-          class="connector"
-          :class="{ completed: step.status === 'completed' }"
-        />
-
-        <!-- Step circle -->
-        <div
-          class="step-circle"
-          :class="step.status"
-          v-tooltip.top="step.status === 'completed' ? buildTooltip(step) : undefined"
+          v-for="(step, index) in steps"
+          :key="step.nodeId"
+          class="stepper-step"
         >
-          <i v-if="step.status === 'completed'" class="pi pi-check" />
-          <span v-else class="pulse-dot" />
-        </div>
+          <!-- Connector line (not before first step) -->
+          <div
+            v-if="index > 0"
+            class="connector"
+            :class="step.status"
+          />
 
-        <!-- Step label -->
-        <span class="step-label" :class="step.status">
-          {{ step.nodeName }}
-        </span>
+          <!-- Step circle -->
+          <div
+            class="step-circle"
+            :class="step.status"
+            v-tooltip.top="step.status === 'completed' ? buildTooltip(step) : undefined"
+          >
+            <i v-if="step.status === 'completed'" class="pi pi-check" />
+            <span v-else class="pulse-dot">
+              <span class="ping" />
+            </span>
+          </div>
+
+          <!-- Step label -->
+          <span class="step-label" :class="step.status">
+            {{ step.nodeName }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.stepper-card {
+  border: 1px solid var(--p-surface-200);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  background: var(--p-surface-0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+:root.p-dark .stepper-card {
+  border-color: var(--p-surface-600);
+  background: var(--p-surface-800);
+}
+
 .stepper-container {
   overflow-x: auto;
-  padding: 0.5rem 0 1rem;
-  margin-bottom: 1rem;
+  padding: 0.25rem 0;
 }
 
 .stepper-track {
@@ -85,11 +102,10 @@ function buildTooltip(step: StepperStep): string {
 
 .connector {
   position: absolute;
-  top: 14px;
+  top: 12px;
   right: 50%;
   width: 100%;
-  height: 2px;
-  background: var(--p-surface-300);
+  height: 1px;
   z-index: 0;
 }
 
@@ -97,11 +113,16 @@ function buildTooltip(step: StepperStep): string {
   background: var(--p-green-500);
 }
 
+.connector.current {
+  background: transparent;
+  border-top: 1px dashed var(--p-surface-300);
+}
+
 .step-circle {
   position: relative;
   z-index: 1;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -116,7 +137,7 @@ function buildTooltip(step: StepperStep): string {
 }
 
 .step-circle.completed .pi {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 }
 
 .step-circle.current {
@@ -125,16 +146,26 @@ function buildTooltip(step: StepperStep): string {
 }
 
 .pulse-dot {
-  width: 10px;
-  height: 10px;
+  position: relative;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--p-blue-500);
-  animation: pulse 2s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
+.ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--p-blue-500);
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 .step-label {
@@ -142,7 +173,7 @@ function buildTooltip(step: StepperStep): string {
   font-size: 0.72rem;
   color: var(--p-text-muted-color);
   text-align: center;
-  max-width: 80px;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -165,7 +196,7 @@ function buildTooltip(step: StepperStep): string {
 
 /* Connector sizing for adjacent steps */
 .stepper-step + .stepper-step .connector {
-  width: calc(100% + 1rem);
-  right: calc(50% + 14px);
+  width: 3rem;
+  right: calc(50% + 12px);
 }
 </style>

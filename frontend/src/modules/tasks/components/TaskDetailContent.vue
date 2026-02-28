@@ -59,6 +59,13 @@ const isCurrentAssignee = computed(() => {
   return !!(task.value?.assigneeId && currentEmployeeId.value && task.value.assigneeId === currentEmployeeId.value)
 })
 
+const isWorkflowTask = computed(() => !!task.value?.workflow_context)
+
+const shortId = computed(() => {
+  if (!task.value) return ''
+  return `TASK-${String(task.value.sequenceNumber).padStart(3, '0')}`
+})
+
 const poolDescription = computed(() => {
   if (!task.value?.isPoolTask) return null
   if (task.value.candidateRoleId) {
@@ -435,9 +442,10 @@ onUnmounted(() => {
     <template v-if="task">
       <!-- Main content area -->
       <main class="main-content">
-        <!-- Header -->
+        <!-- Sticky header -->
         <div class="detail-header">
-          <div class="header-top">
+          <!-- Meta line: back + icon + task ID + process context + actions -->
+          <div class="header-meta-line">
             <Button
               v-if="mode === 'full'"
               icon="pi pi-arrow-left"
@@ -447,7 +455,16 @@ onUnmounted(() => {
               v-tooltip="t('tasks.backToList')"
               @click="emit('close')"
             />
-            <h3 class="detail-title">{{ task.title }}</h3>
+            <div class="type-icon" :class="isWorkflowTask ? 'workflow' : 'regular'">
+              <i :class="isWorkflowTask ? 'pi pi-sitemap' : 'pi pi-list'" />
+            </div>
+            <span class="task-short-id">{{ shortId }}</span>
+            <template v-if="task.workflow_context">
+              <span class="meta-separator">&bull;</span>
+              <span class="process-name">{{ task.workflow_context.process_name }}</span>
+              <span class="meta-separator">&rarr;</span>
+              <Tag :value="task.workflow_context.node_name" severity="info" size="small" />
+            </template>
             <div class="header-actions">
               <Button
                 v-if="mode === 'panel'"
@@ -470,15 +487,11 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Process breadcrumb -->
-          <div v-if="task.workflow_context" class="process-breadcrumb">
-            <i class="pi pi-sitemap" />
-            <span>{{ task.workflow_context.process_name }}</span>
-            <i class="pi pi-chevron-right" style="font-size: 0.65rem" />
-            <Tag :value="task.workflow_context.node_name" severity="info" size="small" />
-          </div>
+          <!-- Title -->
+          <h2 class="detail-title">{{ task.title }}</h2>
 
-          <div class="header-tags">
+          <!-- Actions bar: status dropdown + priority + due date -->
+          <div class="actions-bar">
             <StatusDropdownButton
               :status-label="currentStatusLabel"
               :status-severity="currentStatusSeverity"
@@ -486,7 +499,7 @@ onUnmounted(() => {
               :disabled="task.workflow_context?.is_completed"
               @action="onActionSelected"
             />
-            <Tag :value="t(priorityLabelKeys[task.priority] ?? task.priority)" :severity="taskPrioritySeverity(task.priority)" />
+            <Tag :value="t(priorityLabelKeys[task.priority] ?? task.priority)" :severity="taskPrioritySeverity(task.priority)" outlined />
             <span v-if="task.dueDate" class="due-date-badge" :class="{ overdue: isOverdue(task.dueDate) }">
               <i class="pi pi-calendar" />
               {{ formatDate(task.dueDate) }}
@@ -501,9 +514,9 @@ onUnmounted(() => {
 
         <Divider />
 
-        <!-- Pool Task Banner (conditional) -->
+        <!-- Pool Task Banner: only when pool task has NO assignee -->
         <PoolTaskBanner
-          v-if="task.isPoolTask"
+          v-if="task.isPoolTask && !task.assigneeId"
           :pool-description="poolDescription"
           :candidate-count="poolCandidates.length"
           :candidates="candidateAvatars"
@@ -584,7 +597,14 @@ onUnmounted(() => {
 
       <!-- Sidebar (full mode only) -->
       <aside v-if="mode === 'full'" class="sidebar">
-        <TaskDetailSidebar :task="task" :assignee-name="assigneeName" />
+        <TaskDetailSidebar
+          :task="task"
+          :assignee-name="assigneeName"
+          :is-pool-task-claimed="!!task.isPoolTask && !!task.assigneeId"
+          :is-current-assignee="isCurrentAssignee"
+          :unclaim-loading="claimLoading"
+          @unclaim="handleUnclaim"
+        />
       </aside>
     </template>
 
@@ -609,7 +629,7 @@ onUnmounted(() => {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   align-items: start;
 }
@@ -621,10 +641,6 @@ onUnmounted(() => {
 .sidebar {
   position: sticky;
   top: 1.5rem;
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  padding: 1rem;
 }
 
 .loading-spinner {
@@ -634,39 +650,99 @@ onUnmounted(() => {
   grid-column: 1 / -1;
 }
 
+/* Sticky header with backdrop blur */
 .detail-header {
-  margin-bottom: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--p-surface-card) 85%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1rem 0 0.75rem;
+  margin: -1rem 0 0;
 }
 
-.header-top {
+/* Meta line: back + icon + taskID + process context + actions */
+.header-meta-line {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.detail-title {
-  margin: 0;
-  font-size: 1.25rem;
-  flex: 1;
+.type-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.type-icon.workflow {
+  background: color-mix(in srgb, var(--p-purple-500) 12%, transparent);
+  color: var(--p-purple-600);
+}
+
+:root.p-dark .type-icon.workflow {
+  background: color-mix(in srgb, var(--p-purple-400) 20%, transparent);
+  color: var(--p-purple-300);
+}
+
+.type-icon.regular {
+  background: color-mix(in srgb, var(--p-blue-500) 12%, transparent);
+  color: var(--p-blue-600);
+}
+
+:root.p-dark .type-icon.regular {
+  background: color-mix(in srgb, var(--p-blue-400) 20%, transparent);
+  color: var(--p-blue-300);
+}
+
+.task-short-id {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.meta-separator {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  opacity: 0.5;
+}
+
+.process-name {
+  font-size: 0.8rem;
+  color: var(--p-purple-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root.p-dark .process-name {
+  color: var(--p-purple-300);
 }
 
 .header-actions {
   display: flex;
   gap: 0.25rem;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
-.process-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  color: var(--p-text-muted-color);
-  margin-bottom: 0.5rem;
+/* Title below meta line */
+.detail-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-.header-tags {
+/* Actions bar */
+.actions-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;

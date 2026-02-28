@@ -19,6 +19,24 @@ const { t } = useI18n()
 const orgId = computed(() => route.params.orgId as string)
 const showStartDialog = ref(false)
 const selectedDefId = ref<string | null>(null)
+const filterStatus = ref<string | undefined>(undefined)
+
+const statusOptions = [
+  { label: t('workflow.instanceStatus_running'), value: 'running' },
+  { label: t('workflow.instanceStatus_completed'), value: 'completed' },
+  { label: t('workflow.instanceStatus_cancelled'), value: 'cancelled' },
+  { label: t('workflow.instanceStatus_error'), value: 'error' },
+]
+
+function getActiveTokenCount(instance: ProcessInstanceDTO): number {
+  return instance.tokens.filter(
+    (tok) => tok.status === 'active' || tok.status === 'waiting',
+  ).length
+}
+
+async function onFilterChange() {
+  await instanceStore.fetchInstances(orgId.value, filterStatus.value)
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -60,6 +78,19 @@ async function cancelInstance(instance: ProcessInstanceDTO) {
       <Button :label="t('workflow.startProcess')" icon="pi pi-play" @click="showStartDialog = true" />
     </div>
 
+    <div class="tab-toolbar">
+      <Select
+        v-model="filterStatus"
+        :options="statusOptions"
+        optionLabel="label"
+        optionValue="value"
+        :placeholder="t('workflow.allStatuses')"
+        showClear
+        @change="onFilterChange"
+        style="width: 200px"
+      />
+    </div>
+
     <DataTable :value="instanceStore.instances" :loading="instanceStore.loading" stripedRows paginator :rows="20">
       <template #empty>
         <div class="empty-table">{{ t('workflow.noInstancesFound') }}</div>
@@ -68,6 +99,16 @@ async function cancelInstance(instance: ProcessInstanceDTO) {
       <Column field="status" :header="t('workflow.status')" sortable>
         <template #body="{ data }">
           <Tag :value="t('workflow.instanceStatus_' + data.status)" :severity="instanceStatusSeverity(data.status)" />
+        </template>
+      </Column>
+      <Column :header="t('workflow.activeTokens')" style="width: 140px">
+        <template #body="{ data }">
+          <Tag
+            v-if="data.status === 'running'"
+            :value="String(getActiveTokenCount(data))"
+            :severity="getActiveTokenCount(data) > 0 ? 'warn' : 'secondary'"
+          />
+          <span v-else>—</span>
         </template>
       </Column>
       <Column field="started_at" :header="t('workflow.startedAt')" sortable />
@@ -106,6 +147,10 @@ async function cancelInstance(instance: ProcessInstanceDTO) {
 
 .page-header h3 {
   margin: 0;
+}
+
+.tab-toolbar {
+  margin-bottom: 1rem;
 }
 
 .empty-table {

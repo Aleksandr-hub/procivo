@@ -4,12 +4,14 @@ import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useTaskStore } from '@/modules/tasks/stores/task.store'
 import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
+import { useRoleStore } from '@/modules/organization/stores/role.store'
+import { useDepartmentStore } from '@/modules/organization/stores/department.store'
 import { useProcessInstanceStore } from '@/modules/workflow/stores/process-instance.store'
 import { useProcessDefinitionStore } from '@/modules/workflow/stores/process-definition.store'
 import { processDefinitionApi } from '@/modules/workflow/api/process-definition.api'
 import DynamicFormField from '@/modules/tasks/components/DynamicFormField.vue'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
-import type { TaskPriority } from '@/modules/tasks/types/task.types'
+import type { TaskPriority, AssignmentStrategy } from '@/modules/tasks/types/task.types'
 import type { FormFieldDefinition } from '@/modules/workflow/types/process-definition.types'
 
 const props = defineProps<{
@@ -26,6 +28,8 @@ const toast = useToast()
 const { t } = useI18n()
 const taskStore = useTaskStore()
 const empStore = useEmployeeStore()
+const roleStore = useRoleStore()
+const deptStore = useDepartmentStore()
 const instanceStore = useProcessInstanceStore()
 const defStore = useProcessDefinitionStore()
 
@@ -42,6 +46,11 @@ const priority = ref<TaskPriority>('medium')
 const assigneeId = ref<string | null>(null)
 const dueDate = ref<Date | null>(null)
 const estimatedHours = ref<number | null>(null)
+
+// Assignment strategy
+const assignmentStrategy = ref<AssignmentStrategy>('specific_user')
+const selectedRoleId = ref<string | null>(null)
+const selectedDepartmentId = ref<string | null>(null)
 
 // Process form data
 const processFormData = ref<Record<string, unknown>>({})
@@ -68,6 +77,22 @@ const employeeOptions = computed(() =>
     })),
 )
 
+const roleOptions = computed(() =>
+  roleStore.roles.map((r) => ({ label: r.name, value: r.id })),
+)
+
+const departmentOptions = computed(() => {
+  const result: Array<{ label: string; value: string }> = []
+  function collect(nodes: Array<{ id: string; name: string; children: unknown[] }>) {
+    for (const node of nodes) {
+      result.push({ label: node.name, value: node.id })
+      if (node.children?.length) collect(node.children as typeof nodes)
+    }
+  }
+  collect(deptStore.tree)
+  return result
+})
+
 const canSubmit = computed(() => {
   if (!title.value.trim()) return false
   if (mode.value === 'process' && !selectedDefId.value) return false
@@ -84,6 +109,9 @@ function resetForm() {
   description.value = ''
   priority.value = 'medium'
   assigneeId.value = null
+  assignmentStrategy.value = 'specific_user'
+  selectedRoleId.value = null
+  selectedDepartmentId.value = null
   dueDate.value = null
   estimatedHours.value = null
   submitting.value = false
@@ -95,6 +123,8 @@ watch(
     if (val) {
       resetForm()
       if (empStore.employees.length === 0) empStore.fetchEmployees(props.orgId)
+      if (roleStore.roles.length === 0) roleStore.fetchRoles(props.orgId)
+      if (deptStore.tree.length === 0) deptStore.fetchTree(props.orgId)
       if (defStore.definitions.length === 0) defStore.fetchDefinitions(props.orgId, 'published')
     }
   },
@@ -145,15 +175,23 @@ async function handleSubmit() {
   try {
     if (mode.value === 'quick') {
       const currentEmployee = empStore.employees.find(() => true)
-      await taskStore.createTask(props.orgId, {
+      const payload: Record<string, unknown> = {
         title: title.value,
         description: description.value || null,
         priority: priority.value,
         due_date: serializeDate(dueDate.value),
         estimated_hours: estimatedHours.value,
         creator_id: currentEmployee?.id ?? '',
-        assignee_id: assigneeId.value,
-      })
+        assignment_strategy: assignmentStrategy.value,
+      }
+      if (assignmentStrategy.value === 'specific_user') {
+        payload.assignee_employee_id = assigneeId.value
+      } else if (assignmentStrategy.value === 'by_role') {
+        payload.assignee_role_id = selectedRoleId.value
+      } else if (assignmentStrategy.value === 'by_department') {
+        payload.assignee_department_id = selectedDepartmentId.value
+      }
+      await taskStore.createTask(props.orgId, payload as Parameters<typeof taskStore.createTask>[1])
       toast.add({ severity: 'success', summary: t('common.success'), detail: t('tasks.taskCreated'), life: 3000 })
     } else {
       // Serialize process form data
@@ -255,18 +293,93 @@ async function handleSubmit() {
             class="w-full"
           />
         </div>
-        <div v-if="mode === 'quick'" class="form-group flex-1">
-          <label>{{ t('tasks.assigneeLabel') }}</label>
+      </div>
+
+      <!-- Assignment strategy (quick mode only) -->
+      <div v-if="mode === 'quick'" class="form-group">
+        <label>{{ t('taskDetail.assignmentStrategy') }}</label>
+        <div class="strategy-toggle">
+          <div
+            class="strategy-option"
+            :class="{ active: assignmentStrategy === 'specific_user' }"
+            @click="assignmentStrategy = 'specific_user'"
+          >
+            <RadioButton v-model="assignmentStrategy" value="specific_user" />
+            <div class="strategy-info">
+              <i class="pi pi-user" />
+              <span>{{ t('taskDetail.specificPerson') }}</span>
+            </div>
+          </div>
+          <div
+            class="strategy-option"
+            :class="{ active: assignmentStrategy === 'by_role' }"
+            @click="assignmentStrategy = 'by_role'"
+          >
+            <RadioButton v-model="assignmentStrategy" value="by_role" />
+            <div class="strategy-info">
+              <i class="pi pi-id-card" />
+              <span>{{ t('taskDetail.byRole') }}</span>
+            </div>
+          </div>
+          <div
+            class="strategy-option"
+            :class="{ active: assignmentStrategy === 'by_department' }"
+            @click="assignmentStrategy = 'by_department'"
+          >
+            <RadioButton v-model="assignmentStrategy" value="by_department" />
+            <div class="strategy-info">
+              <i class="pi pi-building" />
+              <span>{{ t('taskDetail.byDepartment') }}</span>
+            </div>
+          </div>
+          <div
+            class="strategy-option"
+            :class="{ active: assignmentStrategy === 'unassigned' }"
+            @click="assignmentStrategy = 'unassigned'"
+          >
+            <RadioButton v-model="assignmentStrategy" value="unassigned" />
+            <div class="strategy-info">
+              <i class="pi pi-minus-circle" />
+              <span>{{ t('tasks.unassigned') }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="strategy-select">
           <Select
+            v-if="assignmentStrategy === 'specific_user'"
             v-model="assigneeId"
             :options="employeeOptions"
             optionLabel="label"
             optionValue="value"
-            :placeholder="t('tasks.assigneePlaceholder')"
+            :placeholder="t('taskDetail.selectPerson')"
             class="w-full"
             showClear
             filter
           />
+          <Select
+            v-else-if="assignmentStrategy === 'by_role'"
+            v-model="selectedRoleId"
+            :options="roleOptions"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="t('taskDetail.selectRole')"
+            class="w-full"
+            filter
+          />
+          <Select
+            v-else-if="assignmentStrategy === 'by_department'"
+            v-model="selectedDepartmentId"
+            :options="departmentOptions"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="t('taskDetail.selectDepartment')"
+            class="w-full"
+            filter
+          />
+          <Message v-if="assignmentStrategy === 'by_role' || assignmentStrategy === 'by_department'" severity="info" :closable="false" class="pool-hint">
+            {{ t('tasks.poolTaskHint') }}
+          </Message>
         </div>
       </div>
 
@@ -348,5 +461,53 @@ async function handleSubmit() {
   margin: 0 0 0.75rem;
   font-size: 0.875rem;
   color: var(--p-text-muted-color);
+}
+
+/* Assignment strategy */
+.strategy-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.strategy-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.strategy-option.active {
+  border-color: var(--p-primary-color);
+  background: color-mix(in srgb, var(--p-primary-color) 5%, transparent);
+}
+
+.strategy-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.strategy-info i {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color);
+}
+
+.strategy-select {
+  margin-top: 0.25rem;
+}
+
+.pool-hint {
+  margin-top: 0.5rem;
+}
+
+.pool-hint :deep(.p-message-text) {
+  font-size: 0.8rem;
 }
 </style>

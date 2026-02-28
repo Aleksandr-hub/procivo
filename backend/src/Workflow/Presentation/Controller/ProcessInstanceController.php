@@ -11,6 +11,7 @@ use App\Shared\Application\Bus\QueryBusInterface;
 use App\Workflow\Application\Command\CancelProcess\CancelProcessCommand;
 use App\Workflow\Application\Command\StartProcess\StartProcessCommand;
 use App\Workflow\Application\Query\GetProcessInstance\GetProcessInstanceQuery;
+use App\Workflow\Application\Query\GetProcessInstanceGraph\GetProcessInstanceGraphQuery;
 use App\Workflow\Application\Query\GetProcessInstanceHistory\GetProcessInstanceHistoryQuery;
 use App\Workflow\Application\Query\ListProcessInstances\ListProcessInstancesQuery;
 use App\Workflow\Domain\ValueObject\ProcessInstanceId;
@@ -84,6 +85,20 @@ final readonly class ProcessInstanceController
         $events = $this->queryBus->ask(new GetProcessInstanceHistoryQuery($instanceId));
 
         return new JsonResponse($events);
+    }
+
+    #[Route('/{instanceId}/graph', name: 'graph', methods: ['GET'])]
+    public function graph(string $organizationId, string $instanceId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_VIEW');
+
+        $graph = $this->queryBus->ask(new GetProcessInstanceGraphQuery($instanceId));
+
+        if (null === $graph) {
+            return new JsonResponse(['error' => 'Graph not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse($graph);
     }
 
     #[Route('/{instanceId}/cancel', name: 'cancel', methods: ['POST'])]

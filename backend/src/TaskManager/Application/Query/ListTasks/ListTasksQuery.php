@@ -12,6 +12,7 @@ final readonly class ListTasksQuery implements QueryInterface
         public string $organizationId,
         public ?string $status = null,
         public ?string $assigneeId = null,
+        public ?string $candidateEmployeeId = null,
     ) {
     }
 }

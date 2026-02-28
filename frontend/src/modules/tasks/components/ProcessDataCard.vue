@@ -19,7 +19,7 @@ const props = withDefaults(
 
 const { t } = useI18n()
 
-const MAX_VISIBLE = 8
+const MAX_VISIBLE = 4
 const expanded = ref(props.initiallyExpanded)
 
 const visibleVariables = computed(() => {
@@ -42,7 +42,7 @@ function formatValue(value: unknown): string {
 <template>
   <div class="process-data-card">
     <div class="data-header">
-      <i class="pi pi-database" />
+      <i class="pi pi-list-check" />
       <span class="data-title">{{ t('process.processData') }}</span>
     </div>
 
@@ -58,22 +58,31 @@ function formatValue(value: unknown): string {
       </div>
     </div>
 
-    <button
+    <Button
       v-if="hasMore"
+      :label="expanded ? t('process.collapse') : t('process.showAll', { count: variables.length })"
+      :icon="expanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+      text
+      size="small"
       class="toggle-btn"
       @click="expanded = !expanded"
-    >
-      {{ expanded ? t('process.collapse') : t('process.showAll', { count: variables.length }) }}
-    </button>
+    />
   </div>
 </template>
 
 <style scoped>
 .process-data-card {
-  border: 1px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  padding: 1rem;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
   margin-bottom: 1rem;
+  background: var(--p-surface-0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+:root.p-dark .process-data-card {
+  border-color: var(--p-surface-600);
+  background: var(--p-surface-800);
 }
 
 .data-header {
@@ -98,7 +107,7 @@ function formatValue(value: unknown): string {
 .data-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem 1.5rem;
+  gap: 1rem 1.5rem;
 }
 
 .data-item {
@@ -120,25 +129,12 @@ function formatValue(value: unknown): string {
 }
 
 .data-source {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--p-text-muted-color);
-  font-style: italic;
 }
 
 .toggle-btn {
-  display: inline-block;
   margin-top: 0.75rem;
-  padding: 0;
-  background: none;
-  border: none;
-  color: var(--p-primary-color);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.toggle-btn:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 640px) {

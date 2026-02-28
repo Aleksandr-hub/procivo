@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useProcessInstanceStore } from '@/modules/workflow/stores/process-instance.store'
+import ProcessMonitorGraph from '@/modules/workflow/components/ProcessMonitorGraph.vue'
 import { instanceStatusSeverity, tokenStatusSeverity } from '@/shared/utils/status-severity'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 
@@ -20,6 +21,7 @@ onMounted(async () => {
   await Promise.all([
     store.fetchInstance(orgId.value, instanceId.value),
     store.fetchHistory(orgId.value, instanceId.value),
+    store.fetchGraph(orgId.value, instanceId.value),
   ])
 })
 
@@ -54,6 +56,15 @@ function formatEventType(type: string) {
     </div>
 
     <div v-if="store.currentInstance" class="detail-content">
+      <div v-if="store.graph" class="graph-section">
+        <h4>{{ t('workflow.processGraph') }}</h4>
+        <div class="graph-container">
+          <ProcessMonitorGraph :graph="store.graph" :tokens="store.currentInstance.tokens" />
+        </div>
+      </div>
+
+      <Divider />
+
       <div class="detail-section">
         <h4>{{ t('workflow.tokens') }}</h4>
         <DataTable :value="store.currentInstance.tokens" stripedRows size="small">
@@ -129,6 +140,17 @@ function formatEventType(type: string) {
 
 .event-type {
   text-transform: capitalize;
+}
+
+.graph-section h4 {
+  margin: 0 0 1rem;
+}
+
+.graph-container {
+  height: 400px;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .loading {

@@ -11,4 +11,13 @@ interface WorkflowTaskLinkRepositoryInterface
     public function save(WorkflowTaskLink $link): void;
 
     public function findByTaskId(string $taskId): ?WorkflowTaskLink;
+
+    /**
+     * @param list<string> $taskIds
+     *
+     * @return list<WorkflowTaskLink>
+     */
+    public function findByTaskIds(array $taskIds): array;
+
+    public function findLatestByProcessInstanceId(string $processInstanceId): ?WorkflowTaskLink;
 }

@@ -104,4 +104,16 @@ final readonly class DoctrineTaskRepository implements TaskRepositoryInterface
 
         return $qb->getQuery()->getResult();
     }
+
+    public function nextSequenceNumber(string $organizationId): int
+    {
+        $conn = $this->entityManager->getConnection();
+
+        $result = $conn->fetchOne(
+            'SELECT COALESCE(MAX(sequence_number), 0) + 1 FROM task_manager_tasks WHERE organization_id = ?',
+            [$organizationId],
+        );
+
+        return (int) $result;
+    }
 }

@@ -2,6 +2,7 @@ import httpClient from '@/shared/api/http-client'
 import type { IdResponse, MessageResponse } from '@/shared/types/api.types'
 import type {
   ProcessInstanceDTO,
+  ProcessInstanceGraphDTO,
   ProcessEventDTO,
   StartProcessPayload,
 } from '@/modules/workflow/types/process-instance.types'
@@ -25,6 +26,10 @@ export const processInstanceApi = {
 
   cancel(orgId: string, id: string, reason?: string): Promise<MessageResponse> {
     return httpClient.post(`${base(orgId)}/${id}/cancel`, { reason }).then((r) => r.data)
+  },
+
+  graph(orgId: string, id: string): Promise<ProcessInstanceGraphDTO> {
+    return httpClient.get(`${base(orgId)}/${id}/graph`).then((r) => r.data)
   },
 
   history(orgId: string, id: string): Promise<ProcessEventDTO[]> {

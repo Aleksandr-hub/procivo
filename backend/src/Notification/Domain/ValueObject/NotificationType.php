@@ -10,4 +10,5 @@ enum NotificationType: string
     case TaskStatusChanged = 'task_status_changed';
     case CommentAdded = 'comment_added';
     case TaskCreated = 'task_created';
+    case ProcessNotification = 'process_notification';
 }

@@ -12,7 +12,7 @@ export type NodeType =
 
 export type ProcessDefinitionStatus = 'draft' | 'published' | 'archived'
 
-export type FormFieldType = 'text' | 'number' | 'date' | 'select' | 'checkbox' | 'textarea'
+export type FormFieldType = 'text' | 'number' | 'date' | 'select' | 'checkbox' | 'textarea' | 'employee'
 
 export interface FormFieldDefinition {
   name: string

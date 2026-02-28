@@ -117,6 +117,9 @@ services:
     App\Organization\Application\Port\CurrentUserProviderInterface:
         alias: App\Organization\Infrastructure\Service\SecurityCurrentUserProvider
 
+    App\Organization\Domain\Repository\EmployeeRoleRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineEmployeeRoleRepository
+
     App\Organization\Domain\Repository\InvitationRepositoryInterface:
         alias: App\Organization\Infrastructure\Repository\DoctrineInvitationRepository
 
@@ -153,9 +156,13 @@ services:
     App\TaskManager\Application\Port\FileStorageInterface:
         alias: App\TaskManager\Infrastructure\Storage\S3FileStorage
 
+    App\TaskManager\Application\Port\OrganizationQueryPort:
+        alias: App\TaskManager\Infrastructure\Organization\DoctrineOrganizationQueryAdapter
+
     App\TaskManager\Infrastructure\Storage\S3FileStorage:
         arguments:
             $endpoint: '%env(AWS_ENDPOINT)%'
+            $endpointPublic: '%env(AWS_ENDPOINT_PUBLIC)%'
             $region: '%env(AWS_REGION)%'
             $bucket: '%env(AWS_BUCKET)%'
             $accessKeyId: '%env(AWS_ACCESS_KEY_ID)%'

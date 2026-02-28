@@ -2,6 +2,7 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
+import { useRoleStore } from '@/modules/organization/stores/role.store'
 import { useDepartmentStore } from '@/modules/organization/stores/department.store'
 import DynamicFormField from '@/modules/tasks/components/DynamicFormField.vue'
 import { buildZodSchema, flattenZodErrors } from '@/shared/utils/zod-schema-builder'
@@ -22,6 +23,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const empStore = useEmployeeStore()
+const roleStore = useRoleStore()
 const deptStore = useDepartmentStore()
 
 const formData = ref<Record<string, unknown>>({})
@@ -29,15 +31,20 @@ const errors = ref<Record<string, string>>({})
 const comment = ref('')
 const hasSubmitted = ref(false)
 
-// Next executor state
-const assignmentMode = ref<'person' | 'department'>('person')
+// Next executor state — 4 types
+const assignmentMode = ref<'person' | 'role' | 'department' | 'position'>('person')
 const selectedPersonId = ref<string | null>(null)
+const selectedRoleId = ref<string | null>(null)
 const selectedDepartmentId = ref<string | null>(null)
 
 const employeeOptions = computed(() =>
   empStore.employees
     .filter((e) => e.status === 'active')
     .map((e) => ({ label: e.userFullName ?? e.userId, value: e.id })),
+)
+
+const roleOptions = computed(() =>
+  roleStore.roles.map((r) => ({ label: r.name, value: r.id })),
 )
 
 const departmentOptions = computed(() => {
@@ -50,6 +57,16 @@ const departmentOptions = computed(() => {
   }
   collect(deptStore.tree)
   return result
+})
+
+const assignmentHint = computed(() => {
+  switch (assignmentMode.value) {
+    case 'person': return t('taskDetail.userAssignmentHint')
+    case 'role': return t('taskDetail.roleAssignmentHint')
+    case 'department': return t('taskDetail.departmentAssignmentHint')
+    case 'position': return t('taskDetail.positionAssignmentHint')
+    default: return ''
+  }
 })
 
 function getDefaultValue(field: FormFieldDefinition): unknown {
@@ -65,6 +82,17 @@ function getDefaultValue(field: FormFieldDefinition): unknown {
   }
 }
 
+// Form validity check for disabled submit
+const isFormValid = computed(() => {
+  const fields = allFields()
+  const requiredFields = fields.filter(f => f.required)
+  for (const field of requiredFields) {
+    const val = formData.value[field.name]
+    if (val === undefined || val === null || val === '') return false
+  }
+  return true
+})
+
 watch(
   () => props.visible,
   (val) => {
@@ -74,6 +102,7 @@ watch(
       hasSubmitted.value = false
       assignmentMode.value = 'person'
       selectedPersonId.value = null
+      selectedRoleId.value = null
       selectedDepartmentId.value = null
       const data: Record<string, unknown> = {}
       for (const field of props.sharedFields ?? []) {
@@ -139,6 +168,8 @@ function handleSubmit() {
   if (props.showNextExecutor) {
     if (assignmentMode.value === 'person' && selectedPersonId.value) {
       serialized._next_assignee_id = selectedPersonId.value
+    } else if (assignmentMode.value === 'role' && selectedRoleId.value) {
+      serialized._next_candidate_role_id = selectedRoleId.value
     } else if (assignmentMode.value === 'department' && selectedDepartmentId.value) {
       serialized._next_candidate_department_id = selectedDepartmentId.value
     }
@@ -153,7 +184,8 @@ function handleSubmit() {
     :visible="visible"
     :header="action?.label ?? ''"
     modal
-    :style="{ width: '520px' }"
+    :style="{ width: '672px', maxHeight: '90vh' }"
+    :content-style="{ overflowY: 'auto' }"
     @update:visible="!$event && emit('hide')"
   >
     <p class="action-subtitle">{{ t('taskDetail.fillFormForAction') }}</p>
@@ -209,6 +241,13 @@ function handleSubmit() {
               <span>{{ t('taskDetail.specificPerson') }}</span>
             </div>
           </div>
+          <div class="mode-option" :class="{ active: assignmentMode === 'role' }" @click="assignmentMode = 'role'">
+            <RadioButton v-model="assignmentMode" value="role" />
+            <div class="mode-info">
+              <i class="pi pi-id-card" />
+              <span>{{ t('taskDetail.byRole') }}</span>
+            </div>
+          </div>
           <div class="mode-option" :class="{ active: assignmentMode === 'department' }" @click="assignmentMode = 'department'">
             <RadioButton v-model="assignmentMode" value="department" />
             <div class="mode-info">
@@ -216,7 +255,19 @@ function handleSubmit() {
               <span>{{ t('taskDetail.byDepartment') }}</span>
             </div>
           </div>
+          <div class="mode-option disabled" :class="{ active: assignmentMode === 'position' }" @click="assignmentMode = 'position'">
+            <RadioButton v-model="assignmentMode" value="position" />
+            <div class="mode-info">
+              <i class="pi pi-briefcase" />
+              <span>{{ t('taskDetail.byPosition') }}</span>
+            </div>
+          </div>
         </div>
+
+        <!-- Info hint -->
+        <Message severity="info" :closable="false" class="assignment-hint">
+          {{ assignmentHint }}
+        </Message>
 
         <div class="assignment-select">
           <Select
@@ -229,21 +280,34 @@ function handleSubmit() {
             filter
             class="w-full"
           />
-          <div v-else>
-            <Select
-              v-model="selectedDepartmentId"
-              :options="departmentOptions"
-              optionLabel="label"
-              optionValue="value"
-              :placeholder="t('taskDetail.selectDepartment')"
-              filter
-              class="w-full"
-            />
-            <small class="pool-hint">
-              <i class="pi pi-info-circle" />
-              {{ t('taskDetail.poolTaskHint') }}
-            </small>
-          </div>
+          <Select
+            v-else-if="assignmentMode === 'role'"
+            v-model="selectedRoleId"
+            :options="roleOptions"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="t('taskDetail.selectRole')"
+            filter
+            class="w-full"
+          />
+          <Select
+            v-else-if="assignmentMode === 'department'"
+            v-model="selectedDepartmentId"
+            :options="departmentOptions"
+            optionLabel="label"
+            optionValue="value"
+            :placeholder="t('taskDetail.selectDepartment')"
+            filter
+            class="w-full"
+          />
+          <Select
+            v-else-if="assignmentMode === 'position'"
+            :model-value="null"
+            :options="[]"
+            :placeholder="t('taskDetail.selectPosition')"
+            disabled
+            class="w-full"
+          />
         </div>
       </div>
     </div>
@@ -253,6 +317,7 @@ function handleSubmit() {
       <Button
         :label="action?.label ?? t('common.submit')"
         :severity="action ? actionSeverity(action.key) : undefined"
+        :disabled="!isFormValid"
         @click="handleSubmit"
       />
     </template>
@@ -298,8 +363,9 @@ function handleSubmit() {
 }
 
 .assignment-mode-toggle {
-  display: flex;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
@@ -311,13 +377,16 @@ function handleSubmit() {
   border: 1px solid var(--p-surface-border);
   border-radius: var(--p-border-radius);
   cursor: pointer;
-  flex: 1;
   transition: border-color 0.15s;
 }
 
 .mode-option.active {
   border-color: var(--p-primary-color);
   background: color-mix(in srgb, var(--p-primary-color) 5%, transparent);
+}
+
+.mode-option.disabled {
+  opacity: 0.5;
 }
 
 .mode-info {
@@ -332,20 +401,15 @@ function handleSubmit() {
   color: var(--p-text-muted-color);
 }
 
+.assignment-hint {
+  margin-bottom: 0.75rem;
+}
+
+.assignment-hint :deep(.p-message-text) {
+  font-size: 0.8rem;
+}
+
 .assignment-select {
   margin-top: 0.25rem;
-}
-
-.pool-hint {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
-  color: var(--p-text-muted-color);
-}
-
-.pool-hint i {
-  font-size: 0.75rem;
 }
 </style>

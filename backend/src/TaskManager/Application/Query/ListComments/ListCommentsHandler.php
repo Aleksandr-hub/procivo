@@ -34,7 +34,8 @@ final readonly class ListCommentsHandler
         foreach ($authorIds as $authorId) {
             $user = $this->userRepository->findById(UserId::fromString($authorId));
             if (null !== $user) {
-                $authorMap[$authorId] = $user->firstName() . ' ' . $user->lastName();
+                $fullName = trim($user->firstName() . ' ' . $user->lastName());
+                $authorMap[$authorId] = '' !== $fullName ? $fullName : $user->email()->value();
             }
         }
 

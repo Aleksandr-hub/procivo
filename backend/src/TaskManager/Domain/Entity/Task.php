@@ -33,6 +33,7 @@ class Task extends AggregateRoot
     private ?string $candidateDepartmentId;
     /** @var array<string, mixed>|null */
     private ?array $formSchema = null;
+    private int $sequenceNumber;
     private string $creatorId;
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
@@ -50,6 +51,7 @@ class Task extends AggregateRoot
         ?\DateTimeImmutable $dueDate,
         ?float $estimatedHours,
         string $creatorId,
+        int $sequenceNumber,
         ?string $assigneeId = null,
         AssignmentStrategy $assignmentStrategy = AssignmentStrategy::Unassigned,
         ?string $candidateRoleId = null,
@@ -70,6 +72,7 @@ class Task extends AggregateRoot
         $task->candidateRoleId = $candidateRoleId;
         $task->candidateDepartmentId = $candidateDepartmentId;
         $task->formSchema = $formSchema;
+        $task->sequenceNumber = $sequenceNumber;
         $task->creatorId = $creatorId;
         $task->createdAt = new \DateTimeImmutable();
         $task->updatedAt = null;
@@ -160,6 +163,11 @@ class Task extends AggregateRoot
     public function id(): TaskId
     {
         return TaskId::fromString($this->id);
+    }
+
+    public function sequenceNumber(): int
+    {
+        return $this->sequenceNumber;
     }
 
     public function organizationId(): string

@@ -26,11 +26,11 @@ interface TimelineItem {
 }
 
 const eventConfig: Record<string, { icon: string; color: string; labelKey: string }> = {
-  'workflow.process.started': { icon: 'pi pi-play', color: 'success', labelKey: 'history.processStarted' },
-  'workflow.task_node.activated': { icon: 'pi pi-user', color: 'info', labelKey: 'history.taskActivated' },
+  'workflow.process.started': { icon: 'pi pi-play', color: 'purple', labelKey: 'history.processStarted' },
+  'workflow.task_node.activated': { icon: 'pi pi-user', color: 'purple', labelKey: 'history.taskActivated' },
   'workflow.process.variables.merged': {
     icon: 'pi pi-file-edit',
-    color: 'primary',
+    color: 'purple',
     labelKey: 'history.formSubmitted',
   },
   'workflow.token.completed': { icon: 'pi pi-check-circle', color: 'success', labelKey: 'history.stageCompleted' },
@@ -167,11 +167,28 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
   background: var(--p-surface-card);
-  border: 2px solid var(--p-primary-color);
+  border: 2px solid var(--p-purple-500);
+  position: relative;
+}
+
+/* Inner dot */
+.timeline-marker::after {
+  content: '';
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--p-purple-500);
+  display: none;
+}
+
+.timeline-marker.purple {
+  border-color: var(--p-purple-500);
+  color: var(--p-purple-500);
 }
 
 .timeline-marker.success {
@@ -179,14 +196,8 @@ onMounted(async () => {
   color: var(--p-green-500);
 }
 
-.timeline-marker.info {
-  border-color: var(--p-blue-500);
-  color: var(--p-blue-500);
-}
-
-.timeline-marker.primary {
-  border-color: var(--p-primary-color);
-  color: var(--p-primary-color);
+.timeline-marker.success::after {
+  background: var(--p-green-500);
 }
 
 .timeline-marker.danger {
@@ -194,8 +205,17 @@ onMounted(async () => {
   color: var(--p-red-500);
 }
 
+.timeline-marker.danger::after {
+  background: var(--p-red-500);
+}
+
 .timeline-marker .pi {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
+}
+
+/* Purple connector line */
+.process-history :deep(.p-timeline-event-connector) {
+  background: color-mix(in srgb, var(--p-purple-500) 30%, transparent);
 }
 
 .event-title {

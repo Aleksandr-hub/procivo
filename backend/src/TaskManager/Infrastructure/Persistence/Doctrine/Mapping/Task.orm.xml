@@ -9,6 +9,7 @@
         <id name="id" type="string" length="36" column="id"/>
 
         <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="sequenceNumber" type="integer" column="sequence_number"/>
         <field name="title" type="string" length="255" column="title"/>
         <field name="description" type="text" nullable="true" column="description"/>
         <field name="status" type="string" length="20" column="status"/>
@@ -33,6 +34,10 @@
             <index name="idx_task_candidate_role" columns="candidate_role_id"/>
             <index name="idx_task_candidate_dept" columns="candidate_department_id"/>
         </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uniq_task_org_sequence" columns="organization_id,sequence_number"/>
+        </unique-constraints>
 
     </entity>
 

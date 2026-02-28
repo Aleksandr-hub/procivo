@@ -9,6 +9,7 @@ import type {
   UpdateNodePayload,
   AddTransitionPayload,
   UpdateTransitionPayload,
+  FormFieldDefinition,
 } from '@/modules/workflow/types/process-definition.types'
 
 const base = (orgId: string) => `/organizations/${orgId}/process-definitions`
@@ -42,6 +43,10 @@ export const processDefinitionApi = {
 
   revertToDraft(orgId: string, id: string): Promise<MessageResponse> {
     return httpClient.post(`${base(orgId)}/${id}/revert-to-draft`).then((r) => r.data)
+  },
+
+  getStartForm(orgId: string, defId: string): Promise<{ fields: FormFieldDefinition[] }> {
+    return httpClient.get(`${base(orgId)}/${defId}/start-form`).then((r) => r.data)
   },
 
   // Nodes

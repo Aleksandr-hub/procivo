@@ -12,6 +12,7 @@
         <field name="processInstanceId" column="process_instance_id" type="string" length="36"/>
         <field name="tokenId" column="token_id" type="string" length="36"/>
         <field name="taskId" column="task_id" type="string" length="36"/>
+        <field name="nodeName" column="node_name" type="string" length="255"/>
         <field name="createdAt" column="created_at" type="datetime_immutable"/>
         <field name="completedAt" column="completed_at" type="datetime_immutable" nullable="true"/>
 

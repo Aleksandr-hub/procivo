@@ -2,12 +2,12 @@
 import { Handle, Position } from '@vue-flow/core'
 
 defineProps<{
-  data: { label: string; isOrphan?: boolean }
+  data: { label: string; isOrphan?: boolean; tokenStatus?: string | null }
 }>()
 </script>
 
 <template>
-  <div class="start-node" :class="{ orphan: data.isOrphan }">
+  <div class="start-node" :class="{ orphan: data.isOrphan, 'token-completed': data.tokenStatus === 'completed' }">
     <div class="start-circle" />
     <Handle type="source" :position="Position.Right" />
   </div>
@@ -38,5 +38,11 @@ defineProps<{
 @keyframes pulse-border {
   0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
   50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1); }
+}
+
+.start-node.token-completed .start-circle {
+  opacity: 0.6;
+  border-color: #9ca3af;
+  background: #6b7280;
 }
 </style>

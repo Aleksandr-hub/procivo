@@ -10,6 +10,7 @@ class WorkflowTaskLink
     private string $processInstanceId;
     private string $tokenId;
     private string $taskId;
+    private string $nodeName = '';
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $completedAt = null;
 
@@ -22,12 +23,14 @@ class WorkflowTaskLink
         string $processInstanceId,
         string $tokenId,
         string $taskId,
+        string $nodeName = '',
     ): self {
         $link = new self();
         $link->id = $id;
         $link->processInstanceId = $processInstanceId;
         $link->tokenId = $tokenId;
         $link->taskId = $taskId;
+        $link->nodeName = $nodeName;
         $link->createdAt = new \DateTimeImmutable();
 
         return $link;
@@ -51,6 +54,11 @@ class WorkflowTaskLink
     public function taskId(): string
     {
         return $this->taskId;
+    }
+
+    public function nodeName(): string
+    {
+        return $this->nodeName;
     }
 
     public function createdAt(): \DateTimeImmutable

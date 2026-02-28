@@ -9,6 +9,13 @@ import type { TaskDetailDTO } from '@/modules/tasks/types/task.types'
 const props = defineProps<{
   task: TaskDetailDTO
   assigneeName: string | null
+  isPoolTaskClaimed?: boolean
+  isCurrentAssignee?: boolean
+  unclaimLoading?: boolean
+}>()
+
+const emit = defineEmits<{
+  unclaim: []
 }>()
 
 const { t } = useI18n()
@@ -57,6 +64,20 @@ const creatorInitials = computed(() => {
             <Avatar :label="assigneeName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)" shape="circle" size="small" />
             <span>{{ assigneeName }}</span>
           </div>
+          <Button
+            v-if="isPoolTaskClaimed && isCurrentAssignee"
+            :label="t('tasks.returnToQueue')"
+            icon="pi pi-undo"
+            text
+            size="small"
+            :loading="unclaimLoading"
+            class="unclaim-btn"
+            @click="emit('unclaim')"
+          />
+          <div v-if="isPoolTaskClaimed" class="pool-tag-inline">
+            <i class="pi pi-users" />
+            <span>{{ t('tasks.poolTask') }}</span>
+          </div>
         </template>
         <template v-else-if="task.isPoolTask">
           <div class="pool-info-compact">
@@ -78,11 +99,13 @@ const creatorInitials = computed(() => {
           :value="t(statusLabelKeys[task.status] ?? task.status)"
           :severity="taskStatusSeverity(task.status)"
           size="small"
+          outlined
         />
         <Tag
           :value="t(priorityLabelKeys[task.priority] ?? task.priority)"
           :severity="taskPrioritySeverity(task.priority)"
           size="small"
+          outlined
         />
       </div>
     </div>
@@ -186,20 +209,21 @@ const creatorInitials = computed(() => {
 .sidebar-cards {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.75rem;
 }
 
 .sidebar-card {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--p-surface-border);
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--p-surface-200);
+  border-radius: 0.75rem;
+  background: var(--p-surface-0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.sidebar-card:first-child {
-  padding-top: 0;
-}
-
-.sidebar-card:last-child {
-  border-bottom: none;
+:root.p-dark .sidebar-card {
+  border-color: var(--p-surface-600);
+  background: var(--p-surface-800);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .card-label {
@@ -241,6 +265,20 @@ const creatorInitials = computed(() => {
   gap: 0.3rem;
   color: var(--p-text-muted-color);
   font-size: 0.85rem;
+}
+
+.unclaim-btn {
+  margin-top: 0.3rem;
+  align-self: flex-start;
+}
+
+.pool-tag-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+  margin-top: 0.25rem;
 }
 
 .dates-list,

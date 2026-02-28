@@ -33,4 +33,9 @@ interface TaskRepositoryInterface
      * @return list<Task>
      */
     public function findAvailableForEmployee(string $organizationId, array $roleIds, ?string $departmentId): array;
+
+    /**
+     * Returns the next sequence number for tasks within an organization.
+     */
+    public function nextSequenceNumber(string $organizationId): int;
 }

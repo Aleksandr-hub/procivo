@@ -140,54 +140,54 @@ watch(
 
 <template>
   <div class="tasks-page">
-    <!-- Header -->
-    <div class="tasks-header">
-      <div class="tasks-header-left">
-        <h2>{{ t('tasks.title') }}</h2>
-        <span class="tasks-count">{{ filteredTasks.length }} {{ t('tasks.tasksCount') }}</span>
-      </div>
-      <div class="tasks-header-right">
-        <Button
-          :label="t('tasks.createTask')"
-          icon="pi pi-plus"
-          @click="showCreateDialog = true"
-        />
-      </div>
-    </div>
-
-    <!-- Search + Filters row -->
-    <div class="tasks-toolbar">
-      <div class="toolbar-left">
-        <IconField class="search-field">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="searchQuery"
-            :placeholder="t('tasks.searchPlaceholder')"
-            class="w-full"
+    <!-- Sticky header -->
+    <div class="tasks-sticky-header">
+      <div class="tasks-header">
+        <div class="tasks-header-left">
+          <h1>{{ t('tasks.title') }}</h1>
+          <span class="tasks-count">{{ filteredTasks.length }} {{ t('tasks.tasksCount') }}</span>
+        </div>
+        <div class="tasks-header-right">
+          <Button
+            :label="t('tasks.createTask')"
+            icon="pi pi-plus"
+            @click="showCreateDialog = true"
           />
-        </IconField>
-
-        <SelectButton
-          v-model="quickFilter"
-          :options="quickFilterOptions"
-          optionLabel="label"
-          optionValue="value"
-          :allowEmpty="false"
-          class="quick-filter-buttons"
-        />
+        </div>
       </div>
 
-      <Button
-        :label="t('tasks.filters')"
-        icon="pi pi-filter"
-        :outlined="!showFilters"
-        :severity="showFilters ? undefined : 'secondary'"
-        @click="showFilters = !showFilters"
-      />
+      <!-- Search + filter button -->
+      <div class="tasks-toolbar">
+        <div class="search-wrapper">
+          <IconField>
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="searchQuery"
+              :placeholder="t('tasks.searchPlaceholder')"
+              class="w-full"
+            />
+          </IconField>
+        </div>
+        <Button
+          :label="t('tasks.filters')"
+          icon="pi pi-filter"
+          :outlined="!showFilters"
+          :severity="showFilters ? undefined : 'secondary'"
+          @click="showFilters = !showFilters"
+        />
+      </div>
     </div>
 
     <!-- Extended filters (collapsible) -->
     <div v-if="showFilters" class="tasks-filters">
+      <SelectButton
+        v-model="quickFilter"
+        :options="quickFilterOptions"
+        optionLabel="label"
+        optionValue="value"
+        :allowEmpty="false"
+        class="quick-filter-buttons"
+      />
       <Select
         v-model="filterStatus"
         :options="statusOptions"
@@ -247,16 +247,29 @@ watch(
 
 <style scoped>
 .tasks-page {
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+/* Sticky header with backdrop blur */
+.tasks-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--p-surface-card) 85%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--p-surface-border);
+  padding: 1.5rem 0 1rem;
+  margin-bottom: 1rem;
 }
 
 .tasks-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .tasks-header-left {
@@ -265,9 +278,10 @@ watch(
   gap: 0.75rem;
 }
 
-.tasks-header-left h2 {
+.tasks-header-left h1 {
   margin: 0;
   font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .tasks-count {
@@ -283,28 +297,14 @@ watch(
 .tasks-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.toolbar-left {
-  display: flex;
-  align-items: center;
   gap: 0.75rem;
+}
+
+.search-wrapper {
   flex: 1;
 }
 
-.search-field {
-  max-width: 400px;
-  flex: 1;
-}
-
-.quick-filter-buttons :deep(.p-togglebutton) {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.75rem;
-}
-
+/* Filters panel */
 .tasks-filters {
   display: flex;
   gap: 0.75rem;
@@ -313,16 +313,24 @@ watch(
   background: var(--p-surface-50);
   border-radius: var(--p-border-radius);
   border: 1px solid var(--p-surface-border);
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 :root.p-dark .tasks-filters {
   background: var(--p-surface-800);
 }
 
+.quick-filter-buttons :deep(.p-togglebutton) {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
+}
+
 .filter-select {
   min-width: 180px;
 }
 
+/* Task list */
 .tasks-list {
   display: flex;
   flex-direction: column;
@@ -346,7 +354,7 @@ watch(
 
 @media (max-width: 768px) {
   .tasks-page {
-    padding: 1rem;
+    padding: 0 1rem 1rem;
   }
 
   .tasks-toolbar {
@@ -354,24 +362,8 @@ watch(
     align-items: stretch;
   }
 
-  .toolbar-left {
+  .tasks-filters {
     flex-direction: column;
-  }
-
-  .search-field {
-    max-width: none;
-  }
-
-  .quick-filter-buttons {
-    width: 100%;
-  }
-
-  .quick-filter-buttons :deep(.p-selectbutton) {
-    width: 100%;
-  }
-
-  .quick-filter-buttons :deep(.p-togglebutton) {
-    flex: 1;
   }
 }
 </style>

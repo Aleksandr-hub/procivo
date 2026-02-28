@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Workflow\Application\Query\GetTaskWorkflowContext;
 
 use App\Workflow\Application\DTO\TaskWorkflowContextDTO;
+use App\Workflow\Application\Service\FormFieldCollector;
 use App\Workflow\Domain\Repository\ProcessDefinitionRepositoryInterface;
 use App\Workflow\Domain\Repository\ProcessDefinitionVersionRepositoryInterface;
 use App\Workflow\Domain\Repository\ProcessInstanceRepositoryInterface;
@@ -22,6 +23,7 @@ final readonly class GetTaskWorkflowContextHandler
         private ProcessInstanceRepositoryInterface $instanceRepository,
         private ProcessDefinitionVersionRepositoryInterface $versionRepository,
         private ProcessDefinitionRepositoryInterface $definitionRepository,
+        private FormFieldCollector $fieldCollector,
     ) {
     }
 
@@ -67,15 +69,22 @@ final readonly class GetTaskWorkflowContextHandler
         $outgoing = $graph->outgoingTransitions($nodeId);
         $actions = [];
         foreach ($outgoing as $transition) {
+            $formFields = $transition['form_fields'] ?? [];
+            $formFields = $this->fieldCollector->injectAssigneeFieldsForDownstream(
+                $graph,
+                (string) ($transition['target_node_id'] ?? ''),
+                $formFields,
+            );
+
             $actions[] = [
                 'key' => $transition['action_key'] ?? 'complete',
                 'label' => $transition['name'] ?? $transition['action_key'] ?? 'Complete',
-                'form_fields' => $transition['form_fields'] ?? [],
+                'form_fields' => $formFields,
             ];
         }
 
         /** @var list<array<string, mixed>> $sharedFields */
-        $sharedFields = $nodeConfig['form_fields'] ?? [];
+        $sharedFields = $nodeConfig['formFields'] ?? [];
 
         return new TaskWorkflowContextDTO(
             processInstanceId: $link->processInstanceId(),

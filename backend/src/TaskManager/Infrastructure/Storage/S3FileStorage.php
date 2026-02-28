@@ -14,10 +14,12 @@ final class S3FileStorage implements FileStorageInterface
 {
     private readonly FilesystemOperator $filesystem;
     private readonly S3Client $client;
+    private readonly S3Client $publicClient;
     private readonly string $bucket;
 
     public function __construct(
         string $endpoint,
+        string $endpointPublic,
         string $region,
         string $bucket,
         string $accessKeyId,
@@ -25,16 +27,18 @@ final class S3FileStorage implements FileStorageInterface
     ) {
         $this->bucket = $bucket;
 
-        $this->client = new S3Client([
+        $clientConfig = [
             'region' => $region,
             'version' => 'latest',
-            'endpoint' => $endpoint,
             'use_path_style_endpoint' => true,
             'credentials' => [
                 'key' => $accessKeyId,
                 'secret' => $secretAccessKey,
             ],
-        ]);
+        ];
+
+        $this->client = new S3Client([...$clientConfig, 'endpoint' => $endpoint]);
+        $this->publicClient = new S3Client([...$clientConfig, 'endpoint' => $endpointPublic]);
 
         // Ensure bucket exists
         if (!$this->client->doesBucketExist($bucket)) {
@@ -54,13 +58,13 @@ final class S3FileStorage implements FileStorageInterface
 
     public function getUrl(string $path): string
     {
-        // Generate a pre-signed URL valid for 1 hour
-        $command = $this->client->getCommand('GetObject', [
+        // Generate a pre-signed URL using the public endpoint (accessible from browser)
+        $command = $this->publicClient->getCommand('GetObject', [
             'Bucket' => $this->bucket,
             'Key' => $path,
         ]);
 
-        $presignedRequest = $this->client->createPresignedRequest($command, '+1 hour');
+        $presignedRequest = $this->publicClient->createPresignedRequest($command, '+1 hour');
 
         return (string) $presignedRequest->getUri();
     }

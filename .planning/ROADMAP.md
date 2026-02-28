@@ -12,10 +12,10 @@ This milestone connects two existing modules — the Workflow Engine (token-base
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Backend Foundation** - Variable namespacing, XOR gateway condition evaluation, and form validation architecture
-- [ ] **Phase 2: Form Schema and Assignment** - Task form schema creation-time embedding and assignment strategy resolution
-- [ ] **Phase 3: Completion and Claim APIs** - Task completion endpoint with validation and pool task claim/unclaim
-- [ ] **Phase 4: Frontend Task Integration** - Task detail UI with dynamic forms, action dialogs, pool task banner, process context card, My Path Stepper, and process navigation
+- [x] **Phase 1: Backend Foundation** - Variable namespacing, XOR gateway condition evaluation, and form validation architecture
+- [x] **Phase 2: Form Schema and Assignment** - Task form schema creation-time embedding and assignment strategy resolution
+- [x] **Phase 3: Completion and Claim APIs** - Task completion endpoint with validation and pool task claim/unclaim
+- [x] **Phase 4: Frontend Task Integration** - Task detail UI with dynamic forms, action dialogs, pool task banner, process context card, My Path Stepper, and process navigation
 - [ ] **Phase 5: Designer Configuration** - Assignment strategy and per-transition form field configuration in the Workflow Designer
 
 ## Phase Details
@@ -110,8 +110,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Foundation | 0/? | Not started | - |
-| 2. Form Schema and Assignment | 0/2 | Planned | - |
-| 3. Completion and Claim APIs | 0/? | Not started | - |
-| 4. Frontend Task Integration | 0/? | Not started | - |
+| 1. Backend Foundation | 3/3 | Complete | 2026-02-28 |
+| 2. Form Schema and Assignment | 2/2 | Complete | 2026-02-28 |
+| 3. Completion and Claim APIs | 2/2 | Complete | 2026-02-28 |
+| 4. Frontend Task Integration | 5/5 | Complete | 2026-02-28 |
 | 5. Designer Configuration | 0/? | Not started | - |

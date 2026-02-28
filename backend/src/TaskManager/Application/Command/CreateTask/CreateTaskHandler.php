@@ -46,6 +46,8 @@ final readonly class CreateTaskHandler
             }
         }
 
+        $sequenceNumber = $this->taskRepository->nextSequenceNumber($command->organizationId);
+
         $task = Task::create(
             id: TaskId::fromString($command->id),
             organizationId: $command->organizationId,
@@ -55,6 +57,7 @@ final readonly class CreateTaskHandler
             dueDate: null !== $command->dueDate ? new \DateTimeImmutable($command->dueDate) : null,
             estimatedHours: $command->estimatedHours,
             creatorId: $command->creatorId,
+            sequenceNumber: $sequenceNumber,
             assigneeId: $assigneeId,
             assignmentStrategy: $strategy,
             candidateRoleId: $candidateRoleId,

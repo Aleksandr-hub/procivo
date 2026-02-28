@@ -31,6 +31,10 @@ framework:
             App\TaskManager\Domain\Event\CommentAddedEvent: async
             # Workflow timer → async (RabbitMQ) with DelayStamp
             App\Workflow\Infrastructure\Timer\FireTimerMessage: async
+            # Workflow webhook → async (RabbitMQ) for HTTP calls
+            App\Workflow\Infrastructure\Webhook\ExecuteWebhookMessage: async
+            # Workflow notification node → async (non-blocking)
+            App\Workflow\Domain\Event\NotificationNodeActivatedEvent: async
 
 when@test:
     framework:

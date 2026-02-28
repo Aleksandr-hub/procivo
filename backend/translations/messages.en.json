@@ -35,5 +35,9 @@
     "error.workflow_token_not_found": "Token with ID \"%id%\" not found.",
     "error.workflow_execution_error": "Workflow execution error: %reason%",
     "error.process_not_running": "Process instance \"%id%\" is not in running state.",
-    "error.form_fields_required": "Required form fields missing: %fields%"
+    "error.form_fields_required": "Required form fields missing: %fields%",
+    "error.task_claim_not_pool": "Task \"%id%\" is not a pool task and cannot be claimed.",
+    "error.task_claim_already_claimed": "Task \"%id%\" is already claimed by someone.",
+    "error.task_claim_not_claimed": "Task \"%id%\" is not currently claimed.",
+    "error.task_claim_not_eligible": "You are not eligible to claim task \"%taskId%\"."
 }

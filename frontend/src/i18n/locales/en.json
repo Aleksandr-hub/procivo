@@ -818,7 +818,15 @@
     "byDepartment": "Department",
     "selectPerson": "Select person",
     "selectDepartment": "Select department",
-    "poolTaskHint": "Will become a pool task for selection"
+    "poolTaskHint": "Will become a pool task for selection",
+    "byRole": "By role",
+    "byPosition": "By position",
+    "selectRole": "Select role",
+    "selectPosition": "Select position",
+    "userAssignmentHint": "Task will be assigned to specific person",
+    "roleAssignmentHint": "Task will become pool task for all with this role",
+    "departmentAssignmentHint": "Task will become pool task for entire department",
+    "positionAssignmentHint": "Task will be assigned to position holder"
   },
   "templates": {
     "simpleTaskName": "Stage with Review",
@@ -868,7 +876,11 @@
     "processData": "Process Data",
     "fromStage": "from stage: {stage}",
     "showAll": "Show all ({count})",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "nextStep": "Next step"
+  },
+  "form": {
+    "required": "Required"
   },
   "stepper": {
     "completedAt": "Completed: {time}",

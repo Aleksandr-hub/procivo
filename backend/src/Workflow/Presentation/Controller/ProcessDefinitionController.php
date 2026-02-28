@@ -14,6 +14,7 @@ use App\Workflow\Application\Command\PublishProcessDefinition\PublishProcessDefi
 use App\Workflow\Application\Command\RevertProcessDefinitionToDraft\RevertProcessDefinitionToDraftCommand;
 use App\Workflow\Application\Command\UpdateProcessDefinition\UpdateProcessDefinitionCommand;
 use App\Workflow\Application\Query\GetProcessDefinition\GetProcessDefinitionQuery;
+use App\Workflow\Application\Query\GetStartFormSchema\GetStartFormSchemaQuery;
 use App\Workflow\Application\Query\ListProcessDefinitions\ListProcessDefinitionsQuery;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionId;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -112,6 +113,17 @@ final readonly class ProcessDefinitionController
         ));
 
         return new JsonResponse(['message' => 'Process definition published.']);
+    }
+
+    #[Route('/{definitionId}/start-form', name: 'start_form', methods: ['GET'])]
+    public function startForm(string $organizationId, string $definitionId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_VIEW');
+
+        /** @var array{fields: list<array<string, mixed>>} $schema */
+        $schema = $this->queryBus->ask(new GetStartFormSchemaQuery($definitionId));
+
+        return new JsonResponse($schema);
     }
 
     #[Route('/{definitionId}/revert-to-draft', name: 'revert_to_draft', methods: ['POST'])]
