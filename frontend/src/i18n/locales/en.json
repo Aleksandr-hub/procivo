@@ -802,7 +802,10 @@
     "actionFailed": "Failed to execute action",
     "sharedFields": "Stage Information",
     "fieldRequired": "This field is required",
-    "confirmAction": "Execute action: {action}?"
+    "confirmAction": "Execute action: {action}?",
+    "comment": "Comment",
+    "commentPlaceholder": "Enter comment...",
+    "fillFormForAction": "Fill the form to complete action"
   },
   "templates": {
     "simpleTaskName": "Stage with Review",

@@ -802,7 +802,10 @@
     "actionFailed": "Не вдалося виконати дію",
     "sharedFields": "Інформація етапу",
     "fieldRequired": "Це поле обов'язкове",
-    "confirmAction": "Виконати дію: {action}?"
+    "confirmAction": "Виконати дію: {action}?",
+    "comment": "Коментар",
+    "commentPlaceholder": "Введіть коментар...",
+    "fillFormForAction": "Заповніть форму для виконання дії"
   },
   "templates": {
     "simpleTaskName": "Етап з перевіркою",
