@@ -46,11 +46,11 @@ Plans:
   3. GET /api/v1/tasks/{id} returns form_schema alongside task data
   4. AssignmentResolver resolves all 4 strategies (unassigned, specific_employee, by_role, by_department) and creates tasks with correct assigneeId or candidateRoleId/candidateDepartmentId
   5. Pool tasks with a single candidate are auto-assigned to that candidate
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — FormSchemaBuilder service + Task entity formSchema JSONB field + migration + CreateTaskCommand/Handler/DTO updates + unit tests
+- [ ] 02-02-PLAN.md — Wire OnTaskNodeActivated to use FormSchemaBuilder + AssignmentResolver and CreateTaskHandler unit tests
 
 ### Phase 3: Completion and Claim APIs
 **Goal**: Users can complete workflow tasks by submitting action + formData through the API, and pool tasks can be claimed/unclaimed with proper concurrency control
@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Foundation | 0/? | Not started | - |
-| 2. Form Schema and Assignment | 0/? | Not started | - |
+| 2. Form Schema and Assignment | 0/2 | Planned | - |
 | 3. Completion and Claim APIs | 0/? | Not started | - |
 | 4. Frontend Task Integration | 0/? | Not started | - |
 | 5. Designer Configuration | 0/? | Not started | - |
