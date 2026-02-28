@@ -6,9 +6,12 @@ namespace App\Workflow\Domain\Entity;
 
 use App\Shared\Domain\DomainEvent;
 use App\Workflow\Domain\Event\GatewayEvaluatedEvent;
+use App\Workflow\Domain\Event\NotificationNodeActivatedEvent;
 use App\Workflow\Domain\Event\ProcessCancelledEvent;
 use App\Workflow\Domain\Event\ProcessCompletedEvent;
 use App\Workflow\Domain\Event\ProcessStartedEvent;
+use App\Workflow\Domain\Event\SubProcessCompletedEvent;
+use App\Workflow\Domain\Event\SubProcessNodeActivatedEvent;
 use App\Workflow\Domain\Event\TaskNodeActivatedEvent;
 use App\Workflow\Domain\Event\TimerFiredEvent;
 use App\Workflow\Domain\Event\TimerScheduledEvent;
@@ -16,6 +19,8 @@ use App\Workflow\Domain\Event\TokenCompletedEvent;
 use App\Workflow\Domain\Event\TokenCreatedEvent;
 use App\Workflow\Domain\Event\TokenMovedEvent;
 use App\Workflow\Domain\Event\VariablesMergedEvent;
+use App\Workflow\Domain\Event\WebhookFiredEvent;
+use App\Workflow\Domain\Event\WebhookNodeActivatedEvent;
 use App\Workflow\Domain\Exception\WorkflowExecutionException;
 use App\Workflow\Domain\ValueObject\NodeId;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionId;
@@ -34,6 +39,8 @@ class ProcessInstance
     private string $startedBy;
     /** @var array<string, mixed> */
     private array $variables;
+    private ?string $parentProcessInstanceId = null;
+    private ?string $parentTokenId = null;
     /** @var array<string, Token> */
     private array $tokens = [];
     private int $version = 0;
@@ -66,6 +73,43 @@ class ProcessInstance
             organizationId: $organizationId,
             startedBy: $startedBy,
             variables: $variables,
+        ));
+
+        $tokenId = TokenId::generate();
+        $instance->recordThat(new TokenCreatedEvent(
+            processInstanceId: $id->value(),
+            tokenId: $tokenId->value(),
+            nodeId: $startNodeId->value(),
+        ));
+
+        return $instance;
+    }
+
+    /**
+     * @param array<string, mixed> $variables
+     */
+    public static function startAsSubProcess(
+        ProcessInstanceId $id,
+        ProcessDefinitionId $processDefinitionId,
+        ProcessDefinitionVersionId $versionId,
+        string $organizationId,
+        string $startedBy,
+        array $variables,
+        NodeId $startNodeId,
+        string $parentProcessInstanceId,
+        string $parentTokenId,
+    ): self {
+        $instance = new self();
+
+        $instance->recordThat(new ProcessStartedEvent(
+            processInstanceId: $id->value(),
+            processDefinitionId: $processDefinitionId->value(),
+            versionId: $versionId->value(),
+            organizationId: $organizationId,
+            startedBy: $startedBy,
+            variables: $variables,
+            parentProcessInstanceId: $parentProcessInstanceId,
+            parentTokenId: $parentTokenId,
         ));
 
         $tokenId = TokenId::generate();
@@ -169,6 +213,72 @@ class ProcessInstance
             processInstanceId: $this->id->value(),
             nodeId: $nodeId->value(),
             tokenId: $tokenId->value(),
+        ));
+    }
+
+    /**
+     * @param array<string, mixed> $notificationConfig
+     */
+    public function activateNotificationNode(NodeId $nodeId, TokenId $tokenId, array $notificationConfig): void
+    {
+        $this->recordThat(new NotificationNodeActivatedEvent(
+            processInstanceId: $this->id->value(),
+            organizationId: $this->organizationId,
+            nodeId: $nodeId->value(),
+            tokenId: $tokenId->value(),
+            notificationConfig: $notificationConfig,
+            variables: $this->variables,
+            startedBy: $this->startedBy,
+        ));
+    }
+
+    /**
+     * @param array<string, mixed> $webhookConfig
+     */
+    public function activateWebhookNode(NodeId $nodeId, TokenId $tokenId, array $webhookConfig): void
+    {
+        $this->recordThat(new WebhookNodeActivatedEvent(
+            processInstanceId: $this->id->value(),
+            organizationId: $this->organizationId,
+            nodeId: $nodeId->value(),
+            tokenId: $tokenId->value(),
+            webhookConfig: $webhookConfig,
+            variables: $this->variables,
+        ));
+    }
+
+    public function fireWebhook(NodeId $nodeId, TokenId $tokenId): void
+    {
+        $this->recordThat(new WebhookFiredEvent(
+            processInstanceId: $this->id->value(),
+            nodeId: $nodeId->value(),
+            tokenId: $tokenId->value(),
+        ));
+    }
+
+    /**
+     * @param array<string, mixed> $subProcessConfig
+     */
+    public function activateSubProcessNode(NodeId $nodeId, TokenId $tokenId, array $subProcessConfig): void
+    {
+        $this->recordThat(new SubProcessNodeActivatedEvent(
+            processInstanceId: $this->id->value(),
+            organizationId: $this->organizationId,
+            nodeId: $nodeId->value(),
+            tokenId: $tokenId->value(),
+            subProcessConfig: $subProcessConfig,
+            variables: $this->variables,
+            startedBy: $this->startedBy,
+        ));
+    }
+
+    public function completeSubProcess(NodeId $nodeId, TokenId $tokenId, string $childProcessInstanceId): void
+    {
+        $this->recordThat(new SubProcessCompletedEvent(
+            processInstanceId: $this->id->value(),
+            nodeId: $nodeId->value(),
+            tokenId: $tokenId->value(),
+            childProcessInstanceId: $childProcessInstanceId,
         ));
     }
 
@@ -290,6 +400,16 @@ class ProcessInstance
         return $this->variables;
     }
 
+    public function parentProcessInstanceId(): ?string
+    {
+        return $this->parentProcessInstanceId;
+    }
+
+    public function parentTokenId(): ?string
+    {
+        return $this->parentTokenId;
+    }
+
     public function isRunning(): bool
     {
         return ProcessInstanceStatus::Running === $this->status;
@@ -329,6 +449,11 @@ class ProcessInstance
             $event instanceof TaskNodeActivatedEvent => $this->applyTaskNodeActivated($event),
             $event instanceof TimerScheduledEvent => $this->applyTimerScheduled($event),
             $event instanceof TimerFiredEvent => $this->applyTimerFired($event),
+            $event instanceof NotificationNodeActivatedEvent => null, // informational, no state change — token keeps moving
+            $event instanceof WebhookNodeActivatedEvent => $this->applyWebhookNodeActivated($event),
+            $event instanceof WebhookFiredEvent => $this->applyWebhookFired($event),
+            $event instanceof SubProcessNodeActivatedEvent => $this->applySubProcessNodeActivated($event),
+            $event instanceof SubProcessCompletedEvent => $this->applySubProcessCompleted($event),
             $event instanceof VariablesMergedEvent => $this->applyVariablesMerged($event),
             $event instanceof GatewayEvaluatedEvent => null, // informational, no state change
             $event instanceof ProcessCompletedEvent => $this->applyProcessCompleted(),
@@ -346,6 +471,8 @@ class ProcessInstance
         $this->status = ProcessInstanceStatus::Running;
         $this->startedBy = $event->startedBy;
         $this->variables = $event->variables;
+        $this->parentProcessInstanceId = $event->parentProcessInstanceId;
+        $this->parentTokenId = $event->parentTokenId;
     }
 
     private function applyTokenCreated(TokenCreatedEvent $event): void
@@ -385,9 +512,48 @@ class ProcessInstance
         $token?->activate();
     }
 
+    private function applyWebhookNodeActivated(WebhookNodeActivatedEvent $event): void
+    {
+        $token = $this->tokens[$event->tokenId] ?? null;
+        $token?->wait();
+    }
+
+    private function applyWebhookFired(WebhookFiredEvent $event): void
+    {
+        $token = $this->tokens[$event->tokenId] ?? null;
+        $token?->activate();
+    }
+
+    private function applySubProcessNodeActivated(SubProcessNodeActivatedEvent $event): void
+    {
+        $token = $this->tokens[$event->tokenId] ?? null;
+        $token?->wait();
+    }
+
+    private function applySubProcessCompleted(SubProcessCompletedEvent $event): void
+    {
+        $token = $this->tokens[$event->tokenId] ?? null;
+        $token?->activate();
+    }
+
     private function applyVariablesMerged(VariablesMergedEvent $event): void
     {
-        $this->variables = array_merge($this->variables, $event->mergedData);
+        // 1. Namespaced storage: stages.{nodeId}.{actionKey}.{fieldName}
+        $namespaced = [
+            'stages' => [
+                $event->nodeId => [
+                    $event->actionKey => $event->mergedData,
+                ],
+            ],
+        ];
+
+        // 2. Deep merge namespaced data (preserves existing stages)
+        $this->variables = array_replace_recursive($this->variables, $namespaced);
+
+        // 3. Flat aliases at root level (last-writer-wins for expression ergonomics)
+        foreach ($event->mergedData as $key => $value) {
+            $this->variables[$key] = $value;
+        }
     }
 
     private function applyProcessCompleted(): void
