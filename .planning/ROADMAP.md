@@ -71,6 +71,7 @@ Plans:
 **Goal**: Users interact with workflow tasks through a polished UI: see dynamic forms per action, submit decisions, view process context with stepper and navigation, and claim pool tasks
 **Depends on**: Phase 3
 **Requirements**: FEND-01, FEND-02, FEND-03, FEND-04, FEND-05, FEND-06, FEND-07, FEND-08, FEND-09, FEND-10, FEND-11
+**Design Reference**: https://www.figma.com/make/cgshZil5qRJ31B5vWKsIkE/Analyze-system-file — Figma Make prototype with TaskList, TaskDetail, ActionFormDialog, ProcessHeader, ProcessStepper, ProcessDataCard, SLAIndicator, SubtasksList, ActivityStream, WatchersCard, TimeTrackingCard, RelatedTasksCard components. Use as visual reference for Vue+PrimeVue implementation. v1 scope: ProcessHeader (FEND-09), ProcessStepper (FEND-10), navigation button (FEND-11). Other components are v2.
 **Success Criteria** (what must be TRUE):
   1. Task detail page renders dynamic form fields from form_schema using DynamicFormField.vue, with action buttons derived from form_schema.actions
   2. Clicking an action button opens ActionFormDialog showing action-specific fields + shared fields + optional comment, with Zod-based frontend validation and field-level error display
