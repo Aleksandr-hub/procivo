@@ -8,6 +8,7 @@ use App\Workflow\Domain\Service\ExpressionEvaluator;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\ExpressionLanguage\SyntaxError;
 
 final class ExpressionEvaluatorTest extends TestCase
 {
@@ -175,5 +176,55 @@ final class ExpressionEvaluatorTest extends TestCase
         self::assertTrue($evaluator->evaluate('amount <= 100', ['amount' => 100]));
         self::assertTrue($evaluator->evaluate('amount <= 100', ['amount' => 50]));
         self::assertFalse($evaluator->evaluate('amount <= 100', ['amount' => 101]));
+    }
+
+    #[Test]
+    public function itLintsValidExpression(): void
+    {
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $evaluator->lint("status == 'approved'");
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function itLintsExpressionWithOperators(): void
+    {
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $evaluator->lint("amount > 100 and status != 'rejected'");
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function itThrowsSyntaxErrorForInvalidExpression(): void
+    {
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $this->expectException(SyntaxError::class);
+
+        $evaluator->lint('invalid !! expression');
+    }
+
+    #[Test]
+    public function itLintsNullCoalescingExpression(): void
+    {
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $evaluator->lint("status ?? 'pending'");
+
+        $this->addToAssertionCount(1);
+    }
+
+    #[Test]
+    public function itThrowsSyntaxErrorForUnbalancedParens(): void
+    {
+        $evaluator = $this->createEvaluatorWithStub();
+
+        $this->expectException(SyntaxError::class);
+
+        $evaluator->lint('(a == b');
     }
 }

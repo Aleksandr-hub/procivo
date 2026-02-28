@@ -7,9 +7,15 @@ namespace App\Workflow\Domain\Service;
 use App\Workflow\Domain\Entity\Node;
 use App\Workflow\Domain\Entity\Transition;
 use App\Workflow\Domain\ValueObject\NodeType;
+use Symfony\Component\ExpressionLanguage\SyntaxError;
 
 final class ProcessGraphValidator
 {
+    public function __construct(
+        private readonly ExpressionEvaluator $expressionEvaluator,
+    ) {
+    }
+
     /**
      * @param list<Node>       $nodes
      * @param list<Transition> $transitions
@@ -31,6 +37,7 @@ final class ProcessGraphValidator
         $this->validateNoOrphanNodes($nodes, $transitions, $errors);
         $this->validateGatewayConnections($nodes, $transitions, $errors);
         $this->validateReachability($nodes, $transitions, $errors);
+        $this->validateExpressionSyntax($transitions, $errors);
 
         return 0 === \count($errors)
             ? ValidationResult::success()
@@ -241,6 +248,30 @@ final class ProcessGraphValidator
         foreach ($nodes as $node) {
             if (!isset($visited[$node->id()->value()])) {
                 $errors[] = \sprintf('Node "%s" is not reachable from the Start node.', $node->name());
+            }
+        }
+    }
+
+    /**
+     * @param list<Transition> $transitions
+     * @param list<string>    &$errors
+     */
+    private function validateExpressionSyntax(array $transitions, array &$errors): void
+    {
+        foreach ($transitions as $transition) {
+            $expression = $transition->conditionExpression();
+            if (null === $expression || '' === $expression->value()) {
+                continue;
+            }
+
+            try {
+                $this->expressionEvaluator->lint($expression->value());
+            } catch (SyntaxError $e) {
+                $errors[] = \sprintf(
+                    'Transition "%s": invalid expression syntax — %s',
+                    $transition->name() ?? $transition->id()->value(),
+                    $e->getMessage(),
+                );
             }
         }
     }

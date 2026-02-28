@@ -34,8 +34,9 @@ final readonly class WorkflowEngine
             'parallel_gateway' => $this->handleParallelGateway($instance, $tokenId, $graph, $nodeId),
             'inclusive_gateway' => $this->handleInclusiveGateway($instance, $tokenId, $graph, $nodeId),
             'timer' => $this->handleTimerNode($instance, $tokenId, $graph, $nodeId),
-            'notification', 'webhook' => $this->handlePassThrough($instance, $tokenId, $graph, $nodeId),
-            'sub_process' => $this->handlePassThrough($instance, $tokenId, $graph, $nodeId),
+            'notification' => $this->handleNotificationNode($instance, $tokenId, $graph, $nodeId),
+            'webhook' => $this->handleWebhookNode($instance, $tokenId, $graph, $nodeId),
+            'sub_process' => $this->handleSubProcessNode($instance, $tokenId, $graph, $nodeId),
             default => throw WorkflowExecutionException::invalidTransition(\sprintf('Unsupported node type: %s', $nodeType)),
         };
     }
@@ -131,7 +132,9 @@ final readonly class WorkflowEngine
         $selectedTransition ??= $defaultTransition;
 
         if (null === $selectedTransition) {
-            throw WorkflowExecutionException::invalidTransition('No matching transition found for exclusive gateway');
+            throw WorkflowExecutionException::invalidTransition(
+                \sprintf('No matching transition found for exclusive gateway "%s" and no default branch configured', $nodeId),
+            );
         }
 
         $instance->evaluateGateway(
@@ -250,6 +253,25 @@ final readonly class WorkflowEngine
             $tokenId,
             $fireAt,
         );
+    }
+
+    private function handleNotificationNode(ProcessInstance $instance, TokenId $tokenId, ProcessGraph $graph, string $nodeId): void
+    {
+        $config = $graph->nodeConfig($nodeId);
+        $instance->activateNotificationNode(NodeId::fromString($nodeId), $tokenId, $config);
+        $this->moveTokenForward($instance, $tokenId, $graph);
+    }
+
+    private function handleWebhookNode(ProcessInstance $instance, TokenId $tokenId, ProcessGraph $graph, string $nodeId): void
+    {
+        $config = $graph->nodeConfig($nodeId);
+        $instance->activateWebhookNode(NodeId::fromString($nodeId), $tokenId, $config);
+    }
+
+    private function handleSubProcessNode(ProcessInstance $instance, TokenId $tokenId, ProcessGraph $graph, string $nodeId): void
+    {
+        $config = $graph->nodeConfig($nodeId);
+        $instance->activateSubProcessNode(NodeId::fromString($nodeId), $tokenId, $config);
     }
 
     private function moveTokenForward(ProcessInstance $instance, TokenId $tokenId, ProcessGraph $graph): void
