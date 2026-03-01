@@ -1,12 +1,12 @@
-# Procivo — Workflow + Tasks Integration
+# Procivo — BPM Platform
 
 ## What This Is
 
-Procivo is a BPM (Business Process Management) platform built with Symfony 8 + Vue 3 + PrimeVue 4. It combines task management (boards, kanban, assignments), a custom BPMN workflow engine (designer, process execution with token-based state machine), and organizational structure (departments, roles, positions). This milestone completes the integration between the Workflow and TaskManager modules — making workflow tasks interactive with dynamic forms, action-based completion, gateway condition evaluation, and task assignment strategies.
+Procivo is a BPM (Business Process Management) platform built with Symfony 8 + Vue 3 + PrimeVue 4. It combines task management (boards, kanban, assignments), a custom BPMN workflow engine (designer, process execution with token-based state machine), and organizational structure (departments, roles, positions). Users can design processes with forms and assignment rules in the visual designer, start processes, fill out dynamic task forms, choose actions, have the process branch based on form data via XOR gateways, claim pool tasks, and complete processes end-to-end.
 
 ## Core Value
 
-Users can execute BPMN processes end-to-end: start a process, fill out task forms, choose actions (approve/reject/etc.), have the process branch based on form data, and complete — with proper task assignment and pool task claiming.
+Users can execute BPMN processes end-to-end: design → publish → start → fill task forms → choose actions → gateway routing → complete — with proper task assignment and pool task claiming.
 
 ## Requirements
 
@@ -32,53 +32,54 @@ Users can execute BPMN processes end-to-end: start a process, fill out task form
 - ✓ Notifications module with Mercure real-time updates — Phase 3
 - ✓ Frontend i18n (Ukrainian + English) — Phase 1
 - ✓ DynamicFormField.vue component exists (basic) — Phase 3
+- ✓ Form schema built from TaskNode config + outgoing transitions, stored in Task JSONB — v1.0
+- ✓ Task completion API: POST /tasks/{id}/complete with action + formData validation — v1.0
+- ✓ Extended form validation (required, type, min/max, regex, field dependencies) — v1.0
+- ✓ ExpressionEvaluator integrated with XOR gateway using Symfony ExpressionLanguage — v1.0
+- ✓ Assignment strategies (unassigned, specific_employee, by_role, by_department) — v1.0
+- ✓ Claim/unclaim mechanism for pool tasks with pessimistic locking — v1.0
+- ✓ Task detail page with dynamic form rendering per action — v1.0
+- ✓ ActionFormDialog with Zod validation, action-typed buttons, optional comment — v1.0
+- ✓ Process context on task cards (process name badge, current stage) — v1.0
+- ✓ Process history timeline on task detail — v1.0
+- ✓ Pool task banner with claim/assign buttons and candidate list — v1.0
+- ✓ ProcessContextCard (process name, stage, progress, next step hint) — v1.0
+- ✓ MyPathStepper (token path visualization, adaptive display) — v1.0
+- ✓ Process navigation ("View Full Process" button) — v1.0
+- ✓ Assignment strategy selector in Workflow Designer (TaskNodeConfig) — v1.0
+- ✓ Per-transition form field builder in designer (FormFieldsBuilder) — v1.0
+- ✓ Canvas validation warnings (missing action_key, duplicate action_keys) — v1.0
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
+<!-- Current scope. Building toward these in next milestone. -->
 
-- [ ] Backend: form_schema built from TaskNode config + outgoing transitions, stored in Task metadata (JSONB)
-- [ ] Backend: CompleteTaskNodeCommand accepts { action, formData }, validates required fields, merges into ProcessInstance.variables
-- [ ] Backend: Extended form validation (required, type, min/max, regex patterns, field dependencies)
-- [ ] Backend: ExpressionEvaluator integrated with XOR gateway — evaluates conditions against ProcessInstance.variables using Symfony ExpressionLanguage
-- [ ] Backend: Task assignment strategies (unassigned, specific_employee, process_initiator, by_role, by_department)
-- [ ] Backend: Claim/unclaim mechanism for pool tasks
-- [ ] Backend: API GET /api/v1/tasks/{id} returns form_schema
-- [ ] Backend: API POST /api/v1/tasks/{id}/complete with { action, formData }
-- [ ] Frontend: Task detail page with dynamic form rendering per action
-- [ ] Frontend: Action buttons from form_schema.actions (e.g., "Approve", "Reject")
-- [ ] Frontend: ActionFormDialog — dynamic fields per action + shared fields + comment + next assignment selector
-- [ ] Frontend: Process context on task cards (process name badge, current stage)
-- [ ] Frontend: Process history timeline on task detail
-- [ ] Frontend: Pool task banner with claim/assign buttons and candidate list
-- [ ] Frontend: "Start Process" button from tasks page
-- [ ] Frontend: Assignment configuration in Workflow Designer (TaskNodeConfig)
+(To be defined in next milestone via `/gsd:new-milestone`)
 
 ### Out of Scope
 
 <!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
 
 - Mobile app — web-first, mobile later
-- Parallel gateway full implementation — XOR gateway is priority for this milestone
-- SubProcess execution — node type exists but full execution deferred
+- Parallel gateway full implementation — XOR gateway is priority; parallel adds significant complexity
+- SubProcess full execution — node type exists but cascading execution deferred
 - Advanced timer events — basic timer exists, complex scheduling deferred
 - Process versioning migration (live instances) — only new instances use new versions
 - Dark mode — PrimeVue theming deferred to future milestone
+- File upload in form fields — form fields are data-entry only for now
+- Mobile-responsive task forms — desktop-first
 
 ## Context
 
-- Figma Make prototype with UI reference: https://www.figma.com/make/cgshZil5qRJ31B5vWKsIkE/Analyze-system-file
-  - Key components: TaskList, TaskDetail, ActionDialog, TaskAssignmentBadge
-  - Types: ActionConfig, FormField, NextAssignmentConfig
-  - Design intent: Linear/Notion-style clean UI with action buttons in header, pool task banners, process history timeline
-- Existing plan documents: `docs/WORKFLOW_TASKS_INTEGRATION_PLAN.md`, `docs/TASK_ASSIGNMENT_SPEC.md`
-- Key architectural decision: forms per ACTION (transition), not per task. Different actions = different form fields
-- ExpressionEvaluator service exists but is not integrated with gateway execution yet
-- DynamicFormField.vue exists with basic field rendering
-- TaskNodeConfig.vue exists with basic task node configuration in designer
-- Several new files already started (visible in git status): ClaimTask, UnclaimTask commands, AssignmentStrategy VO, OrganizationQueryPort, etc.
-- Process variables stored as JSONB in ProcessInstance entity
-- Frontend uses PrimeVue 4 components (NOT shadcn/Tailwind from Figma prototype — adapt design intent to PrimeVue)
+Shipped v1.0 with ~49K LOC (30.7K PHP, 14.6K Vue, 3.8K TypeScript).
+Tech stack: Symfony 8, Vue 3, PrimeVue 4, PostgreSQL, Redis, RabbitMQ, Mercure.
+Architecture: Clean Architecture, DDD, CQRS, Event Sourcing (Workflow), Modular Monolith.
+
+Known tech debt from v1.0:
+- Task.formSchema snapshot written but not consumed by frontend (uses live schema from workflow context)
+- Duplicate schema-building logic in GetTaskWorkflowContextHandler vs FormSchemaBuilder
+- from_variable strategy in frontend dropdown not backed by AssignmentStrategy enum
+- Phase 4 missing formal VERIFICATION.md (code confirmed working via integration check)
 
 ## Constraints
 
@@ -96,11 +97,16 @@ Users can execute BPMN processes end-to-end: start a process, fill out task form
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Forms per ACTION (transition), not per task | Different actions need different fields (approve vs reject) | — Pending |
-| Symfony ExpressionLanguage for conditions | Full EL power — functions, methods, arrays | — Pending |
-| Extended form validation (required + type + min/max + regex + field dependencies) | Production-quality forms need proper validation | — Pending |
-| Pool tasks with claim/unclaim | Enterprise BPM standard for group assignments | — Pending |
-| PrimeVue adaptation of Figma prototype | Keep consistent UI library, adapt design intent | — Pending |
+| Forms per ACTION (transition), not per task | Different actions need different fields (approve vs reject) | ✓ Good — clean separation, each action gets its own field set |
+| Symfony ExpressionLanguage for conditions | Full EL power — functions, methods, arrays | ✓ Good — design-time lint + runtime evaluation working |
+| Extended form validation (required + type + min/max + regex + field dependencies) | Production-quality forms need proper validation | ✓ Good — iterative dependency resolution handles cascading visibility |
+| Pool tasks with claim/unclaim | Enterprise BPM standard for group assignments | ✓ Good — pessimistic locking prevents double-claim |
+| PrimeVue adaptation of Figma prototype | Keep consistent UI library, adapt design intent | ✓ Good — full-page list + action dialogs match design intent |
+| Variable namespacing by node ID | Prevents key collisions across stages | ✓ Good — dual-layer (namespaced + flat aliases) |
+| Form schema snapshot at task creation | Prevents schema drift from definition updates | ⚠️ Revisit — snapshot written but frontend uses live schema |
+| Custom domain validation (not Symfony Validator) | Simpler for dynamic JSON schema | ✓ Good — rule-per-type dispatch, easy to extend |
+| Zod 4 for frontend validation | Type-safe schema builder from form definitions | ✓ Good — flattenError() API works well with PrimeVue |
+| Definition re-fetch after save | Prevents stale state in designer | ✓ Good — parent page owns fetch, designer emits signal |
 
 ---
-*Last updated: 2026-02-27 after initialization*
+*Last updated: 2026-03-01 after v1.0 milestone*
