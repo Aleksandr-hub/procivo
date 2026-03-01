@@ -81,7 +81,7 @@ Plans:
   5. GitHub Actions CI pipeline runs CS Fixer, PHPStan, PHPUnit, frontend type-check, and ESLint on every push
   6. Pre-commit hooks block commits that fail CS Fixer (PHP) or ESLint (TypeScript/Vue) on staged files
   7. .env.example and README contain sufficient instructions for a new developer to run the project locally
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 07-01-PLAN.md — Backend profile API (UpdateProfile + UploadAvatar commands, UserDTO extension, migration)
 - [ ] 07-02-PLAN.md — Frontend ProfilePage + avatar display integration (topbar, task sidebar)
@@ -156,7 +156,7 @@ Plans:
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
-| 7. User Profile + CI/CD | v2.0 | 0/TBD | Not started | - |
+| 7. User Profile + CI/CD | 1/3 | In Progress|  | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |

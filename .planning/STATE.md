@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T14:57:22.578Z"
+last_updated: "2026-03-01T17:55:10.162Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 06.1 (Process Definition Versioning) — COMPLETE
-Plan: 2 of 2 (completed)
-Status: Phase complete
-Last activity: 2026-03-01 — Completed 06.1-02: VersionHistoryDrawer admin UI, migrateInstances API+store, 10 i18n keys per locale
+Phase: 07 (User Profile + CI/CD) — In Progress
+Plan: 3 of 4 (completed)
+Status: Plan 03 complete
+Last activity: 2026-03-01 — Completed 07-03: GitHub Actions CI pipeline, lefthook pre-commit hooks, .env.example, README
 
-Progress: [██████████] Phase 06.1 complete (2/2 plans)
+Progress: [███████░░░] Phase 07 in progress (3/4 plans)
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [██████████] Phase 06.1 complete (2/2 plans)
 | Phase 06-process-polish P02 | 14 | 2 tasks | 11 files |
 | Phase 06.1-process-definition-versioning P01 | 3 | 2 tasks | 7 files |
 | Phase 06.1-process-definition-versioning P02 | 5 | 2 tasks | 7 files |
+| Phase 07-user-profile-cicd P03 | 1 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 06.1-01]: Migration is event-sourced: ProcessInstanceMigratedEvent recorded in event store, projection updates read model — no direct SQL UPDATE in command handler
 - [Phase 06.1-01]: Action_key validation checks outgoing transitions count > 0, not exact key match — avoids per-instance current version load
 - [Phase 06.1-02]: VersionHistoryDrawer uses computed drawerVisible with get/set for v-model:visible — standard PrimeVue pattern for overlay components
+- [Phase 07-user-profile-cicd]: CI uses npx eslint . without --fix for pure detection — lint:eslint in package.json uses --fix which would silently fix CI failures
+- [Phase 07-user-profile-cicd]: lefthook ESLint runs natively on host, CS Fixer via docker compose exec -T php
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06.1-02-PLAN.md — VersionHistoryDrawer with migration controls, migrateInstances API+store action, 10 i18n keys per locale
+Stopped at: Completed 07-03-PLAN.md — CI/CD infrastructure: GitHub Actions, lefthook pre-commit hooks, .env.example, README
 Resume file: None
-Next action: Phase 06.1 complete — plan next phase
+Next action: Execute Phase 07 Plan 04

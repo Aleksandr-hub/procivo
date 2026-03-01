@@ -7,6 +7,8 @@ namespace App\Identity\Presentation\Controller;
 use App\Identity\Application\Command\ChangePassword\ChangePasswordCommand;
 use App\Identity\Application\Command\Logout\LogoutCommand;
 use App\Identity\Application\Command\RegisterUser\RegisterUserCommand;
+use App\Identity\Application\Command\UpdateProfile\UpdateProfileCommand;
+use App\Identity\Application\Command\UploadAvatar\UploadAvatarCommand;
 use App\Identity\Application\Query\GetCurrentUser\GetCurrentUserQuery;
 use App\Identity\Application\Query\Login\LoginQuery;
 use App\Identity\Application\Query\RefreshToken\RefreshTokenQuery;
@@ -17,6 +19,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
@@ -107,6 +110,45 @@ final readonly class AuthController
         $dto = $this->queryBus->ask(new GetCurrentUserQuery($user->getId()));
 
         return new JsonResponse($dto);
+    }
+
+    #[Route('/me', name: 'update_profile', methods: ['PUT'])]
+    public function updateProfile(Request $request, #[CurrentUser] SecurityUser $user): JsonResponse
+    {
+        $data = $this->decodeJson($request);
+
+        $this->commandBus->dispatch(new UpdateProfileCommand(
+            userId: $user->getId(),
+            firstName: $data['first_name'] ?? '',
+            lastName: $data['last_name'] ?? '',
+            email: $data['email'] ?? '',
+        ));
+
+        return new JsonResponse(['message' => 'Profile updated.']);
+    }
+
+    #[Route('/me/avatar', name: 'upload_avatar', methods: ['POST'])]
+    public function uploadAvatar(Request $request, #[CurrentUser] SecurityUser $user): JsonResponse
+    {
+        $file = $request->files->get('avatar');
+
+        if (null === $file) {
+            throw new BadRequestHttpException('No file uploaded.');
+        }
+
+        $content = file_get_contents($file->getPathname());
+
+        if (false === $content) {
+            throw new \RuntimeException('Failed to read uploaded file.');
+        }
+
+        $this->commandBus->dispatch(new UploadAvatarCommand(
+            userId: $user->getId(),
+            fileContent: $content,
+            originalName: $file->getClientOriginalName(),
+        ));
+
+        return new JsonResponse(['message' => 'Avatar uploaded.']);
     }
 
     #[Route('/password', name: 'password', methods: ['PUT'])]

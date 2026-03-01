@@ -17,10 +17,11 @@ final readonly class UserDTO
         /** @var list<string> */
         public array $roles,
         public string $createdAt,
+        public ?string $avatarUrl = null,
     ) {
     }
 
-    public static function fromEntity(User $user): self
+    public static function fromEntity(User $user, ?string $avatarUrl = null): self
     {
         return new self(
             id: $user->id()->value(),
@@ -30,6 +31,7 @@ final readonly class UserDTO
             status: $user->status()->value,
             roles: $user->roles(),
             createdAt: (string) $user->createdAt(),
+            avatarUrl: $avatarUrl,
         );
     }
 }
