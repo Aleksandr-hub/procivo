@@ -15,7 +15,10 @@ final readonly class NotificationDTO implements \JsonSerializable
         public string $title,
         public string $body,
         public ?string $relatedEntityId,
+        public ?string $relatedEntityType,
+        public string $channel,
         public bool $isRead,
+        public ?string $readAt,
         public string $createdAt,
     ) {
     }
@@ -29,7 +32,10 @@ final readonly class NotificationDTO implements \JsonSerializable
             title: $notification->title(),
             body: $notification->body(),
             relatedEntityId: $notification->relatedEntityId(),
+            relatedEntityType: $notification->relatedEntityType(),
+            channel: $notification->channel(),
             isRead: $notification->isRead(),
+            readAt: $notification->readAt()?->format(\DateTimeInterface::ATOM),
             createdAt: $notification->createdAt()->format(\DateTimeInterface::ATOM),
         );
     }
@@ -44,7 +50,10 @@ final readonly class NotificationDTO implements \JsonSerializable
             'title' => $this->title,
             'body' => $this->body,
             'relatedEntityId' => $this->relatedEntityId,
+            'relatedEntityType' => $this->relatedEntityType,
+            'channel' => $this->channel,
             'isRead' => $this->isRead,
+            'readAt' => $this->readAt,
             'createdAt' => $this->createdAt,
         ];
     }

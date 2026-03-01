@@ -19,8 +19,9 @@ final readonly class ListNotificationsHandler
     /** @return list<NotificationDTO> */
     public function __invoke(ListNotificationsQuery $query): array
     {
-        $notifications = $this->notificationRepository->findByRecipientId(
+        $notifications = $this->notificationRepository->findByRecipientIdAndType(
             $query->recipientId,
+            $query->type,
             $query->limit,
             $query->offset,
         );

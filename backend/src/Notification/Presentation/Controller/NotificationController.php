@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace App\Notification\Presentation\Controller;
 
+use App\Notification\Application\Command\MarkAllAsRead\MarkAllAsReadCommand;
+use App\Notification\Application\Command\MarkAsRead\MarkAsReadCommand;
+use App\Notification\Application\Command\SavePreferences\SavePreferencesCommand;
+use App\Notification\Application\Query\CountUnread\CountUnreadQuery;
+use App\Notification\Application\Query\GetPreferences\GetPreferencesQuery;
+use App\Notification\Application\Query\ListNotifications\ListNotificationsQuery;
 use App\Organization\Application\Port\CurrentUserProviderInterface;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
-use App\Notification\Application\Command\MarkAsRead\MarkAsReadCommand;
-use App\Notification\Application\Command\MarkAllAsRead\MarkAllAsReadCommand;
-use App\Notification\Application\Query\CountUnread\CountUnreadQuery;
-use App\Notification\Application\Query\ListNotifications\ListNotificationsQuery;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,8 +33,9 @@ final readonly class NotificationController
         $userId = $this->currentUserProvider->getUserId();
         $limit = (int) $request->query->get('limit', '50');
         $offset = (int) $request->query->get('offset', '0');
+        $type = $request->query->get('type');
 
-        $notifications = $this->queryBus->ask(new ListNotificationsQuery($userId, $limit, $offset));
+        $notifications = $this->queryBus->ask(new ListNotificationsQuery($userId, $limit, $offset, $type));
 
         return new JsonResponse($notifications);
     }
@@ -64,5 +67,29 @@ final readonly class NotificationController
         $this->commandBus->dispatch(new MarkAllAsReadCommand($userId));
 
         return new JsonResponse(['message' => 'All notifications marked as read.']);
+    }
+
+    #[Route('/preferences', name: 'get_preferences', methods: ['GET'])]
+    public function getPreferences(): JsonResponse
+    {
+        $userId = $this->currentUserProvider->getUserId();
+
+        /** @var array<string, array{in_app: bool, email: bool}> $preferences */
+        $preferences = $this->queryBus->ask(new GetPreferencesQuery($userId));
+
+        return new JsonResponse($preferences);
+    }
+
+    #[Route('/preferences', name: 'save_preferences', methods: ['PUT'])]
+    public function savePreferences(Request $request): JsonResponse
+    {
+        $userId = $this->currentUserProvider->getUserId();
+
+        /** @var array<string, array{in_app: bool, email: bool}> $preferences */
+        $preferences = (array) json_decode((string) $request->getContent(), true);
+
+        $this->commandBus->dispatch(new SavePreferencesCommand($userId, $preferences));
+
+        return new JsonResponse(['message' => 'Preferences saved.']);
     }
 }

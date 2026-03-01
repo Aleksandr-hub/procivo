@@ -12,6 +12,7 @@ final readonly class ListNotificationsQuery implements QueryInterface
         public string $recipientId,
         public int $limit = 50,
         public int $offset = 0,
+        public ?string $type = null,
     ) {
     }
 }
