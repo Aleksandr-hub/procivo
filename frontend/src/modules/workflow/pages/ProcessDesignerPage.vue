@@ -43,6 +43,10 @@ async function handleRevertToDraft() {
     toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.operationFailed')), life: 5000 })
   }
 }
+
+async function onDefinitionChanged() {
+  await store.fetchDefinition(orgId.value, definitionId.value)
+}
 </script>
 
 <template>
@@ -59,7 +63,7 @@ async function handleRevertToDraft() {
       </div>
     </div>
 
-    <WorkflowDesigner v-if="store.currentDefinition" :definition="store.currentDefinition" :org-id="orgId" />
+    <WorkflowDesigner v-if="store.currentDefinition" :definition="store.currentDefinition" :org-id="orgId" @definition-changed="onDefinitionChanged" />
     <div v-else-if="store.loading" class="loading">
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>

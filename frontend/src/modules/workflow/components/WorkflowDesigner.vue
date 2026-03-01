@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, markRaw, type Ref, toRef } from 'vue'
+import { ref, computed, watch, watchEffect, markRaw, type Ref } from 'vue'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -23,6 +23,10 @@ import GettingStartedPanel from '@/modules/workflow/components/GettingStartedPan
 const props = defineProps<{
   definition: ProcessDefinitionDetailDTO
   orgId: string
+}>()
+
+const emit = defineEmits<{
+  'definition-changed': []
 }>()
 
 const toast = useToast()
@@ -196,6 +200,7 @@ async function updateNodeData(nodeId: string, data: { name: string; description:
     })
     node.data = { ...node.data, label: data.name, description: data.description, config: data.config }
     toast.add({ severity: 'success', summary: t('common.success'), detail: t('workflow.nodeUpdated'), life: 2000 })
+    emit('definition-changed')
   } catch (error: unknown) {
     toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.operationFailed')), life: 5000 })
   }
@@ -207,6 +212,7 @@ function onTransitionUpdate(edgeId: string, data: { name: string; condition_expr
     edge.label = data.name || data.condition_expression || ''
     edge.animated = !!data.condition_expression
   }
+  emit('definition-changed')
 }
 
 function onTransitionDelete(edgeId: string) {
