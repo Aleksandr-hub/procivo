@@ -3,6 +3,7 @@ import { onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrganizationStore } from '@/modules/organization/stores/organization.store'
 import { useI18n } from 'vue-i18n'
+import AuditLogTimeline from '@/modules/audit/components/AuditLogTimeline.vue'
 
 const props = defineProps<{
   orgId: string
@@ -56,6 +57,10 @@ watch(
         @tab-change="(e: { index: number }) => router.push(tabRoutes[e.index])"
       />
     </div>
+    <Fieldset :legend="t('audit.activityTimeline')" :toggleable="true" :collapsed="true" class="org-audit-fieldset">
+      <AuditLogTimeline :org-id="orgId" :limit="20" />
+    </Fieldset>
+
     <RouterView />
   </div>
 </template>
@@ -67,5 +72,9 @@ watch(
 
 .org-detail-header h2 {
   margin: 0 0 1rem 0;
+}
+
+.org-audit-fieldset {
+  margin-bottom: 1.5rem;
 }
 </style>

@@ -20,6 +20,7 @@ import TaskDetailSidebar from '@/modules/tasks/components/TaskDetailSidebar.vue'
 import ProcessContextCard from '@/modules/tasks/components/ProcessContextCard.vue'
 import MyPathStepper from '@/modules/tasks/components/MyPathStepper.vue'
 import ProcessDataCard from '@/modules/tasks/components/ProcessDataCard.vue'
+import AuditLogTimeline from '@/modules/audit/components/AuditLogTimeline.vue'
 import { processInstanceApi } from '@/modules/workflow/api/process-instance.api'
 import type { ProcessEventDTO, ProcessInstanceGraphDTO } from '@/modules/workflow/types/process-instance.types'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
@@ -135,8 +136,7 @@ const priorityLabelKeys: Record<string, string> = {
 
 const assigneeName = computed(() => {
   if (!task.value?.assigneeId) return null
-  const emp = empStore.employees.find((e) => e.id === task.value!.assigneeId)
-  return emp ? (emp.userFullName ?? task.value.assigneeId) : task.value.assigneeId
+  return task.value.assigneeName ?? task.value.assigneeId
 })
 
 // Status dropdown: unified for workflow + regular tasks
@@ -596,6 +596,14 @@ onUnmounted(() => {
               :org-id="orgId"
               :process-instance-id="task.workflow_context.process_instance_id"
               :field-labels="historyFieldLabels"
+            />
+          </TabPanel>
+          <TabPanel value="audit" :header="t('audit.activityTimeline')">
+            <AuditLogTimeline
+              :org-id="orgId"
+              entity-type="task"
+              :entity-id="taskId"
+              :limit="20"
             />
           </TabPanel>
         </TabView>

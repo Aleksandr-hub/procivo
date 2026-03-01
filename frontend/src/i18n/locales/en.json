@@ -920,6 +920,8 @@
     "avatar": "Avatar",
     "changeAvatar": "Change avatar",
     "avatarUploaded": "Avatar uploaded successfully",
+    "deleteAvatar": "Delete photo",
+    "avatarDeleted": "Avatar deleted",
     "personalInfo": "Personal Information",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -930,5 +932,23 @@
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "passwordChanged": "Password changed"
+  },
+  "audit": {
+    "activityTimeline": "Activity Timeline",
+    "noActivity": "No activity recorded",
+    "taskCreated": "Task created",
+    "taskStatusChanged": "Status changed",
+    "taskAssigned": "Task assigned",
+    "taskClaimed": "Task claimed",
+    "taskUnclaimed": "Task unclaimed",
+    "taskDeleted": "Task deleted",
+    "commentAdded": "Comment added",
+    "processStarted": "Process started",
+    "processCompleted": "Process completed",
+    "processCancelled": "Process cancelled",
+    "userRegistered": "User registered",
+    "passwordChanged": "Password changed",
+    "changesFrom": "from",
+    "changesTo": "to"
   }
 }

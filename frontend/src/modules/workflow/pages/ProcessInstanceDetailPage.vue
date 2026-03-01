@@ -6,6 +6,7 @@ import { useConfirm } from 'primevue/useconfirm'
 import { useI18n } from 'vue-i18n'
 import { useProcessInstanceStore } from '@/modules/workflow/stores/process-instance.store'
 import ProcessMonitorGraph from '@/modules/workflow/components/ProcessMonitorGraph.vue'
+import AuditLogTimeline from '@/modules/audit/components/AuditLogTimeline.vue'
 import { instanceStatusSeverity, tokenStatusSeverity } from '@/shared/utils/status-severity'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 
@@ -111,6 +112,17 @@ function formatEventType(type: string) {
           <Column field="occurred_at" :header="t('workflow.occurredAt')" />
         </DataTable>
       </div>
+
+      <Divider />
+
+      <Fieldset :legend="t('audit.activityTimeline')" :toggleable="true" :collapsed="true">
+        <AuditLogTimeline
+          :org-id="orgId"
+          entity-type="process_instance"
+          :entity-id="instanceId"
+          :limit="20"
+        />
+      </Fieldset>
     </div>
 
     <div v-else-if="store.loading" class="loading">

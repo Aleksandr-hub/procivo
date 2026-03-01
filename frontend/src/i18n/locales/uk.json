@@ -920,6 +920,8 @@
     "avatar": "Аватар",
     "changeAvatar": "Змінити аватар",
     "avatarUploaded": "Аватар завантажено",
+    "deleteAvatar": "Видалити фото",
+    "avatarDeleted": "Аватар видалено",
     "personalInfo": "Особиста інформація",
     "firstName": "Ім'я",
     "lastName": "Прізвище",
@@ -930,5 +932,23 @@
     "currentPassword": "Поточний пароль",
     "newPassword": "Новий пароль",
     "passwordChanged": "Пароль змінено"
+  },
+  "audit": {
+    "activityTimeline": "Хронологія подій",
+    "noActivity": "Подій не зафіксовано",
+    "taskCreated": "Задачу створено",
+    "taskStatusChanged": "Статус змінено",
+    "taskAssigned": "Задачу призначено",
+    "taskClaimed": "Задачу взято в роботу",
+    "taskUnclaimed": "Задачу повернено в пул",
+    "taskDeleted": "Задачу видалено",
+    "commentAdded": "Додано коментар",
+    "processStarted": "Процес запущено",
+    "processCompleted": "Процес завершено",
+    "processCancelled": "Процес скасовано",
+    "userRegistered": "Користувача зареєстровано",
+    "passwordChanged": "Пароль змінено",
+    "changesFrom": "з",
+    "changesTo": "на"
   }
 }
