@@ -66,6 +66,7 @@ export interface ProcessDefinitionVersionDTO {
   version_number: number
   published_at: string
   published_by: string
+  running_instance_count: number
 }
 
 export interface CreateProcessDefinitionPayload {

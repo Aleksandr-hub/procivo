@@ -69,6 +69,11 @@ export const useProcessDefinitionStore = defineStore('processDefinition', () => 
     await fetchDefinitions(orgId)
   }
 
+  async function migrateInstances(orgId: string, defId: string, versionId: string) {
+    await processDefinitionApi.migrateInstances(orgId, defId, versionId)
+    await fetchVersions(orgId, defId)
+  }
+
   return {
     definitions,
     currentDefinition,
@@ -83,5 +88,6 @@ export const useProcessDefinitionStore = defineStore('processDefinition', () => 
     deleteDefinition,
     publishDefinition,
     revertToDraft,
+    migrateInstances,
   }
 })

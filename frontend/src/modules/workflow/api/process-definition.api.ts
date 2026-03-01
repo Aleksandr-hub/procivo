@@ -50,6 +50,10 @@ export const processDefinitionApi = {
     return httpClient.get(`${base(orgId)}/${id}/versions`).then((r) => r.data)
   },
 
+  migrateInstances(orgId: string, defId: string, versionId: string): Promise<MessageResponse> {
+    return httpClient.post(`${base(orgId)}/${defId}/versions/${versionId}/migrate`).then((r) => r.data)
+  },
+
   getStartForm(orgId: string, defId: string): Promise<{ fields: FormFieldDefinition[] }> {
     return httpClient.get(`${base(orgId)}/${defId}/start-form`).then((r) => r.data)
   },
