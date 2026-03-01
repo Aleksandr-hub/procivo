@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Workflow\Application\Query\GetTaskWorkflowContext;
 
 use App\Workflow\Application\DTO\TaskWorkflowContextDTO;
-use App\Workflow\Application\Service\FormFieldCollector;
+use App\Workflow\Application\Service\FormSchemaBuilder;
 use App\Workflow\Domain\Repository\ProcessDefinitionRepositoryInterface;
 use App\Workflow\Domain\Repository\ProcessDefinitionVersionRepositoryInterface;
 use App\Workflow\Domain\Repository\ProcessInstanceRepositoryInterface;
@@ -23,7 +23,7 @@ final readonly class GetTaskWorkflowContextHandler
         private ProcessInstanceRepositoryInterface $instanceRepository,
         private ProcessDefinitionVersionRepositoryInterface $versionRepository,
         private ProcessDefinitionRepositoryInterface $definitionRepository,
-        private FormFieldCollector $fieldCollector,
+        private FormSchemaBuilder $formSchemaBuilder,
     ) {
     }
 
@@ -64,27 +64,8 @@ final readonly class GetTaskWorkflowContextHandler
         $token = $instance->getToken(TokenId::fromString($link->tokenId()));
         $nodeId = $token->nodeId()->value();
         $nodeName = $graph->nodeName($nodeId);
-        $nodeConfig = $graph->nodeConfig($nodeId);
 
-        $outgoing = $graph->outgoingTransitions($nodeId);
-        $actions = [];
-        foreach ($outgoing as $transition) {
-            $formFields = $transition['form_fields'] ?? [];
-            $formFields = $this->fieldCollector->injectAssigneeFieldsForDownstream(
-                $graph,
-                (string) ($transition['target_node_id'] ?? ''),
-                $formFields,
-            );
-
-            $actions[] = [
-                'key' => $transition['action_key'] ?? 'complete',
-                'label' => $transition['name'] ?? $transition['action_key'] ?? 'Complete',
-                'form_fields' => $formFields,
-            ];
-        }
-
-        /** @var list<array<string, mixed>> $sharedFields */
-        $sharedFields = $nodeConfig['formFields'] ?? [];
+        $formSchema = $this->formSchemaBuilder->build($graph, $nodeId);
 
         return new TaskWorkflowContextDTO(
             processInstanceId: $link->processInstanceId(),
@@ -92,10 +73,7 @@ final readonly class GetTaskWorkflowContextHandler
             nodeName: $nodeName,
             nodeId: $nodeId,
             isCompleted: false,
-            formSchema: [
-                'shared_fields' => $sharedFields,
-                'actions' => $actions,
-            ],
+            formSchema: $formSchema,
         );
     }
 }

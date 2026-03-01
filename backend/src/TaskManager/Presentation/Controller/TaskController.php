@@ -14,10 +14,10 @@ use App\TaskManager\Application\Command\DeleteTask\DeleteTaskCommand;
 use App\TaskManager\Application\Command\TransitionTask\TransitionTaskCommand;
 use App\TaskManager\Application\Command\UnclaimTask\UnclaimTaskCommand;
 use App\TaskManager\Application\Command\UpdateTask\UpdateTaskCommand;
+use App\TaskManager\Application\DTO\TaskDTO;
 use App\TaskManager\Application\Query\GetTask\GetTaskQuery;
 use App\TaskManager\Application\Query\ListTasks\ListTasksQuery;
 use App\TaskManager\Domain\ValueObject\TaskId;
-use App\TaskManager\Application\DTO\TaskDTO;
 use App\Workflow\Application\Command\ExecuteTaskAction\ExecuteTaskActionCommand;
 use App\Workflow\Application\DTO\TaskWorkflowSummaryDTO;
 use App\Workflow\Application\Query\BatchTaskWorkflowSummary\BatchTaskWorkflowSummaryQuery;
@@ -107,7 +107,17 @@ final readonly class TaskController
 
         /** @var array<string, mixed> $taskData */
         $taskData = json_decode(json_encode($dto, \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR);
-        $taskData['workflow_context'] = $workflowContext;
+
+        if (null !== $workflowContext) {
+            /** @var array<string, mixed> $contextData */
+            $contextData = json_decode(json_encode($workflowContext, \JSON_THROW_ON_ERROR), true, 512, \JSON_THROW_ON_ERROR);
+            if (null !== $dto->formSchema) {
+                $contextData['form_schema'] = $dto->formSchema;
+            }
+            $taskData['workflow_context'] = $contextData;
+        } else {
+            $taskData['workflow_context'] = null;
+        }
 
         return new JsonResponse($taskData);
     }

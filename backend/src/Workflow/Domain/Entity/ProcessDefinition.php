@@ -62,8 +62,8 @@ class ProcessDefinition extends AggregateRoot
 
     public function publish(string $versionId, int $versionNumber, string $publishedBy): void
     {
-        if (!$this->isDraft()) {
-            throw new \DomainException('Only draft definitions can be published.');
+        if (ProcessDefinitionStatus::Archived === $this->status()) {
+            throw new \DomainException('Archived definitions cannot be published.');
         }
 
         $this->status = ProcessDefinitionStatus::Published->value;
