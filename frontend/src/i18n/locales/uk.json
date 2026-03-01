@@ -807,7 +807,17 @@
     "deploySuccess": "Версію розгорнуто",
     "deployedVersion": "Розгорнуто версію v{version}",
     "deployFailed": "Не вдалося розгорнути",
-    "version": "Версія"
+    "version": "Версія",
+    "versionHistory": "Історія версій",
+    "publishedAt": "Опубліковано",
+    "runningInstances": "Активні інстанси",
+    "migrateToVersion": "Мігрувати сюди",
+    "migrateConfirmTitle": "Підтвердження міграції",
+    "migrateConfirmMessage": "Мігрувати {count} активних інстансів на версію v{version}?",
+    "migrate": "Мігрувати",
+    "migrateSuccess": "Міграція успішна",
+    "migrateSuccessDetail": "Інстанси мігровані на версію v{version}",
+    "migrateFailed": "Помилка міграції"
   },
   "taskDetail": {
     "dueDate": "Дедлайн",

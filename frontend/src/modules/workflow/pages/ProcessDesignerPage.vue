@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useProcessDefinitionStore } from '@/modules/workflow/stores/process-definition.store'
 import WorkflowDesigner from '@/modules/workflow/components/WorkflowDesigner.vue'
+import VersionHistoryDrawer from '@/modules/workflow/components/VersionHistoryDrawer.vue'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 
 const route = useRoute()
@@ -15,6 +16,7 @@ const { t } = useI18n()
 
 const orgId = computed(() => route.params.orgId as string)
 const definitionId = computed(() => route.params.definitionId as string)
+const showVersionHistory = ref(false)
 
 onMounted(async () => {
   await store.fetchDefinition(orgId.value, definitionId.value)
@@ -54,6 +56,7 @@ async function onDefinitionChanged() {
         <Tag v-if="store.currentVersion !== null" :value="'v' + store.currentVersion" severity="info" />
       </div>
       <div class="header-right">
+        <Button :label="t('workflow.versionHistory')" icon="pi pi-history" severity="secondary" text @click="showVersionHistory = true" />
         <Button :label="t('workflow.deploy')" icon="pi pi-upload" severity="success" @click="handleDeploy" />
       </div>
     </div>
@@ -62,6 +65,13 @@ async function onDefinitionChanged() {
     <div v-else-if="store.loading" class="loading">
       <i class="pi pi-spin pi-spinner" style="font-size: 2rem" />
     </div>
+
+    <VersionHistoryDrawer
+      v-model:visible="showVersionHistory"
+      :org-id="orgId"
+      :definition-id="definitionId"
+      @migrated="onDefinitionChanged"
+    />
   </div>
 </template>
 

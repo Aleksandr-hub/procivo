@@ -807,7 +807,17 @@
     "deploySuccess": "Version deployed",
     "deployedVersion": "Deployed version v{version}",
     "deployFailed": "Failed to deploy",
-    "version": "Version"
+    "version": "Version",
+    "versionHistory": "Version History",
+    "publishedAt": "Published At",
+    "runningInstances": "Running Instances",
+    "migrateToVersion": "Migrate here",
+    "migrateConfirmTitle": "Confirm Migration",
+    "migrateConfirmMessage": "Migrate {count} running instances to version v{version}?",
+    "migrate": "Migrate",
+    "migrateSuccess": "Migration Successful",
+    "migrateSuccessDetail": "Instances migrated to version v{version}",
+    "migrateFailed": "Migration failed"
   },
   "taskDetail": {
     "dueDate": "Due date",
