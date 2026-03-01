@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 08 (Audit Logging) — Complete
-Plan: 2 of 2 (completed)
-Status: Phase 08 complete — both plans done
-Last activity: 2026-03-01 — Completed 08-02: Audit log frontend with AuditLogTimeline component integrated into task, process instance, and organization detail pages
+Phase: 09 (Notification System) — In Progress
+Plan: 1 of 2 (completed)
+Status: Phase 09 plan 01 complete — backend notification system done
+Last activity: 2026-03-01 — Completed 09-01: Backend notification system with NotificationDispatcher, Mercure SSE, email, 7 event handlers, preferences API
 
-Progress: [██████████] Phase 08 complete
+Progress: [█████░░░░░] Phase 09 plan 01/2 complete
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████████] Phase 08 complete
 | Phase 07-user-profile-cicd P02 | 3 | 2 tasks | 8 files |
 | Phase 08-audit-logging P01 | 11 | 2 tasks | 44 files |
 | Phase 08-audit-logging P02 | 5 | 2 tasks | 8 files |
+| Phase 09-notification-system P01 | 8 | 3 tasks | 41 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,10 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 08-audit-logging]: Workflow-initiated task transitions use actorId='system' (ExecuteTaskActionHandler, OnTaskNodeActivated)
 - [Phase 08-02]: AuditLogTimeline entityType/entityId props are optional — omit both for org-wide activity (OrganizationDetailPage)
 - [Phase 08-02]: Task detail uses TabPanel for audit; process instance and org pages use collapsed Fieldset to avoid eager API calls
+- [Phase 09-01]: NotificationDispatcher as central hub: all event handlers inject dispatcher instead of direct repository — single dispatch() call covers preference check + DB + Mercure + email
+- [Phase 09-01]: email channel defaults to disabled (opt-in), in_app defaults to enabled (opt-out) — no preference row = use default
+- [Phase 09-01]: OnProcessCompleted uses DBAL not Doctrine — ProcessCompletedEvent is sync; DBAL fetchAssociative is lightweight
+- [Phase 09-01]: OnInvitationCreated sends in_app only if user exists — invitation email already sent by InviteUserHandler separately
 
 ### Pending Todos
 
@@ -104,6 +109,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 08-02-PLAN.md — Audit log frontend with AuditLogTimeline integrated into 3 detail pages
+Stopped at: Completed 09-01-PLAN.md — Backend notification system with NotificationDispatcher, Mercure SSE, email mailer, 7 event handlers, preferences CRUD API
 Resume file: None
-Next action: Phase 08 complete — proceed to Phase 09 (Notifications) or next planned phase
+Next action: Proceed to Phase 09 Plan 02 (Notification frontend — bell icon, real-time SSE, preferences settings)

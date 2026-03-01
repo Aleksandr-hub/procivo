@@ -115,7 +115,7 @@ Plans:
   5. Bell icon in the topbar shows an unread count badge that updates in real-time via Mercure
   6. User can open a notification center page, filter by type, mark notifications as read, and click to navigate to the referenced entity
   7. Notifications fire for all seven trigger events: task assigned, task completed, process started, process completed, comment added, invitation received, and process cancelled
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 09-01-PLAN.md — Backend: domain model (channel/readAt/preferences), NotificationDispatcher, Mercure publisher, email mailer, 7 event handlers, preferences API
 - [ ] 09-02-PLAN.md — Frontend: Mercure SSE subscription, NotificationsPage, preferences UI in ProfilePage, i18n
@@ -200,7 +200,7 @@ Plans:
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
 | 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
 | 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
-| 9. Notification System | v2.0 | 0/TBD | Not started | - |
+| 9. Notification System | 1/2 | In Progress|  | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
 | 10.1 Board Evolution | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
