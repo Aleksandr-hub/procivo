@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Notification\Application\EventHandler;
 
-use App\Notification\Domain\Entity\Notification;
-use App\Notification\Domain\Repository\NotificationRepositoryInterface;
-use App\Notification\Domain\ValueObject\NotificationId;
+use App\Identity\Domain\Repository\UserRepositoryInterface;
+use App\Identity\Domain\ValueObject\UserId;
+use App\Notification\Application\Service\NotificationDispatcher;
 use App\Notification\Domain\ValueObject\NotificationType;
 use App\TaskManager\Domain\Event\CommentAddedEvent;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
@@ -17,8 +17,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class OnCommentAdded
 {
     public function __construct(
-        private NotificationRepositoryInterface $notificationRepository,
+        private NotificationDispatcher $notificationDispatcher,
         private TaskRepositoryInterface $taskRepository,
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
@@ -32,20 +33,25 @@ final readonly class OnCommentAdded
 
         $recipientId = $task->assigneeId() ?? $task->creatorId();
 
-        // Don't notify the comment author
+        // Do not notify the comment author
         if ($recipientId === $event->authorId) {
             return;
         }
 
-        $notification = Notification::create(
-            NotificationId::generate(),
-            $recipientId,
-            NotificationType::CommentAdded,
-            'New comment on task',
-            \sprintf('A new comment was added to task "%s".', $task->title()),
-            $event->taskId,
-        );
+        $user = $this->userRepository->findById(UserId::fromString($recipientId));
+        $recipientEmail = null !== $user ? $user->email()->value() : null;
 
-        $this->notificationRepository->save($notification);
+        $this->notificationDispatcher->dispatch([
+            'recipientId' => $recipientId,
+            'recipientEmail' => $recipientEmail,
+            'type' => NotificationType::CommentAdded,
+            'title' => 'New comment on task',
+            'body' => \sprintf('A new comment was added to task "%s".', $task->title()),
+            'relatedEntityId' => $event->taskId,
+            'relatedEntityType' => 'task',
+            'emailSubject' => \sprintf('New comment on task: %s', $task->title()),
+            'emailTemplate' => 'email/notification/comment_added.html.twig',
+            'emailContext' => ['taskTitle' => $task->title(), 'taskId' => $event->taskId],
+        ]);
     }
 }

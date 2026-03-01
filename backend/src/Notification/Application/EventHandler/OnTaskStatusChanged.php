@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Notification\Application\EventHandler;
 
-use App\Notification\Domain\Entity\Notification;
-use App\Notification\Domain\Repository\NotificationRepositoryInterface;
-use App\Notification\Domain\ValueObject\NotificationId;
+use App\Identity\Domain\Repository\UserRepositoryInterface;
+use App\Identity\Domain\ValueObject\UserId;
+use App\Notification\Application\Service\NotificationDispatcher;
 use App\Notification\Domain\ValueObject\NotificationType;
 use App\TaskManager\Domain\Event\TaskStatusChangedEvent;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
@@ -17,8 +17,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class OnTaskStatusChanged
 {
     public function __construct(
-        private NotificationRepositoryInterface $notificationRepository,
+        private NotificationDispatcher $notificationDispatcher,
         private TaskRepositoryInterface $taskRepository,
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
@@ -32,15 +33,24 @@ final readonly class OnTaskStatusChanged
 
         $recipientId = $task->assigneeId() ?? $task->creatorId();
 
-        $notification = Notification::create(
-            NotificationId::generate(),
-            $recipientId,
-            NotificationType::TaskStatusChanged,
-            'Task status changed',
-            \sprintf('Task "%s" status changed from %s to %s.', $task->title(), $event->oldStatus, $event->newStatus),
-            $event->taskId,
-        );
+        $notificationType = 'done' === $event->newStatus
+            ? NotificationType::TaskCompleted
+            : NotificationType::TaskStatusChanged;
 
-        $this->notificationRepository->save($notification);
+        $user = $this->userRepository->findById(UserId::fromString($recipientId));
+        $recipientEmail = null !== $user ? $user->email()->value() : null;
+
+        $this->notificationDispatcher->dispatch([
+            'recipientId' => $recipientId,
+            'recipientEmail' => $recipientEmail,
+            'type' => $notificationType,
+            'title' => 'Task status changed',
+            'body' => \sprintf('Task "%s" status changed from %s to %s.', $task->title(), $event->oldStatus, $event->newStatus),
+            'relatedEntityId' => $event->taskId,
+            'relatedEntityType' => 'task',
+            'emailSubject' => \sprintf('Task status update: %s', $task->title()),
+            'emailTemplate' => 'done' === $event->newStatus ? 'email/notification/task_completed.html.twig' : null,
+            'emailContext' => ['taskTitle' => $task->title(), 'taskId' => $event->taskId, 'newStatus' => $event->newStatus],
+        ]);
     }
 }

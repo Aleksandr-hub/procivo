@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Notification\Application\EventHandler;
 
-use App\Notification\Domain\Entity\Notification;
-use App\Notification\Domain\Repository\NotificationRepositoryInterface;
-use App\Notification\Domain\ValueObject\NotificationId;
+use App\Identity\Domain\Repository\UserRepositoryInterface;
+use App\Identity\Domain\ValueObject\UserId;
+use App\Notification\Application\Service\NotificationDispatcher;
 use App\Notification\Domain\ValueObject\NotificationType;
 use App\TaskManager\Domain\Event\TaskAssignedEvent;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
@@ -17,8 +17,9 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class OnTaskAssigned
 {
     public function __construct(
-        private NotificationRepositoryInterface $notificationRepository,
+        private NotificationDispatcher $notificationDispatcher,
         private TaskRepositoryInterface $taskRepository,
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
@@ -31,15 +32,20 @@ final readonly class OnTaskAssigned
         $task = $this->taskRepository->findById(TaskId::fromString($event->taskId));
         $taskTitle = null !== $task ? $task->title() : 'Unknown task';
 
-        $notification = Notification::create(
-            NotificationId::generate(),
-            $event->assigneeId,
-            NotificationType::TaskAssigned,
-            'Task assigned to you',
-            \sprintf('You have been assigned to task "%s".', $taskTitle),
-            $event->taskId,
-        );
+        $user = $this->userRepository->findById(UserId::fromString($event->assigneeId));
+        $recipientEmail = null !== $user ? $user->email()->value() : null;
 
-        $this->notificationRepository->save($notification);
+        $this->notificationDispatcher->dispatch([
+            'recipientId' => $event->assigneeId,
+            'recipientEmail' => $recipientEmail,
+            'type' => NotificationType::TaskAssigned,
+            'title' => 'Task assigned to you',
+            'body' => \sprintf('You have been assigned to task "%s".', $taskTitle),
+            'relatedEntityId' => $event->taskId,
+            'relatedEntityType' => 'task',
+            'emailSubject' => \sprintf('Task assigned: %s', $taskTitle),
+            'emailTemplate' => 'email/notification/task_assigned.html.twig',
+            'emailContext' => ['taskTitle' => $taskTitle, 'taskId' => $event->taskId],
+        ]);
     }
 }

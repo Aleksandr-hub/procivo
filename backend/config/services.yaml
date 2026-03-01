@@ -228,6 +228,13 @@ services:
     App\Notification\Domain\Repository\NotificationPreferenceRepositoryInterface:
         alias: App\Notification\Infrastructure\Repository\DoctrineNotificationPreferenceRepository
 
+    App\Notification\Application\Port\NotificationMailerInterface:
+        alias: App\Notification\Infrastructure\Email\SymfonyNotificationMailer
+
+    App\Notification\Infrastructure\Email\SymfonyNotificationMailer:
+        arguments:
+            $fromEmail: '%env(MAILER_FROM)%'
+
     App\TaskManager\Application\Command\TransitionTask\TransitionTaskHandler:
         arguments:
             $taskStateMachine: '@state_machine.task'
