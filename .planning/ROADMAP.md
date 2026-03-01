@@ -25,7 +25,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 **Milestone Goal:** Make the platform production-ready with notifications, audit trail, dashboard, user profiles, timer execution, and CI/CD — so small teams can actually use it.
 
 - [x] **Phase 6: Process Polish** — Fix v1.0 tech debt: schema snapshot, FormSchemaBuilder dedup, from_variable, process cancel, filters, UI alignment (completed 2026-03-01)
-- [ ] **Phase 7: User Profile + CI/CD** — Avatar upload to S3, profile editing, password change, CI pipeline, pre-commit hooks, developer setup docs
+- [x] **Phase 7: User Profile + CI/CD** — Avatar upload to S3, profile editing, password change, CI pipeline, pre-commit hooks, developer setup docs (completed 2026-03-01)
 - [ ] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI
 - [ ] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center
 - [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
@@ -82,7 +82,7 @@ Plans:
   5. GitHub Actions CI pipeline runs CS Fixer, PHPStan, PHPUnit, frontend type-check, and ESLint on every push
   6. Pre-commit hooks block commits that fail CS Fixer (PHP) or ESLint (TypeScript/Vue) on staged files
   7. .env.example and README contain sufficient instructions for a new developer to run the project locally
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 07-01-PLAN.md — Backend profile API (UpdateProfile + UploadAvatar commands, UserDTO extension, migration)
 - [ ] 07-02-PLAN.md — Frontend ProfilePage + avatar display integration (topbar, task sidebar)
@@ -170,7 +170,7 @@ Plans:
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
-| 7. User Profile + CI/CD | 2/3 | In Progress|  | - |
+| 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |

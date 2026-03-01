@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 07 (User Profile + CI/CD) — In Progress
-Plan: 3 of 4 (completed)
-Status: Plan 03 complete
-Last activity: 2026-03-01 — Completed 07-03: GitHub Actions CI pipeline, lefthook pre-commit hooks, .env.example, README
+Plan: 2 of 4 (completed)
+Status: Plan 02 complete
+Last activity: 2026-03-01 — Completed 07-02: ProfilePage frontend with avatar upload, topbar + sidebar avatar integration
 
-Progress: [███████░░░] Phase 07 in progress (3/4 plans)
+Progress: [████░░░░░░] Phase 07 in progress (2/4 plans)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [███████░░░] Phase 07 in progress (3/4 plans)
 | Phase 06.1-process-definition-versioning P02 | 5 | 2 tasks | 7 files |
 | Phase 07-user-profile-cicd P03 | 1 | 2 tasks | 4 files |
 | Phase 07-user-profile-cicd P01 | 35 | 2 tasks | 13 files |
+| Phase 07-user-profile-cicd P02 | 3 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 07-01]: finfo_buffer() used for MIME validation — client-provided MIME type is untrusted
 - [Phase 07-01]: S3AvatarStorage uses 24h presigned URL TTL (vs 1h in S3FileStorage) for better UX with avatars
 - [Phase 07-01]: UserDTO.fromEntity() accepts optional ?string avatarUrl = null — all existing callers unaffected
+- [Phase 07-02]: Avatar :image receives undefined (not null) — PrimeVue Avatar treats undefined correctly, falls back to :label
+- [Phase 07-02]: TaskDetailSidebar shows current user's avatar only when task.assigneeId === auth.user.id — avoids premature DTO extension before Phase 8
 
 ### Pending Todos
 
@@ -94,6 +97,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 07-01-PLAN.md — User profile backend API with avatar upload to S3
+Stopped at: Completed 07-02-PLAN.md — User profile frontend with ProfilePage, avatar upload, topbar/sidebar integration
 Resume file: None
-Next action: Execute Phase 07 Plan 04
+Next action: Execute Phase 07 Plan 03
