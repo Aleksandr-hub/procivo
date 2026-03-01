@@ -58,10 +58,16 @@ final readonly class ProcessInstanceController
         $this->authorizer->authorize($organizationId, 'WORKFLOW_VIEW');
 
         $status = $request->query->getString('status');
+        $search = $request->query->getString('search');
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 20);
 
         $instances = $this->queryBus->ask(new ListProcessInstancesQuery(
             organizationId: $organizationId,
             status: '' !== $status ? $status : null,
+            search: '' !== $search ? $search : null,
+            page: max(1, $page),
+            limit: min(100, max(1, $limit)),
         ));
 
         return new JsonResponse($instances);

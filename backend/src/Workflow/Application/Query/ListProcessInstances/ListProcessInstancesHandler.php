@@ -17,7 +17,7 @@ final readonly class ListProcessInstancesHandler
     }
 
     /**
-     * @return list<ProcessInstanceDTO>
+     * @return array{items: list<ProcessInstanceDTO>, total: int, page: int, limit: int}
      */
     public function __invoke(ListProcessInstancesQuery $query): array
     {
@@ -33,12 +33,28 @@ final readonly class ListProcessInstancesHandler
                 ->setParameter('status', $query->status);
         }
 
+        if (null !== $query->search && '' !== $query->search) {
+            $qb->andWhere('definition_name ILIKE :search')
+                ->setParameter('search', '%' . $query->search . '%');
+        }
+
+        $countQb = clone $qb;
+        $total = (int) $countQb->select('COUNT(*)')->executeQuery()->fetchOne();
+
+        $offset = ($query->page - 1) * $query->limit;
+        $qb->setMaxResults($query->limit)->setFirstResult($offset);
+
         /** @var list<array<string, mixed>> $rows */
         $rows = $qb->executeQuery()->fetchAllAssociative();
 
-        return array_map(
-            static fn (array $row): ProcessInstanceDTO => ProcessInstanceDTO::fromRow($row),
-            $rows,
-        );
+        return [
+            'items' => array_map(
+                static fn (array $row): ProcessInstanceDTO => ProcessInstanceDTO::fromRow($row),
+                $rows,
+            ),
+            'total' => $total,
+            'page' => $query->page,
+            'limit' => $query->limit,
+        ];
     }
 }
