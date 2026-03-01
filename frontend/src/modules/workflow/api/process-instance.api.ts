@@ -9,10 +9,22 @@ import type {
 
 const base = (orgId: string) => `/organizations/${orgId}/process-instances`
 
+export interface ListProcessInstancesParams {
+  status?: string
+  search?: string
+  page?: number
+  limit?: number
+}
+
+export interface PaginatedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+}
+
 export const processInstanceApi = {
-  list(orgId: string, status?: string): Promise<ProcessInstanceDTO[]> {
-    const params: Record<string, string> = {}
-    if (status) params.status = status
+  list(orgId: string, params: ListProcessInstancesParams = {}): Promise<PaginatedResponse<ProcessInstanceDTO>> {
     return httpClient.get(base(orgId), { params }).then((r) => r.data)
   },
 

@@ -579,6 +579,7 @@
     "processInstances": "Екземпляри процесів",
     "startProcess": "Запустити процес",
     "noInstancesFound": "Екземплярів процесів не знайдено",
+    "searchInstances": "Пошук за назвою процесу",
     "instanceStarted": "Процес запущено",
     "instanceCancelled": "Процес скасовано",
     "selectDefinition": "Оберіть визначення",

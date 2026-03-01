@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { processInstanceApi } from '@/modules/workflow/api/process-instance.api'
+import type { ListProcessInstancesParams } from '@/modules/workflow/api/process-instance.api'
 import type {
   ProcessInstanceDTO,
   ProcessInstanceGraphDTO,
@@ -9,15 +10,18 @@ import type {
 
 export const useProcessInstanceStore = defineStore('processInstance', () => {
   const instances = ref<ProcessInstanceDTO[]>([])
+  const total = ref(0)
   const currentInstance = ref<ProcessInstanceDTO | null>(null)
   const history = ref<ProcessEventDTO[]>([])
   const graph = ref<ProcessInstanceGraphDTO | null>(null)
   const loading = ref(false)
 
-  async function fetchInstances(orgId: string, status?: string) {
+  async function fetchInstances(orgId: string, params: ListProcessInstancesParams = {}) {
     loading.value = true
     try {
-      instances.value = await processInstanceApi.list(orgId, status)
+      const result = await processInstanceApi.list(orgId, params)
+      instances.value = result.items
+      total.value = result.total
     } finally {
       loading.value = false
     }
@@ -56,6 +60,7 @@ export const useProcessInstanceStore = defineStore('processInstance', () => {
 
   return {
     instances,
+    total,
     currentInstance,
     history,
     graph,

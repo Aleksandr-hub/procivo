@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
@@ -20,6 +20,9 @@ const orgId = computed(() => route.params.orgId as string)
 const showStartDialog = ref(false)
 const selectedDefId = ref<string | null>(null)
 const filterStatus = ref<string | undefined>(undefined)
+const searchQuery = ref('')
+const currentPage = ref(1)
+const first = ref(0)
 
 const statusOptions = [
   { label: t('workflow.instanceStatus_running'), value: 'running' },
@@ -34,13 +37,40 @@ function getActiveTokenCount(instance: ProcessInstanceDTO): number {
   ).length
 }
 
-async function onFilterChange() {
-  await instanceStore.fetchInstances(orgId.value, filterStatus.value)
+async function loadInstances() {
+  await instanceStore.fetchInstances(orgId.value, {
+    status: filterStatus.value || undefined,
+    search: searchQuery.value || undefined,
+    page: currentPage.value,
+    limit: 20,
+  })
 }
+
+async function onFilterChange() {
+  currentPage.value = 1
+  first.value = 0
+  await loadInstances()
+}
+
+function onPage(event: { page: number; rows: number; first: number }) {
+  first.value = event.first
+  currentPage.value = event.page + 1
+  loadInstances()
+}
+
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    first.value = 0
+    loadInstances()
+  }, 300)
+})
 
 onMounted(async () => {
   await Promise.all([
-    instanceStore.fetchInstances(orgId.value),
+    loadInstances(),
     defStore.fetchDefinitions(orgId.value, 'published'),
   ])
 })
@@ -89,9 +119,24 @@ async function cancelInstance(instance: ProcessInstanceDTO) {
         @change="onFilterChange"
         style="width: 200px"
       />
+      <InputText
+        v-model="searchQuery"
+        :placeholder="t('workflow.searchInstances')"
+        style="width: 280px"
+      />
     </div>
 
-    <DataTable :value="instanceStore.instances" :loading="instanceStore.loading" stripedRows paginator :rows="20">
+    <DataTable
+      :value="instanceStore.instances"
+      :loading="instanceStore.loading"
+      lazy
+      paginator
+      :rows="20"
+      :totalRecords="instanceStore.total"
+      :first="first"
+      stripedRows
+      @page="onPage"
+    >
       <template #empty>
         <div class="empty-table">{{ t('workflow.noInstancesFound') }}</div>
       </template>
@@ -150,6 +195,8 @@ async function cancelInstance(instance: ProcessInstanceDTO) {
 }
 
 .tab-toolbar {
+  display: flex;
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
