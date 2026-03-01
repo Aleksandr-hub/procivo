@@ -31,6 +31,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
+- [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
 
 ## Phase Details
 
@@ -81,7 +82,7 @@ Plans:
   5. GitHub Actions CI pipeline runs CS Fixer, PHPStan, PHPUnit, frontend type-check, and ESLint on every push
   6. Pre-commit hooks block commits that fail CS Fixer (PHP) or ESLint (TypeScript/Vue) on staged files
   7. .env.example and README contain sufficient instructions for a new developer to run the project locally
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 07-01-PLAN.md — Backend profile API (UpdateProfile + UploadAvatar commands, UserDTO extension, migration)
 - [ ] 07-02-PLAN.md — Frontend ProfilePage + avatar display integration (topbar, task sidebar)
@@ -145,6 +146,19 @@ Plans:
   4. Attempting to impersonate another super admin returns a 403 — privilege escalation is blocked
 **Plans**: TBD
 
+### Phase 13: Granular Permissions (RBAC)
+**Goal**: Organizations can configure fine-grained access control — who can see, create, edit, and manage tasks, processes, and organizational data — per department, per role, per user, and per process definition
+**Depends on**: Phase 8 (audit logging for permission changes), Phase 12 (super admin role concept)
+**Requirements**: PERM-01, PERM-02, PERM-03, PERM-04, PERM-05, PERM-06
+**Success Criteria** (what must be TRUE):
+  1. Permission model supports resource-type + action granularity (e.g., task:create, process:start, organization:manage) with hierarchical inheritance: Organization → Department → Role → User
+  2. User's effective permissions are computed by merging inherited permissions from their department and role, with explicit user-level overrides (allow/deny) taking highest priority
+  3. Process definitions have per-definition access control — admin can restrict which departments/roles can start or view a specific process
+  4. Admin UI provides a permissions management page where org admins can view and edit permission matrices per role, per department, and per user with immediate effect
+  5. All API endpoints enforce permissions via the existing OrganizationAuthorizer — no endpoint relies solely on "user is in organization" for access
+  6. Permission changes are logged in the audit trail with before/after diff
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -156,9 +170,10 @@ Plans:
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
-| 7. User Profile + CI/CD | 1/3 | In Progress|  | - |
+| 7. User Profile + CI/CD | 2/3 | In Progress|  | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
+| 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |

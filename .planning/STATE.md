@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T17:55:10.162Z"
+last_updated: "2026-03-01T17:57:39.635Z"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -53,6 +53,7 @@ Progress: [███████░░░] Phase 07 in progress (3/4 plans)
 | Phase 06.1-process-definition-versioning P01 | 3 | 2 tasks | 7 files |
 | Phase 06.1-process-definition-versioning P02 | 5 | 2 tasks | 7 files |
 | Phase 07-user-profile-cicd P03 | 1 | 2 tasks | 4 files |
+| Phase 07-user-profile-cicd P01 | 35 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,10 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 06.1-02]: VersionHistoryDrawer uses computed drawerVisible with get/set for v-model:visible — standard PrimeVue pattern for overlay components
 - [Phase 07-user-profile-cicd]: CI uses npx eslint . without --fix for pure detection — lint:eslint in package.json uses --fix which would silently fix CI failures
 - [Phase 07-user-profile-cicd]: lefthook ESLint runs natively on host, CS Fixer via docker compose exec -T php
+- [Phase 07-01]: AvatarStorageInterface is Identity's own port — NOT re-using TaskManager FileStorageInterface (bounded context isolation)
+- [Phase 07-01]: finfo_buffer() used for MIME validation — client-provided MIME type is untrusted
+- [Phase 07-01]: S3AvatarStorage uses 24h presigned URL TTL (vs 1h in S3FileStorage) for better UX with avatars
+- [Phase 07-01]: UserDTO.fromEntity() accepts optional ?string avatarUrl = null — all existing callers unaffected
 
 ### Pending Todos
 
@@ -89,6 +94,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 07-03-PLAN.md — CI/CD infrastructure: GitHub Actions, lefthook pre-commit hooks, .env.example, README
+Stopped at: Completed 07-01-PLAN.md — User profile backend API with avatar upload to S3
 Resume file: None
 Next action: Execute Phase 07 Plan 04
