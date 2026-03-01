@@ -81,7 +81,11 @@ Plans:
   5. GitHub Actions CI pipeline runs CS Fixer, PHPStan, PHPUnit, frontend type-check, and ESLint on every push
   6. Pre-commit hooks block commits that fail CS Fixer (PHP) or ESLint (TypeScript/Vue) on staged files
   7. .env.example and README contain sufficient instructions for a new developer to run the project locally
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 07-01-PLAN.md — Backend profile API (UpdateProfile + UploadAvatar commands, UserDTO extension, migration)
+- [ ] 07-02-PLAN.md — Frontend ProfilePage + avatar display integration (topbar, task sidebar)
+- [ ] 07-03-PLAN.md — CI/CD infrastructure (GitHub Actions, lefthook, README, .env.example)
 
 ### Phase 8: Audit Logging
 **Goal**: Every significant system event is recorded asynchronously with full actor attribution, queryable via API and visible on detail pages
