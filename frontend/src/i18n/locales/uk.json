@@ -15,7 +15,8 @@
     "noDescription": "Без опису",
     "none": "Немає",
     "confirm": "Підтвердження",
-    "actions": "Дії"
+    "actions": "Дії",
+    "warning": "Увага"
   },
   "auth": {
     "login": {
@@ -419,6 +420,7 @@
     "taskClaimed": "Задачу призначено на вас",
     "taskUnclaimed": "Задачу повернуто в чергу",
     "taskAssigned": "Задачу успішно призначено",
+    "notEmployeeInOrg": "Ви не знайдені як працівник в цій організації. Зверніться до адміністратора.",
     "assign": "Призначити",
     "selectEmployee": "Оберіть працівника…",
     "poolTaskBadge": "Pool Task",
@@ -828,7 +830,8 @@
     "userAssignmentHint": "Задача буде призначена конкретній людині",
     "roleAssignmentHint": "Задача стане pool task для всіх з цією роллю",
     "departmentAssignmentHint": "Задача стане pool task для всього департаменту",
-    "positionAssignmentHint": "Задача буде призначена носію цієї посади"
+    "positionAssignmentHint": "Задача буде призначена носію цієї посади",
+    "assignmentStrategy": "Стратегія призначення"
   },
   "templates": {
     "simpleTaskName": "Етап з перевіркою",

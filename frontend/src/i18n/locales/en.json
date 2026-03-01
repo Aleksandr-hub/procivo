@@ -15,7 +15,8 @@
     "noDescription": "No description",
     "none": "None",
     "confirm": "Confirm",
-    "actions": "Actions"
+    "actions": "Actions",
+    "warning": "Warning"
   },
   "auth": {
     "login": {
@@ -419,6 +420,7 @@
     "taskClaimed": "Task assigned to you",
     "taskUnclaimed": "Task returned to queue",
     "taskAssigned": "Task assigned successfully",
+    "notEmployeeInOrg": "You are not found as an employee in this organization. Contact administrator.",
     "assign": "Assign",
     "selectEmployee": "Select employee…",
     "poolTaskBadge": "Pool Task",
@@ -828,7 +830,8 @@
     "userAssignmentHint": "Task will be assigned to specific person",
     "roleAssignmentHint": "Task will become pool task for all with this role",
     "departmentAssignmentHint": "Task will become pool task for entire department",
-    "positionAssignmentHint": "Task will be assigned to position holder"
+    "positionAssignmentHint": "Task will be assigned to position holder",
+    "assignmentStrategy": "Assignment Strategy"
   },
   "templates": {
     "simpleTaskName": "Stage with Review",

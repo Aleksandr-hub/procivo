@@ -42,6 +42,7 @@ function onUpdate(value: unknown) {
     <InputText
       v-if="field.type === 'text'"
       :model-value="(modelValue as string) ?? ''"
+      :invalid="!!error"
       class="w-full"
       @update:model-value="onUpdate"
       @blur="emit('blur')"
@@ -50,6 +51,7 @@ function onUpdate(value: unknown) {
     <InputNumber
       v-else-if="field.type === 'number'"
       :model-value="(modelValue as number) ?? null"
+      :invalid="!!error"
       class="w-full"
       @update:model-value="onUpdate"
       @blur="emit('blur')"
@@ -58,6 +60,7 @@ function onUpdate(value: unknown) {
     <DatePicker
       v-else-if="field.type === 'date'"
       :model-value="(modelValue as Date) ?? null"
+      :invalid="!!error"
       class="w-full"
       date-format="yy-mm-dd"
       show-icon
@@ -68,6 +71,7 @@ function onUpdate(value: unknown) {
     <Select
       v-else-if="field.type === 'select'"
       :model-value="(modelValue as string) ?? null"
+      :invalid="!!error"
       :options="field.options ?? []"
       class="w-full"
       @update:model-value="onUpdate"
@@ -77,6 +81,7 @@ function onUpdate(value: unknown) {
     <Checkbox
       v-else-if="field.type === 'checkbox'"
       :model-value="(modelValue as boolean) ?? false"
+      :invalid="!!error"
       binary
       @update:model-value="onUpdate"
     />
@@ -84,6 +89,7 @@ function onUpdate(value: unknown) {
     <Select
       v-else-if="field.type === 'employee'"
       :model-value="(modelValue as string) ?? null"
+      :invalid="!!error"
       :options="employeeOptions"
       option-label="label"
       option-value="value"
@@ -97,6 +103,7 @@ function onUpdate(value: unknown) {
     <Textarea
       v-else-if="field.type === 'textarea'"
       :model-value="(modelValue as string) ?? ''"
+      :invalid="!!error"
       class="w-full"
       :rows="3"
       auto-resize
@@ -125,5 +132,10 @@ function onUpdate(value: unknown) {
 .required-badge {
   font-size: 0.65rem;
   padding: 0.1rem 0.4rem;
+}
+
+.dynamic-field .p-error {
+  display: block;
+  margin-top: 0.25rem;
 }
 </style>

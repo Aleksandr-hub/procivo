@@ -354,7 +354,10 @@ function onActionFormSubmit(data: { actionKey: string; formData: Record<string, 
 }
 
 async function handleClaim() {
-  if (!currentEmployeeId.value) return
+  if (!currentEmployeeId.value) {
+    toast.add({ severity: 'warn', summary: t('common.warning'), detail: t('tasks.notEmployeeInOrg'), life: 5000 })
+    return
+  }
   claimLoading.value = true
   try {
     await taskStore.claimTask(props.orgId, props.taskId, currentEmployeeId.value)

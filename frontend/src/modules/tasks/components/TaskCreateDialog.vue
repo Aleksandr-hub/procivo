@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue'
 import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useTaskStore } from '@/modules/tasks/stores/task.store'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
 import { useRoleStore } from '@/modules/organization/stores/role.store'
 import { useDepartmentStore } from '@/modules/organization/stores/department.store'
@@ -27,6 +28,7 @@ const emit = defineEmits<{
 const toast = useToast()
 const { t } = useI18n()
 const taskStore = useTaskStore()
+const authStore = useAuthStore()
 const empStore = useEmployeeStore()
 const roleStore = useRoleStore()
 const deptStore = useDepartmentStore()
@@ -93,6 +95,12 @@ const departmentOptions = computed(() => {
   return result
 })
 
+const currentEmployeeId = computed(() => {
+  if (!authStore.user) return null
+  const emp = empStore.employees.find((e) => e.userId === authStore.user!.id && e.status === 'active')
+  return emp?.id ?? null
+})
+
 const canSubmit = computed(() => {
   if (!title.value.trim()) return false
   if (mode.value === 'process' && !selectedDefId.value) return false
@@ -125,7 +133,8 @@ watch(
       if (empStore.employees.length === 0) empStore.fetchEmployees(props.orgId)
       if (roleStore.roles.length === 0) roleStore.fetchRoles(props.orgId)
       if (deptStore.tree.length === 0) deptStore.fetchTree(props.orgId)
-      if (defStore.definitions.length === 0) defStore.fetchDefinitions(props.orgId, 'published')
+      // Always re-fetch with 'published' — store may have all definitions from another page
+      defStore.fetchDefinitions(props.orgId, 'published')
     }
   },
 )
@@ -174,14 +183,14 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (mode.value === 'quick') {
-      const currentEmployee = empStore.employees.find(() => true)
+      const creatorId = currentEmployeeId.value
       const payload: Record<string, unknown> = {
         title: title.value,
         description: description.value || null,
         priority: priority.value,
         due_date: serializeDate(dueDate.value),
         estimated_hours: estimatedHours.value,
-        creator_id: currentEmployee?.id ?? '',
+        creator_id: creatorId ?? '',
         assignment_strategy: assignmentStrategy.value,
       }
       if (assignmentStrategy.value === 'specific_user') {
@@ -205,7 +214,7 @@ async function handleSubmit() {
         _task_description: description.value || null,
         _task_priority: priority.value,
         _task_due_date: serializeDate(dueDate.value),
-        _task_creator_id: empStore.employees.find(() => true)?.id ?? '',
+        _task_creator_id: currentEmployeeId.value ?? '',
         ...serializedFormData,
       }
 
