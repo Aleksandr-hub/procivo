@@ -16,6 +16,7 @@
         <field name="roles" type="json" column="roles"/>
         <field name="createdAt" type="datetime_immutable" column="created_at"/>
         <field name="updatedAt" type="datetime_immutable" column="updated_at" nullable="true"/>
+        <field name="avatarPath" type="string" length="500" column="avatar_path" nullable="true"/>
 
     </entity>
 

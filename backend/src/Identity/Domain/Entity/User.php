@@ -30,6 +30,7 @@ class User extends AggregateRoot
     private array $roles;
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
+    private ?string $avatarPath = null;
 
     private function __construct()
     {
@@ -52,6 +53,7 @@ class User extends AggregateRoot
         $user->roles = ['ROLE_USER'];
         $user->createdAt = new \DateTimeImmutable();
         $user->updatedAt = null;
+        $user->avatarPath = null;
 
         $user->recordEvent(new UserRegisteredEvent($id->value(), $email->value()));
 
@@ -78,6 +80,25 @@ class User extends AggregateRoot
         $this->updatedAt = new \DateTimeImmutable();
 
         $this->recordEvent(new PasswordChangedEvent($this->id));
+    }
+
+    public function updateProfile(string $firstName, string $lastName, Email $email): void
+    {
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->email = $email->value();
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function setAvatarPath(?string $path): void
+    {
+        $this->avatarPath = $path;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function avatarPath(): ?string
+    {
+        return $this->avatarPath;
     }
 
     public function id(): UserId

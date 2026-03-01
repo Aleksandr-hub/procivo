@@ -101,6 +101,18 @@ services:
         tags:
             - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
+    App\Identity\Application\Port\AvatarStorageInterface:
+        alias: App\Identity\Infrastructure\Storage\S3AvatarStorage
+
+    App\Identity\Infrastructure\Storage\S3AvatarStorage:
+        arguments:
+            $endpoint: '%env(AWS_ENDPOINT)%'
+            $endpointPublic: '%env(AWS_ENDPOINT_PUBLIC)%'
+            $region: '%env(AWS_REGION)%'
+            $bucket: '%env(AWS_BUCKET)%'
+            $accessKeyId: '%env(AWS_ACCESS_KEY_ID)%'
+            $secretAccessKey: '%env(AWS_SECRET_ACCESS_KEY)%'
+
     # === Organization Module ===
     App\Organization\Domain\Repository\OrganizationRepositoryInterface:
         alias: App\Organization\Infrastructure\Repository\DoctrineOrganizationRepository
