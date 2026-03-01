@@ -29,6 +29,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI (completed 2026-03-01)
 - [ ] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center
 - [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
+- [ ] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view)
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
@@ -114,7 +115,10 @@ Plans:
   5. Bell icon in the topbar shows an unread count badge that updates in real-time via Mercure
   6. User can open a notification center page, filter by type, mark notifications as read, and click to navigate to the referenced entity
   7. Notifications fire for all seven trigger events: task assigned, task completed, process started, process completed, comment added, invitation received, and process cancelled
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 09-01-PLAN.md — Backend: domain model (channel/readAt/preferences), NotificationDispatcher, Mercure publisher, email mailer, 7 event handlers, preferences API
+- [ ] 09-02-PLAN.md — Frontend: Mercure SSE subscription, NotificationsPage, preferences UI in ProfilePage, i18n
 
 ### Phase 10: Dashboard
 **Goal**: Users see a meaningful home screen with their task workload, active processes, completion trends, and recent activity on login
@@ -125,6 +129,27 @@ Plans:
   2. Active Processes widget lists processes where the user is a participant with current status badges
   3. Dashboard charts render: tasks by status (donut), tasks completed over time (line), and process completion rate (bar) — all scoped to the user's organization
   4. Recent activity feed shows the last 20 audit log entries for objects in the user's organization with clickable entity links
+**Plans**: TBD
+
+### Phase 10.1: Board Evolution — Task Board Polish + Process Board
+
+**Goal**: Boards become the primary daily work surface — polished Task Kanban with rich cards, swimlanes, and filters; plus a new Process Board type where columns are BPMN stage nodes and cards are live process instances flowing through the pipeline
+**Depends on**: Phase 10 (Dashboard provides overview; boards provide hands-on workspace), Phase 8 (audit timeline on cards)
+**Requirements**: BRD-01, BRD-02, BRD-03, BRD-04, BRD-05, BRD-06, BRD-07, BRD-08
+**Success Criteria** (what must be TRUE):
+
+*Task Board Polish:*
+  1. Task cards display avatar badge of assignee, priority severity chip, label dots, due date (red when overdue), and comment count — visible without opening the task
+  2. User can toggle swimlanes on a board: by Assignee (horizontal rows per person with "Unassigned" row), by Priority (Critical → Low rows), or None (flat columns)
+  3. User can filter board cards with a Quick Filter bar: text search (title), assignee dropdown, label multi-select, due date range — filters persist in URL query params so links are shareable
+  4. Column WIP limit violation is visually clear: column header turns amber at 80% capacity and red at 100%+, with a count badge showing current/limit
+
+*Process Board (new board type):*
+  5. User can create a Process Board by selecting an existing published ProcessDefinition — the system auto-generates columns from the definition's Task nodes in topological order (Start → task stages → End), plus a "Completed" column
+  6. Each card on the Process Board represents a ProcessInstance: shows instance name, current stage highlight, started date, and assignee of the active task — clicking opens ProcessInstanceDetailPage
+  7. Dragging a card from one stage column to the next triggers the active task's default action (complete with empty form data) — if the task has required form fields, a compact ActionFormDialog appears inline; if no valid transition exists, drag is rejected with a toast
+  8. Process Board header shows pipeline metrics: total active instances, average time per stage (from audit log timestamps), and a mini throughput sparkline (instances completed per day over last 14 days)
+
 **Plans**: TBD
 
 ### Phase 11: Timer Execution
@@ -177,6 +202,7 @@ Plans:
 | 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
+| 10.1 Board Evolution | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
