@@ -35,17 +35,23 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 ## Phase Details
 
 ### Phase 6: Process Polish
-**Goal**: v1.0 tech debt is eliminated and the BPM loop is complete with cancel, search, and correct schema handling
+**Goal**: v1.0 tech debt is eliminated and the BPM loop is complete with cancel, search, versioned process definitions, and correct schema handling
 **Depends on**: Phase 5 (v1.0 complete)
-**Requirements**: PLSH-01, PLSH-02, PLSH-03, PLSH-04, PLSH-05, PLSH-06
+**Requirements**: PLSH-01, PLSH-02, PLSH-03, PLSH-04, PLSH-05, PLSH-06, PLSH-07
 **Success Criteria** (what must be TRUE):
-  1. Task detail page reads formSchema from Task.formSchema snapshot, not from live workflow context on every request
-  2. FormSchemaBuilder is used in exactly one place — both task creation and task query go through the same builder
-  3. User can select "from variable" assignment strategy in the designer and the backend AssignmentStrategy enum validates it
-  4. User can cancel a running process instance from the ProcessInstanceDetailPage and the token stops advancing
-  5. User can filter and search the process instance list by status and name, with paginated results
-  6. Task detail page visual layout matches design intent — correct spacing, card structure, and field alignment
-**Plans**: TBD
+  1. ProcessDefinition has a version number; each "deploy" (save from Designer) creates a new version; ProcessInstance is bound to a specific version — form schemas and node configs are read from the version the instance was started with, not from the latest definition
+  2. Admin can migrate running process instances to a newer definition version; migration validates that existing task form data is compatible with the new schema before applying
+  3. FormSchemaBuilder is used in exactly one place — both task creation and task query go through the same builder
+  4. User can select "from variable" assignment strategy in the designer and the backend AssignmentStrategy enum validates it
+  5. User can cancel a running process instance from the ProcessInstanceDetailPage and the token stops advancing
+  6. User can filter and search the process instance list by status and name, with paginated results
+  7. Task detail page visual layout matches design intent — correct spacing, card structure, and field alignment
+**Plans:** 4 plans
+Plans:
+- [ ] 06-01-PLAN.md — Backend versioning refactor + FormSchemaBuilder dedup + snapshot serving + FromVariable enum
+- [ ] 06-02-PLAN.md — Version history API + instance migration + Designer deploy flow
+- [ ] 06-03-PLAN.md — Process instance search and server-side pagination
+- [ ] 06-04-PLAN.md — Cancel confirmation dialog + task detail UI polish
 
 ### Phase 7: User Profile + CI/CD
 **Goal**: Users have a profile with avatar visible across the platform, and developers have automated quality gates from day one
@@ -128,7 +134,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 | 3. Completion and Claim APIs | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 4. Frontend Task Integration | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
-| 6. Process Polish | v2.0 | 0/TBD | Not started | - |
+| 6. Process Polish | v2.0 | 0/4 | Not started | - |
 | 7. User Profile + CI/CD | v2.0 | 0/TBD | Not started | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |

@@ -15,6 +15,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [ ] **PLSH-04**: User can cancel a running process instance from ProcessInstanceDetailPage
 - [ ] **PLSH-05**: User can filter process instance list by status, search by name, paginate results
 - [ ] **PLSH-06**: Task detail page UI aligned with design intent (spacing, layout polish)
+- [ ] **PLSH-07**: Version history API + instance migration endpoint + Designer deploy flow with version indicator
 
 ### User Profile
 
@@ -113,6 +114,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLSH-04 | Phase 6 | Pending |
 | PLSH-05 | Phase 6 | Pending |
 | PLSH-06 | Phase 6 | Pending |
+| PLSH-07 | Phase 6 | Pending |
 | PROF-01 | Phase 7 | Pending |
 | PROF-02 | Phase 7 | Pending |
 | PROF-03 | Phase 7 | Pending |
@@ -144,8 +146,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADMN-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 32 total
-- Mapped to phases: 32
+- v2.0 requirements: 33 total
+- Mapped to phases: 33
 - Unmapped: 0
 
 ---
