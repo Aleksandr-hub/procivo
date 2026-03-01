@@ -45,6 +45,11 @@ services:
         exclude:
             - '../src/Notification/Domain/Entity/'
 
+    App\Audit\:
+        resource: '../src/Audit/'
+        exclude:
+            - '../src/Audit/Domain/Entity/'
+
     App\Search\:
         resource: '../src/Search/'
 
@@ -171,6 +176,9 @@ services:
     App\TaskManager\Application\Port\OrganizationQueryPort:
         alias: App\TaskManager\Infrastructure\Organization\DoctrineOrganizationQueryAdapter
 
+    App\TaskManager\Application\Port\UserQueryPort:
+        alias: App\TaskManager\Infrastructure\Identity\DoctrineUserQueryAdapter
+
     App\TaskManager\Infrastructure\Storage\S3FileStorage:
         arguments:
             $endpoint: '%env(AWS_ENDPOINT)%'
@@ -208,6 +216,10 @@ services:
     App\Workflow\Infrastructure\Timer\RabbitMqTimerService:
         arguments:
             $messageBus: '@messenger.default_bus'
+
+    # === Audit Module ===
+    App\Audit\Domain\Repository\AuditLogRepositoryInterface:
+        alias: App\Audit\Infrastructure\Persistence\Doctrine\Repository\DoctrineAuditLogRepository
 
     # === Notification Module ===
     App\Notification\Domain\Repository\NotificationRepositoryInterface:

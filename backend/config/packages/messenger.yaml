@@ -25,16 +25,28 @@ framework:
             sync: 'sync://'
 
         routing:
-            # Task events → async (RabbitMQ) for notification processing
+            # Task events → async (RabbitMQ) for notification and audit processing
+            App\TaskManager\Domain\Event\TaskCreatedEvent: async
             App\TaskManager\Domain\Event\TaskAssignedEvent: async
             App\TaskManager\Domain\Event\TaskStatusChangedEvent: async
+            App\TaskManager\Domain\Event\TaskClaimedEvent: async
+            App\TaskManager\Domain\Event\TaskUnclaimedEvent: async
+            App\TaskManager\Domain\Event\TaskDeletedEvent: async
             App\TaskManager\Domain\Event\CommentAddedEvent: async
+            # Workflow events → async (RabbitMQ) for audit processing
+            # Note: ProcessCompletedEvent is intentionally NOT routed async because
+            # OnSubProcessCompleted must run synchronously to continue parent process execution
+            App\Workflow\Domain\Event\ProcessStartedEvent: async
+            App\Workflow\Domain\Event\ProcessCancelledEvent: async
             # Workflow timer → async (RabbitMQ) with DelayStamp
             App\Workflow\Infrastructure\Timer\FireTimerMessage: async
             # Workflow webhook → async (RabbitMQ) for HTTP calls
             App\Workflow\Infrastructure\Webhook\ExecuteWebhookMessage: async
             # Workflow notification node → async (non-blocking)
             App\Workflow\Domain\Event\NotificationNodeActivatedEvent: async
+            # Identity events → async (RabbitMQ) for audit processing
+            App\Identity\Domain\Event\UserRegisteredEvent: async
+            App\Identity\Domain\Event\PasswordChangedEvent: async
 
 when@test:
     framework:
