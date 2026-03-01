@@ -914,5 +914,21 @@
     "employees": "Працівники",
     "orgChart": "Оргструктура",
     "roles": "Ролі"
+  },
+  "profile": {
+    "title": "Профіль",
+    "avatar": "Аватар",
+    "changeAvatar": "Змінити аватар",
+    "avatarUploaded": "Аватар завантажено",
+    "personalInfo": "Особиста інформація",
+    "firstName": "Ім'я",
+    "lastName": "Прізвище",
+    "email": "Електронна пошта",
+    "save": "Зберегти",
+    "saved": "Профіль збережено",
+    "changePassword": "Змінити пароль",
+    "currentPassword": "Поточний пароль",
+    "newPassword": "Новий пароль",
+    "passwordChanged": "Пароль змінено"
   }
 }

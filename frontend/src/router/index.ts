@@ -27,6 +27,11 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         {
+          path: 'profile',
+          name: 'profile',
+          component: () => import('@/modules/auth/pages/ProfilePage.vue'),
+        },
+        {
           path: '',
           name: 'organizations',
           component: () => import('@/modules/organization/pages/OrganizationsPage.vue'),

@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(localStorage.getItem('access_token'))
   const refreshToken = ref<string | null>(localStorage.getItem('refresh_token'))
-  const user = ref<{ id: string; email: string; firstName: string; lastName: string } | null>(null)
+  const user = ref<{ id: string; email: string; firstName: string; lastName: string; avatarUrl?: string } | null>(null)
   const loading = ref(false)
   const initialized = ref(false)
 
@@ -83,6 +83,34 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = response.data
   }
 
+  async function updateProfile(data: { firstName: string; lastName: string; email: string }) {
+    const { default: httpClient } = await import('@/shared/api/http-client')
+    await httpClient.put('/auth/me', {
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+    })
+    await fetchUser()
+  }
+
+  async function uploadAvatar(file: File) {
+    const { default: httpClient } = await import('@/shared/api/http-client')
+    const formData = new FormData()
+    formData.append('avatar', file)
+    await httpClient.post('/auth/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    await fetchUser()
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string) {
+    const { default: httpClient } = await import('@/shared/api/http-client')
+    await httpClient.put('/auth/password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    })
+  }
+
   return {
     accessToken,
     refreshToken,
@@ -97,5 +125,8 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    updateProfile,
+    uploadAvatar,
+    changePassword,
   }
 })

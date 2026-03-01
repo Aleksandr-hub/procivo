@@ -5,6 +5,7 @@ export interface UserDTO {
   lastName: string
   status: string
   roles: string[]
+  avatarUrl?: string
 }
 
 export interface LoginRequest {

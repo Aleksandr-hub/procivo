@@ -914,5 +914,21 @@
     "employees": "Employees",
     "orgChart": "Org Chart",
     "roles": "Roles"
+  },
+  "profile": {
+    "title": "Profile",
+    "avatar": "Avatar",
+    "changeAvatar": "Change avatar",
+    "avatarUploaded": "Avatar uploaded successfully",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "save": "Save",
+    "saved": "Profile saved",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "passwordChanged": "Password changed"
   }
 }
