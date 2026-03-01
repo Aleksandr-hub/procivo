@@ -724,6 +724,8 @@
     "validationNoEnd": "Додайте хоча б один кінцевий вузол.",
     "validationMultipleStarts": "Дозволено лише один стартовий вузол.",
     "validationGatewayMinPaths": "Шлюз \"{name}\" потребує мінімум 2 вихідних шляхи.",
+    "validationTransitionNoActionKey": "Перехід від «{name}» має поля форми, але не має ключа дії — всі дії будуть мати однакову назву 'complete'",
+    "validationDuplicateActionKey": "Етап «{name}» має кілька переходів з однаковим ключем дії «{actionKey}»",
 
     "transitionProperties": "Властивості переходу",
     "transitionName": "Мітка",

@@ -724,6 +724,8 @@
     "validationNoEnd": "Add at least one End node.",
     "validationMultipleStarts": "Only one Start node is allowed.",
     "validationGatewayMinPaths": "Gateway \"{name}\" needs at least 2 outgoing paths.",
+    "validationTransitionNoActionKey": "Transition from '{name}' has form fields but no action key — all actions will default to 'complete'",
+    "validationDuplicateActionKey": "Stage '{name}' has multiple transitions with duplicate action key '{actionKey}'",
 
     "transitionProperties": "Transition Properties",
     "transitionName": "Label",

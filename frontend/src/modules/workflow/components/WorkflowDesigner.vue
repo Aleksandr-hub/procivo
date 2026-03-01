@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, markRaw, type Ref } from 'vue'
+import { ref, computed, watch, watchEffect, markRaw, type Ref, toRef } from 'vue'
 import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -51,7 +51,8 @@ const nodeTypes = markRaw({
 const nodes = ref<Node[]>([])
 const edges = ref<Edge[]>([])
 
-const { validationErrors, orphanNodeIds } = useCanvasValidation(nodes as Ref<Node[]>, edges as Ref<Edge[]>)
+const definitionRef = computed(() => props.definition)
+const { validationErrors, orphanNodeIds } = useCanvasValidation(nodes as Ref<Node[]>, edges as Ref<Edge[]>, definitionRef)
 
 const humanErrors = computed(() =>
   validationErrors.value.map((err) => t(`workflow.${err.key}`, err.params ?? {})),

@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { Node, Edge } from '@vue-flow/core'
+import type { ProcessDefinitionDetailDTO } from '@/modules/workflow/types/process-definition.types'
 
 export interface ValidationError {
   key: string
@@ -29,7 +30,11 @@ function findOrphanIds(ns: Node[], es: Edge[]): Set<string> {
   return ids
 }
 
-export function useCanvasValidation(nodes: Ref<Node[]>, edges: Ref<Edge[]>) {
+export function useCanvasValidation(
+  nodes: Ref<Node[]>,
+  edges: Ref<Edge[]>,
+  definition?: Ref<ProcessDefinitionDetailDTO | null>,
+) {
   const orphanNodeIds = computed(() => findOrphanIds(nodes.value, edges.value))
 
   const validationErrors = computed<ValidationError[]>(() => {
@@ -68,6 +73,44 @@ export function useCanvasValidation(nodes: Ref<Node[]>, edges: Ref<Edge[]>) {
       const isMerge = incoming.length >= 2
       if (!isMerge && outgoing.length > 0 && outgoing.length < 2) {
         errors.push({ key: 'validationGatewayMinPaths', params: { name: node.data.label as string } })
+      }
+    }
+
+    // Check transition-level warnings using the definition from the API
+    if (definition?.value) {
+      const transitions = definition.value.transitions
+
+      // Check for transitions with form_fields but no action_key
+      for (const transition of transitions) {
+        if (transition.form_fields.length > 0 && !transition.action_key) {
+          const sourceNode = ns.find((n) => n.id === transition.source_node_id)
+          const sourceName = sourceNode ? (sourceNode.data.label as string) : transition.source_node_id
+          errors.push({
+            key: 'validationTransitionNoActionKey',
+            params: { name: sourceName },
+          })
+        }
+      }
+
+      // Check for duplicate action_keys on transitions from the same source task node
+      const taskNodes = ns.filter((n) => n.type === 'task')
+      for (const taskNode of taskNodes) {
+        const outgoingTransitions = transitions.filter(
+          (tr) => tr.source_node_id === taskNode.id && tr.action_key !== null && tr.action_key !== '',
+        )
+        const actionKeyCounts = new Map<string, number>()
+        for (const tr of outgoingTransitions) {
+          const key = tr.action_key as string
+          actionKeyCounts.set(key, (actionKeyCounts.get(key) ?? 0) + 1)
+        }
+        for (const [actionKey, count] of actionKeyCounts) {
+          if (count > 1) {
+            errors.push({
+              key: 'validationDuplicateActionKey',
+              params: { name: taskNode.data.label as string, actionKey },
+            })
+          }
+        }
       }
     }
 
