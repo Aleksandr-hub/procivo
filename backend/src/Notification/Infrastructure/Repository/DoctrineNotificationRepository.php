@@ -40,6 +40,30 @@ final readonly class DoctrineNotificationRepository implements NotificationRepos
         );
     }
 
+    /**
+     * @return list<Notification>
+     */
+    public function findByRecipientIdAndType(string $recipientId, ?string $type, int $limit = 50, int $offset = 0): array
+    {
+        if (null === $type) {
+            return $this->findByRecipientId($recipientId, $limit, $offset);
+        }
+
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('n')
+            ->from(Notification::class, 'n')
+            ->where('n.recipientId = :recipientId')
+            ->andWhere('n.type = :type')
+            ->orderBy('n.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->setParameter('recipientId', $recipientId)
+            ->setParameter('type', $type);
+
+        /** @var list<Notification> */
+        return $qb->getQuery()->getResult();
+    }
+
     public function countUnreadByRecipientId(string $recipientId): int
     {
         return $this->entityManager->getRepository(Notification::class)->count([

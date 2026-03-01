@@ -16,6 +16,9 @@ interface NotificationRepositoryInterface
     /** @return list<Notification> */
     public function findByRecipientId(string $recipientId, int $limit = 50, int $offset = 0): array;
 
+    /** @return list<Notification> */
+    public function findByRecipientIdAndType(string $recipientId, ?string $type, int $limit = 50, int $offset = 0): array;
+
     public function countUnreadByRecipientId(string $recipientId): int;
 
     public function markAllAsReadByRecipientId(string $recipientId): void;

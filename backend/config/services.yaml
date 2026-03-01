@@ -225,6 +225,9 @@ services:
     App\Notification\Domain\Repository\NotificationRepositoryInterface:
         alias: App\Notification\Infrastructure\Repository\DoctrineNotificationRepository
 
+    App\Notification\Domain\Repository\NotificationPreferenceRepositoryInterface:
+        alias: App\Notification\Infrastructure\Repository\DoctrineNotificationPreferenceRepository
+
     App\TaskManager\Application\Command\TransitionTask\TransitionTaskHandler:
         arguments:
             $taskStateMachine: '@state_machine.task'
