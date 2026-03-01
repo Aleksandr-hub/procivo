@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: false
+  commands:
+    php-cs-fixer:
+      glob: "backend/**/*.php"
+      run: docker compose exec -T php vendor/bin/php-cs-fixer fix {staged_files} --config=.php-cs-fixer.dist.php
+      stage_fixed: true
+
+    eslint:
+      glob: "frontend/**/*.{ts,vue}"
+      run: cd frontend && npx eslint --fix {staged_files}
+      stage_fixed: true
