@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T13:45:06.520Z"
+last_updated: "2026-03-01T14:05:27.769Z"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 4
 ---
 
 # Project State
@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 Phase: 6 of 12 (Process Polish) — first v2.0 phase
 Plan: 4 of 4 (completed)
 Status: Phase Complete
-Last activity: 2026-03-01 — Completed 06-04: cancel confirmation dialog + ProgressBar fix + layout polish (PLSH-04, PLSH-06)
+Last activity: 2026-03-01 — Completed 06-02: version history API, instance migration endpoint, Designer deploy flow (PLSH-07)
 
 Progress: [████░░░░░░] 4/4 plans complete in Phase 6 (v2.0 milestone)
 
@@ -49,6 +49,7 @@ Progress: [████░░░░░░] 4/4 plans complete in Phase 6 (v2.0 m
 *v2.0 metrics reset — updated after each plan completion*
 | Phase 06-process-polish P03 | 22 | 2 tasks | 8 files |
 | Phase 06-process-polish P04 | 3 | 2 tasks | 5 files |
+| Phase 06-process-polish P02 | 14 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,8 @@ Key architectural constraints for v2.0 (from research):
 - Phase 12 (Impersonation): Custom JWT endpoint, NOT switch_user — JWT firewall is stateless
 - [Phase 06-process-polish]: Clone QueryBuilder for COUNT before LIMIT/OFFSET to avoid subquery complexity in ILIKE pagination
 - [Phase 06-process-polish]: PrimeVue DataTable page event is 0-indexed; translate to 1-indexed for backend API
+- [Phase 06-process-polish]: nodesSnapshot is { nodes, transitions } — access via snapshot['nodes'] for node ID extraction in MigrateProcessInstancesHandler
+- [Phase 06-process-polish]: Deploy button always visible in Designer — no conditional Publish/RevertToDraft pair needed since publish() works from Published state (Plan 01)
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06-03-PLAN.md — server-side search and pagination for process instances
+Stopped at: Completed 06-02-PLAN.md — version history API, instance migration endpoint, Designer deploy flow
 Resume file: None
-Next action: Execute 06-04-PLAN.md (next plan in Phase 6)
+Next action: Phase 6 complete — proceed to next phase
