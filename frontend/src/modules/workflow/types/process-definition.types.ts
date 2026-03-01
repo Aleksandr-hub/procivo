@@ -61,6 +61,13 @@ export interface ProcessDefinitionDetailDTO extends ProcessDefinitionDTO {
   transitions: TransitionDTO[]
 }
 
+export interface ProcessDefinitionVersionDTO {
+  id: string
+  version_number: number
+  published_at: string
+  published_by: string
+}
+
 export interface CreateProcessDefinitionPayload {
   name: string
   description?: string | null

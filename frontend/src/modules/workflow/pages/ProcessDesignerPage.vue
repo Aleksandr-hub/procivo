@@ -18,29 +18,24 @@ const definitionId = computed(() => route.params.definitionId as string)
 
 onMounted(async () => {
   await store.fetchDefinition(orgId.value, definitionId.value)
+  await store.fetchVersions(orgId.value, definitionId.value)
 })
 
 function goBack() {
   router.push({ name: 'process-definitions', params: { orgId: orgId.value } })
 }
 
-async function handlePublish() {
+async function handleDeploy() {
   try {
     await store.publishDefinition(orgId.value, definitionId.value)
-    await store.fetchDefinition(orgId.value, definitionId.value)
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('workflow.definitionPublished'), life: 3000 })
+    toast.add({
+      severity: 'success',
+      summary: t('workflow.deploySuccess'),
+      detail: t('workflow.deployedVersion', { version: store.currentVersion }),
+      life: 3000,
+    })
   } catch (error: unknown) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.publishFailed')), life: 5000 })
-  }
-}
-
-async function handleRevertToDraft() {
-  try {
-    await store.revertToDraft(orgId.value, definitionId.value)
-    await store.fetchDefinition(orgId.value, definitionId.value)
-    toast.add({ severity: 'success', summary: t('common.success'), detail: t('workflow.definitionRevertedToDraft'), life: 3000 })
-  } catch (error: unknown) {
-    toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.operationFailed')), life: 5000 })
+    toast.add({ severity: 'error', summary: t('common.error'), detail: getApiErrorMessage(error, t('workflow.deployFailed')), life: 5000 })
   }
 }
 
@@ -56,10 +51,10 @@ async function onDefinitionChanged() {
         <Button icon="pi pi-arrow-left" text @click="goBack" />
         <h3>{{ store.currentDefinition?.name || t('workflow.designer') }}</h3>
         <Tag v-if="store.currentDefinition" :value="t('workflow.status_' + store.currentDefinition.status)" :severity="store.currentDefinition.status === 'published' ? 'success' : 'info'" />
+        <Tag v-if="store.currentVersion !== null" :value="'v' + store.currentVersion" severity="info" />
       </div>
       <div class="header-right">
-        <Button v-if="store.currentDefinition?.status === 'published'" :label="t('workflow.revertToDraft')" icon="pi pi-pencil" severity="warn" outlined @click="handleRevertToDraft" />
-        <Button v-if="store.currentDefinition?.status === 'draft'" :label="t('workflow.publish')" icon="pi pi-check" severity="success" @click="handlePublish" />
+        <Button :label="t('workflow.deploy')" icon="pi pi-upload" severity="success" @click="handleDeploy" />
       </div>
     </div>
 

@@ -802,7 +802,12 @@
     "gatewayParallelExample": "Example: After hiring a new employee, you need to set up workspace, create accounts, and prepare documents — all at the same time. Add AND gateway that splits into 3 parallel stages. Add another AND gateway to merge them — the process waits until ALL 3 are done before continuing.",
     "gatewayInclusiveExample": "Example: After receiving an order, you might need to check inventory AND/OR arrange delivery depending on item type. OR gateway runs all paths whose conditions match.",
     "confirmCancelInstance": "Are you sure you want to cancel this process? This action cannot be undone.",
-    "cancelProcess": "Cancel process"
+    "cancelProcess": "Cancel process",
+    "deploy": "Deploy",
+    "deploySuccess": "Version deployed",
+    "deployedVersion": "Deployed version v{version}",
+    "deployFailed": "Failed to deploy",
+    "version": "Version"
   },
   "taskDetail": {
     "dueDate": "Due date",

@@ -3,6 +3,7 @@ import type { IdResponse, MessageResponse } from '@/shared/types/api.types'
 import type {
   ProcessDefinitionDTO,
   ProcessDefinitionDetailDTO,
+  ProcessDefinitionVersionDTO,
   CreateProcessDefinitionPayload,
   UpdateProcessDefinitionPayload,
   AddNodePayload,
@@ -43,6 +44,10 @@ export const processDefinitionApi = {
 
   revertToDraft(orgId: string, id: string): Promise<MessageResponse> {
     return httpClient.post(`${base(orgId)}/${id}/revert-to-draft`).then((r) => r.data)
+  },
+
+  versions(orgId: string, id: string): Promise<ProcessDefinitionVersionDTO[]> {
+    return httpClient.get(`${base(orgId)}/${id}/versions`).then((r) => r.data)
   },
 
   getStartForm(orgId: string, defId: string): Promise<{ fields: FormFieldDefinition[] }> {
