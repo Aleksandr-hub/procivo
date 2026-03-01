@@ -63,7 +63,7 @@ Plans:
   2. Migration validates that active task nodes have outgoing transitions in the target version (action_key compatibility)
   3. GET /versions returns running_instance_count per version
   4. Admin can open a Version History drawer from the Designer page, see version list with running instance counts, and trigger migration with confirmation
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 06.1-01-PLAN.md — Event-sourced migration (ProcessInstanceMigratedEvent) + action_key validation + running instance count in versions API

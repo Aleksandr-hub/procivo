@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T14:05:27.769Z"
+last_updated: "2026-03-01T14:47:40.221Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 6 of 12 (Process Polish) — first v2.0 phase
-Plan: 4 of 4 (completed)
-Status: Phase Complete
-Last activity: 2026-03-01 — Completed 06-02: version history API, instance migration endpoint, Designer deploy flow (PLSH-07)
+Phase: 06.1 (Process Definition Versioning)
+Plan: 1 of N (completed)
+Status: In Progress
+Last activity: 2026-03-01 — Completed 06.1-01: ProcessInstanceMigratedEvent, event-sourced migration, action_key validation, running instance count in versions API
 
-Progress: [████░░░░░░] 4/4 plans complete in Phase 6 (v2.0 milestone)
+Progress: [█░░░░░░░░░] 1 plan complete in Phase 06.1
 
 ## Performance Metrics
 
@@ -50,6 +50,7 @@ Progress: [████░░░░░░] 4/4 plans complete in Phase 6 (v2.0 m
 | Phase 06-process-polish P03 | 22 | 2 tasks | 8 files |
 | Phase 06-process-polish P04 | 3 | 2 tasks | 5 files |
 | Phase 06-process-polish P02 | 14 | 2 tasks | 11 files |
+| Phase 06.1-process-definition-versioning P01 | 3 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -65,10 +66,16 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 06-process-polish]: PrimeVue DataTable page event is 0-indexed; translate to 1-indexed for backend API
 - [Phase 06-process-polish]: nodesSnapshot is { nodes, transitions } — access via snapshot['nodes'] for node ID extraction in MigrateProcessInstancesHandler
 - [Phase 06-process-polish]: Deploy button always visible in Designer — no conditional Publish/RevertToDraft pair needed since publish() works from Published state (Plan 01)
+- [Phase 06.1-01]: Migration is event-sourced: ProcessInstanceMigratedEvent recorded in event store, projection updates read model — no direct SQL UPDATE in command handler
+- [Phase 06.1-01]: Action_key validation checks outgoing transitions count > 0, not exact key match — avoids per-instance current version load
 
 ### Pending Todos
 
 None.
+
+### Roadmap Evolution
+
+- Phase 06.1 inserted after Phase 6: Process Definition Versioning — version definitions on deploy, bind instances to versions, admin migration with compatibility validation (URGENT)
 
 ### Blockers/Concerns
 
@@ -77,6 +84,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06-02-PLAN.md — version history API, instance migration endpoint, Designer deploy flow
+Stopped at: Completed 06.1-01-PLAN.md — ProcessInstanceMigratedEvent, event-sourced migration, action_key validation, running instance count
 Resume file: None
-Next action: Phase 6 complete — proceed to next phase
+Next action: Continue Phase 06.1 — proceed to Plan 02
