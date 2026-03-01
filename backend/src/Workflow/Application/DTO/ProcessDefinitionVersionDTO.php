@@ -13,16 +13,18 @@ final readonly class ProcessDefinitionVersionDTO implements \JsonSerializable
         public int $versionNumber,
         public string $publishedAt,
         public string $publishedBy,
+        public int $runningInstanceCount = 0,
     ) {
     }
 
-    public static function fromEntity(ProcessDefinitionVersion $version): self
+    public static function fromEntity(ProcessDefinitionVersion $version, int $runningInstanceCount = 0): self
     {
         return new self(
             id: $version->id()->value(),
             versionNumber: $version->versionNumber(),
             publishedAt: $version->publishedAt()->format(\DateTimeInterface::ATOM),
             publishedBy: $version->publishedBy(),
+            runningInstanceCount: $runningInstanceCount,
         );
     }
 
@@ -36,6 +38,7 @@ final readonly class ProcessDefinitionVersionDTO implements \JsonSerializable
             'version_number' => $this->versionNumber,
             'published_at' => $this->publishedAt,
             'published_by' => $this->publishedBy,
+            'running_instance_count' => $this->runningInstanceCount,
         ];
     }
 }

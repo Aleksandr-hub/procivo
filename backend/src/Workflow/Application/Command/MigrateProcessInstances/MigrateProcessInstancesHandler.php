@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Workflow\Application\Command\MigrateProcessInstances;
 
 use App\Workflow\Domain\Repository\ProcessDefinitionVersionRepositoryInterface;
+use App\Workflow\Domain\Repository\ProcessInstanceRepositoryInterface;
+use App\Workflow\Domain\Service\ProcessGraph;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionVersionId;
+use App\Workflow\Domain\ValueObject\ProcessInstanceId;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -15,6 +18,7 @@ final readonly class MigrateProcessInstancesHandler
     public function __construct(
         private ProcessDefinitionVersionRepositoryInterface $versionRepository,
         private Connection $connection,
+        private ProcessInstanceRepositoryInterface $processInstanceRepository,
     ) {
     }
 
@@ -46,6 +50,9 @@ final readonly class MigrateProcessInstancesHandler
             $snapshotNodes,
         );
 
+        // Build graph from target version snapshot for action_key validation
+        $targetGraph = ProcessGraph::fromSnapshot($snapshot);
+
         // Find active token node_ids for running instances of this definition
         $runningRows = $this->connection->fetchAllAssociative(
             'SELECT id, tokens FROM workflow_process_instances_view WHERE definition_id = :definitionId AND status = :status',
@@ -65,20 +72,36 @@ final readonly class MigrateProcessInstancesHandler
                             $targetVersion->versionNumber(),
                         ));
                     }
+
+                    // Action_key validation: task nodes must have outgoing transitions in target version
+                    if ('task' === $targetGraph->nodeType((string) $token['node_id'])) {
+                        $outgoing = $targetGraph->outgoingTransitions((string) $token['node_id']);
+                        if (0 === count($outgoing)) {
+                            throw new \DomainException(\sprintf(
+                                'Cannot migrate instance %s: task node "%s" has no outgoing transitions in target version %d.',
+                                (string) $row['id'],
+                                (string) $token['node_id'],
+                                $targetVersion->versionNumber(),
+                            ));
+                        }
+                    }
                 }
             }
         }
 
-        // Update version_id in the read model for all running instances of this definition.
-        // Read model table: workflow_process_instances_view
-        // The event store (workflow_process_events) is immutable — events are never modified.
-        $this->connection->executeStatement(
-            'UPDATE workflow_process_instances_view SET version_id = :targetVersionId WHERE definition_id = :definitionId AND status = :status',
-            [
-                'targetVersionId' => $command->targetVersionId,
-                'definitionId' => $command->processDefinitionId,
-                'status' => 'running',
-            ],
-        );
+        // Event-sourced migration: load each running instance from event store,
+        // call migrateToVersion() to record the domain event, then save.
+        // save() appends ProcessInstanceMigratedEvent to event store AND dispatches to event.bus,
+        // which triggers ProcessInstanceProjection::onProcessInstanceMigrated to update read model.
+        $targetVersionIdVO = ProcessDefinitionVersionId::fromString($command->targetVersionId);
+        foreach ($runningRows as $row) {
+            $instance = $this->processInstanceRepository->findById(
+                ProcessInstanceId::fromString((string) $row['id']),
+            );
+            if (null !== $instance && $instance->isRunning()) {
+                $instance->migrateToVersion($targetVersionIdVO, $command->migratedBy);
+                $this->processInstanceRepository->save($instance);
+            }
+        }
     }
 }
