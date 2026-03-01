@@ -9,6 +9,7 @@ use App\Workflow\Domain\Event\GatewayEvaluatedEvent;
 use App\Workflow\Domain\Event\NotificationNodeActivatedEvent;
 use App\Workflow\Domain\Event\ProcessCancelledEvent;
 use App\Workflow\Domain\Event\ProcessCompletedEvent;
+use App\Workflow\Domain\Event\ProcessInstanceMigratedEvent;
 use App\Workflow\Domain\Event\ProcessStartedEvent;
 use App\Workflow\Domain\Event\SubProcessCompletedEvent;
 use App\Workflow\Domain\Event\SubProcessNodeActivatedEvent;
@@ -319,6 +320,20 @@ class ProcessInstance
         ));
     }
 
+    public function migrateToVersion(ProcessDefinitionVersionId $newVersionId, string $migratedBy): void
+    {
+        if (!$this->isRunning()) {
+            throw WorkflowExecutionException::processNotRunning($this->id->value());
+        }
+
+        $this->recordThat(new ProcessInstanceMigratedEvent(
+            processInstanceId: $this->id->value(),
+            fromVersionId: $this->versionId->value(),
+            toVersionId: $newVersionId->value(),
+            migratedBy: $migratedBy,
+        ));
+    }
+
     public function getToken(TokenId $tokenId): Token
     {
         $key = $tokenId->value();
@@ -458,6 +473,7 @@ class ProcessInstance
             $event instanceof GatewayEvaluatedEvent => null, // informational, no state change
             $event instanceof ProcessCompletedEvent => $this->applyProcessCompleted(),
             $event instanceof ProcessCancelledEvent => $this->applyProcessCancelled(),
+            $event instanceof ProcessInstanceMigratedEvent => $this->applyMigrated($event),
             default => null,
         };
     }
@@ -569,5 +585,10 @@ class ProcessInstance
                 $token->cancel();
             }
         }
+    }
+
+    private function applyMigrated(ProcessInstanceMigratedEvent $event): void
+    {
+        $this->versionId = ProcessDefinitionVersionId::fromString($event->toVersionId);
     }
 }

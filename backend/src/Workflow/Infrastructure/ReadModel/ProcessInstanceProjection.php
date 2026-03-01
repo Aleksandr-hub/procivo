@@ -6,6 +6,7 @@ namespace App\Workflow\Infrastructure\ReadModel;
 
 use App\Workflow\Domain\Event\ProcessCancelledEvent;
 use App\Workflow\Domain\Event\ProcessCompletedEvent;
+use App\Workflow\Domain\Event\ProcessInstanceMigratedEvent;
 use App\Workflow\Domain\Event\ProcessStartedEvent;
 use App\Workflow\Domain\Event\TaskNodeActivatedEvent;
 use App\Workflow\Domain\Event\TimerFiredEvent;
@@ -119,6 +120,14 @@ final readonly class ProcessInstanceProjection
         $this->connection->update(self::TABLE, [
             'status' => 'cancelled',
             'cancelled_at' => $event->occurredAt()->format('Y-m-d H:i:s.u'),
+        ], ['id' => $event->processInstanceId]);
+    }
+
+    #[AsMessageHandler(bus: 'event.bus')]
+    public function onProcessInstanceMigrated(ProcessInstanceMigratedEvent $event): void
+    {
+        $this->connection->update(self::TABLE, [
+            'version_id' => $event->toVersionId,
         ], ['id' => $event->processInstanceId]);
     }
 

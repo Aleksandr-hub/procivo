@@ -9,6 +9,7 @@ use App\Workflow\Domain\Event\GatewayEvaluatedEvent;
 use App\Workflow\Domain\Event\NotificationNodeActivatedEvent;
 use App\Workflow\Domain\Event\ProcessCancelledEvent;
 use App\Workflow\Domain\Event\ProcessCompletedEvent;
+use App\Workflow\Domain\Event\ProcessInstanceMigratedEvent;
 use App\Workflow\Domain\Event\ProcessStartedEvent;
 use App\Workflow\Domain\Event\TaskNodeActivatedEvent;
 use App\Workflow\Domain\Event\TimerFiredEvent;
@@ -133,6 +134,12 @@ final class EventSerializer
                 'node_id' => $event->nodeId,
                 'token_id' => $event->tokenId,
                 'child_process_instance_id' => $event->childProcessInstanceId,
+            ],
+            $event instanceof ProcessInstanceMigratedEvent => [
+                'process_instance_id' => $event->processInstanceId,
+                'from_version_id' => $event->fromVersionId,
+                'to_version_id' => $event->toVersionId,
+                'migrated_by' => $event->migratedBy,
             ],
             default => throw new \RuntimeException(\sprintf('Unknown event type: %s', $event::class)),
         };
@@ -263,6 +270,13 @@ final class EventSerializer
                 nodeId: $payload['node_id'],
                 tokenId: $payload['token_id'],
                 childProcessInstanceId: $payload['child_process_instance_id'],
+                occurredAt: $occurredAt,
+            ),
+            'workflow.process_instance.migrated' => new ProcessInstanceMigratedEvent(
+                processInstanceId: $payload['process_instance_id'],
+                fromVersionId: $payload['from_version_id'],
+                toVersionId: $payload['to_version_id'],
+                migratedBy: $payload['migrated_by'],
                 occurredAt: $occurredAt,
             ),
             default => throw new \RuntimeException(\sprintf('Unknown event type: %s', $eventType)),
