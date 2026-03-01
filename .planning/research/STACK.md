@@ -1,108 +1,315 @@
 # Stack Research
 
-**Domain:** BPM Workflow-Task Integration (Procivo)
-**Researched:** 2026-02-28
-**Confidence:** HIGH — core stack already installed and verified; recommendations are additive or pattern-based, verified against official Symfony 8 and Vue 3 docs.
+**Domain:** BPM Platform — Production-Ready Features (v2.0 Milestone)
+**Researched:** 2026-03-01
+**Confidence:** HIGH for most items — verified against official docs, packagist, and existing codebase
 
 ---
 
 ## Context: What Is Already Installed
 
-This is a subsequent-milestone research. The stack is fixed. The question is: what patterns, libraries, and tools to USE from the existing stack for the new features.
+This is a subsequent-milestone research. The core stack is fixed. This document covers ONLY what needs to be added or changed for v2.0 features.
 
-**Backend (already in composer.json):**
-- `symfony/expression-language: 8.0.*` — already installed
-- `symfony/validator: 8.0.*` — already installed (via framework-bundle)
-- `symfony/workflow: 8.0.*` — already installed
-- `doctrine/orm: ^3.6` with PostgreSQL — `json` type used for JSONB columns
-- `symfony/messenger: 8.0.*` — 3-bus CQRS setup (command.bus, query.bus, event.bus)
+**Already installed (do not re-add):**
 
-**Frontend (already in package.json):**
-- `primevue: ^4.5.4` + `@primevue/themes: ^4.5.4`
-- `zod: ^4.3.6` — schema validation library
-- `pinia: ^3.0.4` — state management
-- `vue-router: ^5.0.2`
-- `vue-i18n: ^12.0.0-alpha.3`
-- `axios: ^1.13.5`
+Backend (`/Users/leleka/Projects/procivo/backend/composer.json`):
+- `symfony/mailer: 8.0.*` — already in composer.json
+- `symfony/amqp-messenger: 8.0.*` — already in composer.json
+- `symfony/messenger: 8.0.*` — already in composer.json, 3-bus CQRS setup
+- `symfony/mercure-bundle: ^0.4.2` — already in composer.json
+- `symfony/security-bundle: 8.0.*` — already in composer.json
+- `league/flysystem-aws-s3-v3: ^3.32` — already in composer.json
+- `aws/aws-sdk-php: ^3.x` — already installed as **transitive dependency** via flysystem-aws-s3-v3 (confirmed: `/vendor/aws/aws-sdk-php` exists, latest 3.371.3 as of 2026-02-27)
+- `symfony/workflow: 8.0.*` — already in composer.json
+- `symfony/expression-language: 8.0.*` — already in composer.json
 
-**What is already built for this milestone:**
-- `ExpressionEvaluator` service using `symfony/expression-language` — evaluates gateway conditions
-- `WorkflowEngine.executeAction()` — handles action-based task completion
-- `FormFieldCollector` service — aggregates shared + transition-specific fields
-- `ExecuteTaskActionHandler` — validates required fields, merges formData into ProcessInstance.variables
-- `GetTaskWorkflowContextHandler` — returns form_schema with shared_fields + actions
-- `AssignmentResolver` service — resolves by_role / by_department strategies
-- `DynamicFormField.vue` — renders text, number, date, select, checkbox, textarea, employee fields
-- `ActionFormDialog.vue` — dialog with shared + action-specific field rendering + client validation
-- `ClaimTask` / `UnclaimTask` commands (new, untracked)
+Frontend (`/Users/leleka/Projects/procivo/frontend/package.json`):
+- `primevue: ^4.5.4` — already in package.json (Chart component built-in, needs chart.js added)
+- `pinia: ^3.0.4` — already in package.json
+- `zod: ^4.3.6` — already in package.json
+- `axios: ^1.13.5` — already in package.json
+
+---
+
+## What Needs to Be Added for v2.0
+
+### Backend — New Packages
+
+| Package | Version | Feature | Why |
+|---------|---------|---------|-----|
+| `symfony/scheduler` | `8.0.*` | Timer node execution | Built-in Symfony component for recurring/scheduled dispatch. Required to implement timer node execution in the Workflow Engine. Dispatcher creates `RecurringMessage` or dispatches via `ScheduledStamp`. Replaces need for external cron jobs. [HIGH confidence — official Symfony 8 docs] |
+| `knplabs/knp-paginator-bundle` | `^6.6` | Paginated lists (audit log, task history, notifications) | Standard Symfony pagination bundle for Doctrine queries. Provides `PaginatorInterface` compatible with Doctrine's `QueryBuilder`. Supports LIMIT/OFFSET, total count, page calculation. Used for audit log timeline and notification list. [MEDIUM confidence — packagist verified, widely used] |
+
+**Note on `aws/aws-sdk-php`:** Already available through `league/flysystem-aws-s3-v3`. No need to add directly. For presigned PUT URLs (avatar upload), use `$s3Client->createPresignedRequest()` directly — the S3Client is injectable via Symfony DI. [HIGH confidence — aws docs verified]
+
+**Note on `symfony/mailer`:** Already installed. For async email via RabbitMQ: route `Symfony\Component\Mailer\Messenger\SendEmailMessage` to the existing `amqp` transport in `messenger.yaml`. Zero new packages needed. [HIGH confidence — Symfony docs verified]
+
+**Note on `symfony/security-bundle` switch_user:** Already installed. However, `switch_user` firewall listener is **NOT compatible with stateless JWT authentication** (per official Symfony docs). See impersonation section below for the workaround. [HIGH confidence — official Symfony docs]
+
+### Frontend — New Packages
+
+| Package | Version | Feature | Why |
+|---------|---------|---------|-----|
+| `chart.js` | `^4.4.9` | Dashboard charts | PrimeVue 4 Chart component is a thin wrapper around Chart.js — it does NOT bundle Chart.js. Must be installed separately. PrimeVue docs: "Chart component uses Chart.js underneath so it needs to be installed as a dependency." [HIGH confidence — PrimeVue 4 official docs] |
+
+### Development Tools — New
+
+| Tool | Type | Feature | Why |
+|------|------|---------|-----|
+| `lefthook` | devDependency (npm) or global binary | Pre-commit hooks | Language-agnostic Git hook manager written in Go. Runs PHP CS Fixer, ESLint, TypeScript check, PHPStan on staged files. Preferred over Husky because: no Node.js dependency on PHP-only machines, parallel execution, single YAML config covering both backend and frontend. Config in `lefthook.yml` at repo root. [MEDIUM confidence — multiple sources, actively maintained 2026] |
+| `shivammathur/setup-php@v2` | GitHub Actions marketplace | CI/CD PHP setup | Standard action for PHP 8.4 in GitHub Actions. Supports extensions, composer, PHP version matrix. Used in every Symfony CI/CD tutorial 2025-2026. [HIGH confidence — widely documented] |
+| `actions/cache@v4` | GitHub Actions marketplace | CI/CD Composer cache | Cache `~/.composer/cache` keyed by `composer.lock` hash to avoid re-downloading packages on each run. [HIGH confidence — official GitHub Actions docs] |
 
 ---
 
 ## Recommended Stack
 
-### Core Backend Technologies
+### Core Backend Technologies (New for v2.0)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| `symfony/expression-language` | 8.0.* | XOR/Inclusive gateway condition evaluation | Already installed. Native sandbox — expressions can only access explicitly provided variables. Supports `==`, `!=`, `>`, `<`, `>=`, `<=`, `in`, `not in`, `contains`, `starts with`, `ends with`, `matches` (regex), `and`/`or`/`not`, ternary, null-coalescing `??`, null-safe `?.`. Full BPM expression needs covered without exposing PHP execution. Verified against official Symfony 8 docs. [HIGH confidence] |
-| `symfony/validator` | 8.0.* | Dynamic form field validation on CompleteTask | Already installed. Use `Assert\Collection` built programmatically from a form field schema array — supports `Required`, `Optional`, `NotBlank`, `Type`, `Length`, `Range`, `Regex`, `Email`. The pattern: build `Assert\Collection(['fields' => $fields])` from `formFields[]` schema, call `$validator->validate($data, $constraint)`. No additional library needed. Verified against official Symfony 8 docs. [HIGH confidence] |
-| Doctrine ORM `json` type | 3.6 | Store form schemas, process variables as JSONB in PostgreSQL | Already in use (`form_fields`, `config`, `nodesSnapshot`). Doctrine `json` type maps to PostgreSQL `jsonb` — stored as binary JSON with full indexing capability. Use `json` type in XML mapping for `form_schema` on Task, `variables` on ProcessInstance. [HIGH confidence] |
-| `symfony/messenger` | 8.0.* | CQRS command/query/event routing | Already configured with 3 buses. Pattern: `ExecuteTaskActionCommand` → command.bus, `GetTaskWorkflowContextQuery` → query.bus, `TaskNodeActivatedEvent` → event.bus. Use `#[AsMessageHandler(bus: 'command.bus')]`. Already proven in codebase. [HIGH confidence] |
+| `symfony/scheduler` | `8.0.*` | Timer node execution in WorkflowEngine | Symfony 8 built-in component for managing scheduled/recurring task dispatch. For Timer nodes: when a Timer node is activated, persist its target fire time, then have a Scheduler `RecurringMessage` poll for overdue timers every minute and dispatch `TimerFiredCommand`. Uses Symfony Messenger transport underneath — integrates naturally with existing 3-bus CQRS setup. Does not require external cron. [HIGH confidence — symfony.com/doc/current/scheduler.html verified] |
+| Symfony Messenger `DelayStamp` | `8.0.*` (already installed) | Timer node — single fire delay | For known fixed durations (e.g., "wait 3 days"), dispatch `TimerFiredCommand` with `new DelayStamp($milliseconds)` to the `async` AMQP transport. RabbitMQ Messenger creates a TTL delay queue with DLX automatically via `auto_setup: true` — no plugin needed. For absolute date timers ("fire at 2026-04-15"), use Scheduler poll approach instead. [HIGH confidence — Symfony Messenger docs, DLX/TTL mechanism verified] |
+| Symfony Messenger `SendEmailMessage` routing | `8.0.*` (already installed) | Async email notifications | `symfony/mailer` already installed. Route `Symfony\Component\Mailer\Messenger\SendEmailMessage` to the existing `amqp` transport in `messenger.yaml`. Emails dispatched via `$mailer->send()` automatically go async. Zero new packages. [HIGH confidence — Symfony Mailer async docs verified] |
+| `aws/aws-sdk-php` via flysystem | `^3.371` (transitive) | Avatar presigned upload URL | `aws/aws-sdk-php` is already installed as a transitive dependency. Use `S3Client::createPresignedRequest(PutObject command, '+15 minutes')` to generate upload URLs. Frontend uploads directly to S3/LocalStack — backend never handles binary data. [HIGH confidence — aws PHP SDK v3 docs, `vendor/aws/` confirmed present] |
 
-### Core Frontend Technologies
+### Core Frontend Technologies (New for v2.0)
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| PrimeVue 4 components | 4.5.4 | Dynamic form field rendering | Already installed. Use `InputText`, `InputNumber`, `DatePicker`, `Select`, `Checkbox`, `Textarea`, `Dialog` — all used in `DynamicFormField.vue` and `ActionFormDialog.vue`. No new UI library. `Dialog` with `modal` prop for `ActionFormDialog`. [HIGH confidence] |
-| Zod 4 | 4.3.6 | Frontend schema validation for dynamic form fields | Already installed. Build schema dynamically from `FormFieldDefinition[]`: `z.object({...})` where each field maps to a Zod type (`z.string()`, `z.number()`, `z.coerce.date()`, etc.). Zod 4.3.x added `z.fromJSONSchema()` for converting JSON Schema to Zod — useful if backend starts returning JSON Schema format. Use `.optional()` vs `.min(1)` for required vs optional string fields. [HIGH confidence] |
-| Pinia 3 | 3.0.4 | Task store — form schema caching, action submission state | Already installed. Pattern: `task.store.ts` fetches `TaskDetailDTO` including `workflow_context.form_schema`, stores locally. Action submission: `submittingAction: boolean` flag + `executeAction(payload)` action. [HIGH confidence] |
+| `chart.js` | `^4.4.9` | Dashboard bar/line/doughnut charts | PrimeVue 4 `<Chart>` component wraps Chart.js but does NOT bundle it. Must install separately. Chart.js 4.x is the stable current major (v5 alpha exists but not stable). PrimeVue Chart supports: Bar, Line, Doughnut, Pie, Radar, PolarArea. For dashboard: use Bar (tasks per status), Line (process completions over time), Doughnut (task distribution). [HIGH confidence — primevue.org/chart/ docs verified] |
 
 ### Supporting Backend Libraries
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| `symfony/expression-language` ExpressionFunctionProviderInterface | 8.0.* | Custom functions for BPM expressions | When gateway conditions need domain functions like `hasRole()`, `daysSince()`, `inList()`. Create `BpmExpressionProvider implements ExpressionFunctionProviderInterface` and register via constructor. Only needed if base operators are insufficient — for this milestone, base operators (`==`, `in`, `and`/`or`) cover all cases. [HIGH confidence] |
-| `symfony/expression-language` caching | 8.0.* | Cache compiled expressions for performance | When process definitions have many gateways executing frequently. Use `RedisAdapter` (already have Redis 8 in stack). Pass to `new ExpressionLanguage($cache)`. LOW priority for pet project pace — defer until performance becomes an issue. [MEDIUM confidence] |
-| `Assert\Collection` (symfony/validator) | 8.0.* | Dynamic form data validation | Primary pattern for validating `POST /tasks/{id}/complete` body. Build `Assert\Collection(['fields' => $constraintMap])` programmatically from `FormFieldDefinition[]`. Use `allowExtraFields: true` (user may submit additional data), `allowMissingFields: false` for required fields. Verified against Symfony 8 docs. [HIGH confidence] |
+| `knplabs/knp-paginator-bundle` | `^6.6` | Pagination for audit log, notification inbox | When implementing `GET /audit-logs?page=N` and `GET /notifications?page=N`. Wraps Doctrine `QueryBuilder` — call `$paginator->paginate($query, $page, $limit)`. Returns `PaginationInterface` with total count and page data. Alternative: manual LIMIT/OFFSET with COUNT query — acceptable for v2.0 at pet project scale, but Paginator is 3 lines vs 20. [MEDIUM confidence — packagist, widely used in Symfony ecosystem] |
+| Doctrine `json` type (already in use) | `3.6.*` | `audit_log.context` JSONB column | Already used throughout project. `audit_log` table needs a `context` JSONB column for storing event payload (old/new values, actor info). Use existing pattern. No new library. [HIGH confidence] |
 
 ### Supporting Frontend Libraries
 
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
-| `zod` (dynamic schema building) | 4.3.6 | Build validation schema from API-returned `FormFieldDefinition[]` | In `ActionFormDialog.vue` and `TaskDetailContent.vue`. Build `z.object()` dynamically: iterate `formField[]`, map `type` to Zod primitive, apply `.min(1)` for required text, `.nullable()` for optional. Call `schema.safeParse(formData)` before emitting submit event. Already installed — zero-cost addition. [HIGH confidence] |
-| VeeValidate | NOT recommended | Form validation library | Do NOT add — overkill given existing `DynamicFormField.vue` + manual validation pattern. The existing approach (iterate fields, check required, collect errors) is 30 lines and works. VeeValidate adds ~40KB bundle, composable complexity, and PrimeVue integration friction. Use Zod `safeParse` instead for type-safe error messages. [HIGH confidence] |
+| PrimeVue `<Chart>` component (already installed) | `4.5.4` | Chart rendering wrapper | Already available in PrimeVue 4 — just import `import { Chart } from 'primevue'`. Requires `chart.js` installed separately. Provides Vue-idiomatic props (`type`, `data`, `options`), reactive updates. Use in `DashboardPage.vue`. [HIGH confidence] |
+| PrimeVue `<FileUpload>` component (already installed) | `4.5.4` | Avatar upload UI | PrimeVue 4 `<FileUpload>` supports `customUpload` mode — intercept the upload event, POST to backend for presigned URL, then PUT binary to S3 directly from browser. No server round-trip for binary data. [HIGH confidence] |
+| PrimeVue `<Badge>` + `<OverlayPanel>` (already installed) | `4.5.4` | Notification bell icon | `<Badge>` for unread count overlay on bell icon. `<OverlayPanel>` for notification dropdown. Both already in PrimeVue 4. No new library. [HIGH confidence] |
 
 ### Development Tools
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| PHPStan 2.1 | Static analysis | Already configured. Add `@param list<array<string, mixed>> $formFields` docblocks to `FormFieldCollector` and `validateFormData` — PHPStan will catch mixed-type array access. |
-| PHP CS Fixer 3.94 | Code style | Already configured. All new handlers/services follow existing camelCase test method style. |
-| `symfony/maker-bundle` | Scaffolding | Already installed. Use `make:migration` after adding `form_schema` JSONB column to `task_manager_tasks`. |
-| Vue DevTools 8 | Frontend debugging | Already in devDependencies (`vite-plugin-vue-devtools`). Enable to inspect Pinia store state during form submission debugging. |
+| `lefthook` | Pre-commit hooks — runs CS Fixer + ESLint on staged files | Install via `npm install --save-dev lefthook` or `brew install lefthook`. Config in `lefthook.yml` at repo root. Runs PHP CS Fixer (`php-cs-fixer fix --dry-run`) on staged `.php` files, ESLint + TypeScript on staged `.ts/.vue` files. Faster than Husky (Go binary, parallel execution). [MEDIUM confidence] |
+| `shivammathur/setup-php@v2` | GitHub Actions — PHP 8.4 environment setup | Use in `.github/workflows/ci.yml`. Installs PHP 8.4, composer, required extensions (pgsql, amqp, redis). Standard action for Symfony CI in 2025-2026. [HIGH confidence] |
+| `actions/cache@v4` | GitHub Actions — Composer and npm cache | Cache key: `${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}`. Reduces CI time from ~3 min to ~45 sec. [HIGH confidence] |
+| `ramsey/composer-install` | GitHub Actions — composer install with built-in caching | Alternative to manual `actions/cache` for composer. Single action handles cache key management. Either approach works. [MEDIUM confidence] |
 
 ---
 
 ## Installation
 
-No new packages required for the core milestone features. All libraries are already installed.
+### Backend
 
 ```bash
-# Backend — nothing to add
-# All needed: symfony/expression-language, symfony/validator, symfony/messenger — already in composer.json
+# New packages only
+cd /Users/leleka/Projects/procivo/backend
 
-# Frontend — nothing to add
-# All needed: primevue, zod, pinia — already in package.json
+# Timer node execution
+composer require symfony/scheduler:"8.0.*"
 
-# Optional: if ExpressionLanguage caching becomes needed (defer)
-# composer require symfony/cache  # for RedisAdapter
-# (Already likely transitive dep — check with: composer show symfony/cache)
+# Pagination (optional — can defer to when lists are implemented)
+composer require knplabs/knp-paginator-bundle:"^6.6"
+
+# Note: aws/aws-sdk-php is ALREADY installed via league/flysystem-aws-s3-v3
+# Note: symfony/mailer is ALREADY installed
+# Note: symfony/scheduler may already be a transitive dep — check first:
+composer show symfony/scheduler 2>/dev/null || echo "not installed"
 ```
+
+### Frontend
 
 ```bash
-# Check if symfony/cache is already available
-composer show symfony/cache 2>/dev/null || echo "not installed"
+# New packages only
+cd /Users/leleka/Projects/procivo/frontend
+
+# Chart.js (required by PrimeVue Chart component)
+npm install chart.js
+
+# Pre-commit hooks
+npm install --save-dev lefthook
 ```
+
+### GitHub Actions (no npm/composer install)
+
+Create `.github/workflows/ci.yml` using:
+- `actions/checkout@v4`
+- `shivammathur/setup-php@v2` (PHP 8.4, extensions: pdo_pgsql, amqp, redis, intl)
+- `actions/cache@v4` (composer.lock hash key)
+- `actions/setup-node@v4` (Node 24)
+- `actions/cache@v4` (package-lock.json hash key)
+
+---
+
+## Feature-Specific Integration Notes
+
+### Audit Logging (async domain event → audit_log table)
+
+**Pattern:** Existing `event.bus` already routes domain events. Add `AuditLogSubscriber` that listens on the event bus and persists to `audit_log` table.
+
+```yaml
+# messenger.yaml addition
+routing:
+  'App\Shared\Domain\Event\AuditableEventInterface': audit_transport
+```
+
+**No new library needed.** Use existing Doctrine + Messenger async pattern. The `audit_log` table needs: `id`, `event_type`, `actor_id`, `entity_type`, `entity_id`, `context` (JSONB), `occurred_at`.
+
+### Notification System (in-app + email)
+
+**In-app:** Existing `symfony/mercure-bundle` already installed. Mercure hub at port 3000. `NotificationCreatedEvent` → event.bus → `MercureNotificationPublisher` → browser.
+
+**Email:** `symfony/mailer` already installed. Route `SendEmailMessage` to `amqp` transport:
+```yaml
+# messenger.yaml addition
+routing:
+  'Symfony\Component\Mailer\Messenger\SendEmailMessage': async
+```
+
+**No new Symfony bundle needed.** The existing `Notification` module (confirmed in PROJECT.md: "Notifications module with Mercure real-time updates — Phase 3") just needs to be extended.
+
+### Dashboard Charts
+
+**PrimeVue Chart component** is already available in PrimeVue 4. Only `chart.js` npm package needs to be added. For dashboard data, create a `GET /dashboard/summary` query endpoint returning aggregated counts:
+- tasks by status
+- active processes count
+- recent completions (7/30 day window)
+
+### User Profile + Avatar Upload (S3)
+
+**Backend approach:**
+1. `POST /users/me/avatar/upload-url` → returns presigned PUT URL (15 min expiry) + final CDN URL
+2. Frontend PUTs binary directly to S3/LocalStack
+3. `POST /users/me/avatar/confirm` → marks avatar as active in DB
+
+```php
+// S3Client is already injectable via Flysystem's registered service
+// Or register directly:
+$s3 = new S3Client(['endpoint' => getenv('AWS_ENDPOINT'), 'region' => 'us-east-1', ...]);
+$cmd = $s3->getCommand('PutObject', ['Bucket' => $bucket, 'Key' => $key]);
+$request = $s3->createPresignedRequest($cmd, '+15 minutes');
+$presignedUrl = (string) $request->getUri();
+```
+
+**No new Symfony bundle needed.** `aws/aws-sdk-php` is already present in vendor.
+
+### Timer Node Execution
+
+**Strategy:** Two-part approach depending on timer type.
+
+**Duration timers** (e.g., "wait 2 hours"): Dispatch `TimerFiredCommand` with `DelayStamp`:
+```php
+$this->commandBus->dispatch(
+    new TimerFiredCommand($tokenId, $nodeId),
+    [new DelayStamp($durationMs)]
+);
+```
+Symfony Messenger AMQP transport automatically creates a TTL delay queue with Dead Letter Exchange — no plugin needed. [HIGH confidence — built-in since Symfony 4.2, verified for 4.x/RabbitMQ 4.2]
+
+**Date timers** (e.g., "fire at 2026-04-15 09:00"): Use `symfony/scheduler`:
+```php
+// ScheduleProvider: check for overdue timer tokens every minute
+RecurringMessage::every('1 minute', new CheckOverdueTimersMessage())
+```
+[HIGH confidence — scheduler.html official docs]
+
+**Critical note on RabbitMQ delayed plugin:** The `rabbitmq-delayed-message-exchange` plugin was **archived on January 29, 2026** and will break when RabbitMQ drops Mnesia (planned 4.3 or 4.4). Do NOT use it. Symfony's built-in AMQP delay queue mechanism is the correct approach. [HIGH confidence — official rabbitmq/rabbitmq-delayed-message-exchange GitHub, archived status verified]
+
+### Super Admin Impersonation
+
+**Problem:** Symfony's built-in `switch_user` firewall listener is **incompatible with stateless JWT authentication** (per official Symfony 8 docs). It relies on session state, which JWT APIs don't have.
+
+**Solution — Custom JWT Impersonation Endpoint:**
+```
+POST /admin/impersonate
+Body: { "userId": "uuid" }
+Headers: Authorization: Bearer <super-admin-JWT>
+Response: { "token": "<impersonated-user-JWT>", "originalToken": "<super-admin-JWT>" }
+```
+
+Implementation:
+1. `ROLE_SUPER_ADMIN` guard on endpoint
+2. Load target `User` entity
+3. Use `lexik/jwt-authentication-bundle`'s `JWTManager::create($user)` to generate a short-lived token
+4. Add custom `impersonated_by` claim to JWT payload
+5. Frontend stores both tokens, shows "Exit Impersonation" banner
+
+**Do NOT use `switch_user: true` in `security.yaml`** — it will silently fail with JWT stateless firewalls.
+
+[HIGH confidence — official Symfony impersonating_user.html docs clearly state incompatibility with stateless auth; LexikJWT issue #652 and #1196 confirm no native support]
+
+### CI/CD Pipeline (GitHub Actions)
+
+**Recommended workflow structure** (`.github/workflows/ci.yml`):
+
+```yaml
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+      redis:
+        image: redis:8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, redis, intl, amqp
+      - uses: actions/cache@v4  # composer cache
+      - run: composer install --no-dev --optimize-autoloader
+      - run: vendor/bin/php-cs-fixer check
+      - run: vendor/bin/phpstan analyse
+      - run: vendor/bin/phpunit
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - uses: actions/cache@v4  # npm cache
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm run lint
+      - run: npm run test:unit
+```
+
+[HIGH confidence — shivammathur/setup-php@v2 is the de-facto standard, multiple 2025-2026 sources]
+
+### Pre-commit Hooks (lefthook)
+
+**lefthook.yml** at repo root:
+```yaml
+pre-commit:
+  parallel: true
+  commands:
+    php-cs-fixer:
+      glob: "backend/**/*.php"
+      run: cd backend && vendor/bin/php-cs-fixer fix {staged_files} --config=.php-cs-fixer.php
+    eslint:
+      glob: "frontend/**/*.{ts,vue}"
+      run: cd frontend && npx eslint {staged_files} --fix
+    typescript:
+      glob: "frontend/**/*.{ts,vue}"
+      run: cd frontend && npm run type-check
+
+commit-msg:
+  commands:
+    conventional:
+      run: echo "{1}" | grep -qE "^(feat|fix|chore|docs|refactor|test|style|perf|ci)(\(.+\))?: .+" || (echo "Commit message must follow conventional commits" && exit 1)
+```
+
+[MEDIUM confidence — lefthook docs, PHP CS Fixer staged files support verified]
 
 ---
 
@@ -110,56 +317,26 @@ composer show symfony/cache 2>/dev/null || echo "not installed"
 
 | Recommended | Alternative | Why Not |
 |-------------|-------------|---------|
-| `symfony/expression-language` (already installed) | Custom simple condition parser | ExpressionLanguage provides full sandbox, linting (`$el->lint($expr, [])`), operator richness (`in`, `matches`, `starts with`), and PSR-6 caching. A custom parser would need to re-implement all of this. ExpressionLanguage is what Symfony Workflow's guard expressions use internally. [HIGH confidence] |
-| `Assert\Collection` (programmatic) | Separate `FormValidator` domain service with custom rules | `Assert\Collection` is built-in, tested, returns `ConstraintViolationList` with field paths. Custom service would duplicate this logic. The existing `ExecuteTaskActionHandler::validateFormData()` is already a minimal custom validator — enhance it to use `Assert\Collection` for type + regex + range validation beyond just required-check. [HIGH confidence] |
-| Zod (already installed) for frontend validation | VeeValidate | VeeValidate is a form framework, not a validation library. Zod is headless — works with any UI. Given `DynamicFormField.vue` renders fields independently and `ActionFormDialog.vue` collects values in `formData: ref<Record<string, unknown>>`, Zod `safeParse()` fits perfectly without refactoring the component model. |
-| Pinia store action for `executeAction` | Direct API call in component | Store centralizes loading state, error handling, and optimistic updates. Existing `task.store.ts` already has the pattern — add `executeAction(taskId, payload)` action there. Components remain thin. |
-| Doctrine `json` type | Separate `form_schema` table | Separate table is over-engineering. Form schemas are part of task context, always fetched with the task, never queried independently. JSONB column on task or accessed via `WorkflowTaskLink` join is the right granularity. Decision already validated: the project uses `json` type extensively. |
+| `symfony/scheduler` for timer nodes | External cron job calling Symfony console command | Scheduler runs inside Symfony process, uses Messenger transport, no OS-level cron dependency, testable, visible in Messenger workers. External cron adds operational complexity. |
+| Symfony Messenger built-in AMQP delay (DLX/TTL) | `rabbitmq-delayed-message-exchange` plugin | Plugin archived January 2026, incompatible with RabbitMQ 4.3+ (Khepri migration). Built-in DLX/TTL is production-ready, uses standard RabbitMQ features, no plugin dependency. |
+| Custom JWT impersonation endpoint | Symfony `switch_user` firewall | `switch_user` is session-based and explicitly documented as incompatible with stateless JWT auth. Custom endpoint gives full control over token claims and expiry. |
+| `lefthook` for pre-commit hooks | Husky + lint-staged | Lefthook is written in Go (faster), language-agnostic (no Node.js runtime needed for PHP devs), single YAML config for polyglot repo (PHP + TypeScript), parallel execution out of the box. Husky still valid but Lefthook is the 2025-2026 recommendation for multi-language projects. |
+| `chart.js@^4.4.9` with PrimeVue Chart wrapper | vue-chartjs or react-chartjs-2 | PrimeVue 4's `<Chart>` component IS the Vue wrapper — no need for vue-chartjs. Using vue-chartjs would duplicate the wrapper layer. Chart.js 4.x is stable; v5 alpha not ready for production. |
+| `knplabs/knp-paginator-bundle` | Manual LIMIT/OFFSET | For v2.0 at pet project scale, manual pagination is acceptable. KnpPaginator is the standard choice and reduces boilerplate. Can defer to when lists are actually implemented. |
 
 ---
 
-## What NOT to Use
+## What NOT to Add
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| Formik / React Hook Form patterns | Project is Vue 3 + PrimeVue, not React. Figma prototype uses React+shadcn — adapt UI intent to PrimeVue components, not the React library choices. | PrimeVue `Dialog` + `DynamicFormField.vue` pattern (already built) |
-| API Platform | Project decision: manual REST controllers for learning. Using API Platform would require significant re-architecture. | Custom Symfony controllers (already the pattern) |
-| SpEL (Spring Expression Language) patterns | PHP ecosystem equivalent is Symfony ExpressionLanguage. SpEL docs/tutorials don't translate. | `symfony/expression-language` — fully documented for PHP 8.4 |
-| JSON Schema (draft-07) as form_schema format | Adds complexity without benefit for this milestone. `FormFieldDefinition[]` (existing TypeScript type) is simpler and already consumed by `DynamicFormField.vue`. Zod 4.3 `z.fromJSONSchema()` exists but is premature optimization. | Keep existing `FormFieldDefinition` interface as the schema format |
-| Symfony Form component | Designed for server-rendered HTML forms with CSRF. Procivo uses a JSON REST API with Vue frontend — Symfony Forms add zero value and significant complexity. | Symfony Validator (`Assert\Collection`) for backend validation, Zod for frontend |
-| Global ExpressionLanguage service (singleton) | Current `ExpressionEvaluator` creates `new ExpressionLanguage()` in constructor without cache. Acceptable for low-volume dev, but becomes a performance problem in production with many gateway evaluations. | When needed: inject PSR-6 cache into `ExpressionEvaluator` constructor via Symfony DI. Use `RedisAdapter` already available in the stack. |
-
----
-
-## Stack Patterns by Variant
-
-**If a gateway condition uses process variables from user form input:**
-- Variables are stored as `array<string, mixed>` in `ProcessInstance.variables` (JSONB)
-- Pass directly to `ExpressionEvaluator::evaluate($condition, $variables)`
-- Expression example: `approval_status == 'approved'` where `approval_status` is a form field name
-- Variable keys must not collide with PHP reserved words — enforce in `FormFieldDefinition` validation
-
-**If a task is a pool task (by_role or by_department):**
-- Task created with `candidateRoleId` or `candidateDepartmentId` set, `assigneeId = null`
-- Frontend shows "Claim" banner via `isPoolTask: bool` in `TaskDTO`
-- `ClaimTaskCommand` / `UnclaimTaskCommand` already created (visible in git status)
-- API: `POST /tasks/{id}/claim` and `POST /tasks/{id}/unclaim`
-
-**If a task has no outgoing transitions (single linear flow):**
-- `WorkflowEngine.executeAction()` handles: if no transition with matching `actionKey`, falls back to first outgoing transition when only one exists
-- Frontend: show single "Complete" button, no dialog needed — use inline form rendering
-- `form_schema.actions` will have exactly one entry with `key: 'complete'`
-
-**If a transition has `from_variable` assignment for the downstream task:**
-- `FormFieldCollector.injectAssigneeFieldsForDownstream()` auto-adds `employee` type picker fields
-- Field name pattern: `_assignee_for_{nodeId}`
-- Frontend `DynamicFormField.vue` already renders `employee` type (Select with employee options)
-- This is already implemented end-to-end — no new stack needed
-
-**If extended field validation is needed (min/max, regex, type checking):**
-- Backend: enhance `ExecuteTaskActionHandler.validateFormData()` to build `Assert\Collection` programmatically
-- Map `FormFieldDefinition.type` to Symfony constraints: `text` → `Assert\Type('string') + Assert\Length`, `number` → `Assert\Type('numeric') + Assert\Range`, `date` → `Assert\Date`
-- Frontend: enhance Zod schema building: `text` → `z.string()`, `number` → `z.number()`, `date` → `z.coerce.date()`
+| `rabbitmq-delayed-message-exchange` Docker plugin | Archived January 2026, incompatible with RabbitMQ 4.3+ (Mnesia removal). Will break on next RabbitMQ upgrade. | Symfony Messenger built-in AMQP delay queues with `DelayStamp` |
+| `Symfony\Component\Security\Http\Firewall\SwitchUserListener` (switch_user: true) | Explicitly incompatible with stateless JWT firewalls per official Symfony docs | Custom `POST /admin/impersonate` endpoint using `JWTManager::create()` |
+| `vich/uploader-bundle` | Adds server-side binary upload handling overhead. Procivo already uses S3 directly via Flysystem. Vich adds its own entity lifecycle hooks that conflict with DDD aggregate approach. | Direct `aws/aws-sdk-php` presigned URL + Flysystem for storage |
+| `chart.js@^5.0` (alpha) | Version 5 is alpha as of March 2026, not stable, PrimeVue 4 Chart component explicitly targets v4 | `chart.js@^4.4.9` |
+| `GrumPHP` | PHP-only Git hook manager. Procivo is a polyglot repo (PHP + TypeScript + Vue). GrumPHP cannot run ESLint/TypeScript checks without hacks. | `lefthook` (language-agnostic) |
+| Separate `audit-trail` third-party bundle | Adds migration complexity, conflicts with custom DDD event model. Procivo's event.bus already dispatches domain events — just subscribe and persist. | Custom `AuditLogSubscriber` + `audit_log` table |
+| `aws/aws-sdk-php` as direct composer dependency | Already transitively installed via `league/flysystem-aws-s3-v3`. Adding it directly creates version conflict risk. | Use the existing transitive installation; access `S3Client` directly or via Flysystem's registered service |
 
 ---
 
@@ -167,162 +344,28 @@ composer show symfony/cache 2>/dev/null || echo "not installed"
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| `symfony/expression-language: 8.0.*` | Symfony 8.0.*, PHP 8.4 | Already in use. `ExpressionEvaluator` works as-is. Add cache + providers when needed. |
-| `primevue: 4.5.4` | Vue 3.5.28, `@primevue/themes: 4.5.4` | Already installed and in use. `DynamicFormField.vue` uses `InputText`, `InputNumber`, `DatePicker`, `Select`, `Checkbox`, `Textarea`. `ActionFormDialog.vue` uses `Dialog`. |
-| `zod: 4.3.6` | TypeScript 5.9.3, Vue 3.5.28 | Already installed. Zod 4.x is a breaking change from Zod 3.x (different import patterns in some cases) — check `import { z } from 'zod'` syntax which is unchanged. |
-| `doctrine/orm: 3.6` + PostgreSQL 18 | `json` type maps to JSONB in PostgreSQL | Verified by existing use of `json` type in `Transition.orm.xml`, `Node.orm.xml`. No additional Doctrine extensions needed. |
-| `symfony/validator: 8.0.*` | Symfony 8.0.*, PHP 8.4 | Already installed. `Assert\Collection` with programmatic field array is documented and stable. |
-
----
-
-## ExpressionLanguage: Key Operators for BPM Conditions
-
-Verified from official Symfony 8 docs — these are the operators available for gateway `condition_expression` fields:
-
-```
-# Equality
-status == 'approved'
-amount != 0
-
-# Comparison (for number fields)
-score > 80
-days_remaining <= 3
-
-# Collection membership
-department in ['hr', 'finance', 'legal']
-role not in ['intern', 'contractor']
-
-# String matching
-comment starts with 'URGENT'
-name contains 'Smith'
-code matches '/^[A-Z]{3}\\d{4}$/'
-
-# Logical
-approved == true and score > 50
-status == 'rejected' or clarification_needed == true
-
-# Null coalescing (for optional fields)
-override_assignee ?? null
-
-# Chaining
-(amount > 1000 and department == 'finance') or is_critical == true
-```
-
-The `ExpressionEvaluator` receives `ProcessInstance.variables` as the `$variables` array. Form field values (submitted by users in `ActionFormDialog`) are merged into these variables via `ProcessInstance.mergeVariables()`.
-
----
-
-## Symfony Validator: Dynamic Form Validation Pattern
-
-Verified from official Symfony 8 docs — the pattern for dynamic form field validation:
-
-```php
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-
-// Build constraints from FormFieldDefinition[] schema
-private function buildCollection(array $formFields): Assert\Collection
-{
-    $fields = [];
-    foreach ($formFields as $field) {
-        $constraints = $this->constraintsForType($field['type']);
-        $fieldName = $field['name'];
-
-        if ($field['required'] ?? false) {
-            $fields[$fieldName] = new Assert\Required($constraints);
-        } else {
-            $fields[$fieldName] = new Assert\Optional($constraints);
-        }
-    }
-
-    return new Assert\Collection([
-        'fields' => $fields,
-        'allowExtraFields' => true,  // allow _assignee_for_* injected fields
-        'allowMissingFields' => false,
-    ]);
-}
-
-private function constraintsForType(string $type): array
-{
-    return match($type) {
-        'text', 'textarea' => [new Assert\Type('string'), new Assert\NotBlank()],
-        'number' => [new Assert\Type('numeric')],
-        'date' => [new Assert\Date()],
-        'select' => [new Assert\NotBlank()],
-        'employee' => [new Assert\Uuid()],
-        'checkbox' => [new Assert\Type('bool')],
-        default => [],
-    };
-}
-```
-
-This pattern replaces the current minimal `validateFormData()` in `ExecuteTaskActionHandler`. The current implementation only checks required/non-empty — the above adds type validation.
-
----
-
-## Zod: Dynamic Schema Building Pattern (Frontend)
-
-```typescript
-import { z } from 'zod'
-import type { FormFieldDefinition } from '@/modules/workflow/types/process-definition.types'
-
-function buildZodSchema(fields: FormFieldDefinition[]): z.ZodObject<z.ZodRawShape> {
-  const shape: z.ZodRawShape = {}
-
-  for (const field of fields) {
-    let zodType: z.ZodTypeAny
-
-    switch (field.type) {
-      case 'text':
-      case 'textarea':
-        zodType = field.required ? z.string().min(1) : z.string().optional()
-        break
-      case 'number':
-        zodType = field.required ? z.number() : z.number().nullable()
-        break
-      case 'date':
-        zodType = field.required ? z.coerce.date() : z.coerce.date().nullable()
-        break
-      case 'select':
-        zodType = field.required ? z.string().min(1) : z.string().optional()
-        break
-      case 'checkbox':
-        zodType = z.boolean()
-        break
-      case 'employee':
-        zodType = field.required ? z.string().uuid() : z.string().uuid().optional()
-        break
-      default:
-        zodType = z.unknown()
-    }
-
-    shape[field.name] = zodType
-  }
-
-  return z.object(shape)
-}
-
-// Usage in ActionFormDialog.vue
-const schema = buildZodSchema([...sharedFields, ...action.formFields])
-const result = schema.safeParse(formData.value)
-if (!result.success) {
-  // result.error.flatten().fieldErrors → { fieldName: ['error message'] }
-}
-```
+| `symfony/scheduler: 8.0.*` | Symfony 8.0.*, PHP 8.4, `symfony/messenger: 8.0.*` | Must use same Symfony minor as the rest of the project. Uses Messenger under the hood — workers run via `bin/console messenger:consume scheduler_*`. |
+| `chart.js: ^4.4.9` | `primevue: ^4.5.4`, Vue 3.5.x | PrimeVue 4 `<Chart>` component wraps Chart.js 4.x. Chart.js 3.x is NOT compatible with PrimeVue 4's Chart API. Do not use ^3. |
+| `knplabs/knp-paginator-bundle: ^6.6` | Symfony 8.0.*, Doctrine ORM 3.6 | KnpPaginator 6.x requires Symfony 7+/8+. Version 5.x was for Symfony 5/6. [MEDIUM confidence — packagist page] |
+| `lefthook` (any recent) | Node 24, PHP 8.4 | Language-agnostic — no runtime dependency. Works with any PHP/Node version. Config in repo root `lefthook.yml`. |
+| `aws/aws-sdk-php: ^3.371` (transitive) | PHP 8.1+, PHP 8.4 compatible | Already installed. `createPresignedRequest` API unchanged since v3.x. [HIGH confidence] |
 
 ---
 
 ## Sources
 
-- Official Symfony 8.0 ExpressionLanguage docs — https://symfony.com/doc/current/components/expression_language.html — operators, syntax, providers verified [HIGH confidence]
-- Official Symfony 8.0 ExpressionLanguage syntax — https://symfony.com/doc/current/components/expression_language/syntax.html — full operator list verified [HIGH confidence]
-- Official Symfony 8.0 ExpressionLanguage extending — https://symfony.com/doc/current/components/expression_language/extending.html — ExpressionFunctionProviderInterface pattern [HIGH confidence]
-- Official Symfony 8.0 Validator docs — https://symfony.com/doc/current/validation.html — programmatic validation, constraint list [HIGH confidence]
-- Official Symfony 8.0 Validator `Assert\Collection` — https://symfony.com/doc/current/reference/constraints/Collection.html — dynamic collection pattern [HIGH confidence]
-- Symfony 8.0 Messenger docs — https://symfony.com/doc/current/messenger.html — multi-bus CQRS configuration [HIGH confidence]
-- Zod GitHub releases — https://github.com/colinhacks/zod/releases — v4.3.6 confirmed latest, `z.fromJSONSchema()` added in 4.3.0 [MEDIUM confidence — release notes only]
-- Codebase direct analysis — `/Users/leleka/Projects/procivo/backend/` and `/Users/leleka/Projects/procivo/frontend/` — existing implementations verified [HIGH confidence]
+- Official Symfony 8 Scheduler docs — https://symfony.com/doc/current/scheduler.html — confirms it's for recurring tasks, uses Messenger, available since 6.3 [HIGH confidence]
+- Official Symfony 8 Messenger docs — https://symfony.com/doc/current/messenger.html — `DelayStamp`, AMQP auto-setup, delay queue DLX/TTL mechanism [HIGH confidence]
+- Official Symfony Security docs — https://symfony.com/doc/current/security/impersonating_user.html — confirmed JWT stateless incompatibility with `switch_user` [HIGH confidence]
+- Official PrimeVue 4 Chart docs — https://primevue.org/chart/ — confirmed Chart.js peer dependency required [HIGH confidence]
+- `rabbitmq/rabbitmq-delayed-message-exchange` GitHub — https://github.com/rabbitmq/rabbitmq-delayed-message-exchange — archived January 29, 2026, Mnesia-dependent, recommended against for 4.3+ [HIGH confidence]
+- AWS SDK PHP v3 presigned URLs — https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-presigned-url.html — `createPresignedRequest` API [HIGH confidence]
+- `packagist.org/packages/aws/aws-sdk-php` — latest stable 3.371.3 (2026-02-27), requires PHP >=8.1 [HIGH confidence]
+- `shivammathur/setup-php@v2` GitHub Actions — https://github.com/marketplace/actions/setup-php-action — standard Symfony CI action [HIGH confidence]
+- Lefthook vs Husky 2026 comparison — https://www.edopedia.com/blog/lefthook-vs-husky/ — performance and polyglot advantages [MEDIUM confidence]
+- LexikJWT impersonation issues — https://github.com/lexik/LexikJWTAuthenticationBundle/issues/652 — confirmed no native switch_user support [MEDIUM confidence]
+- Codebase analysis — `/Users/leleka/Projects/procivo/backend/composer.json` and `frontend/package.json` — existing dependencies verified [HIGH confidence]
 
 ---
-*Stack research for: Procivo BPM — Workflow-Task Integration Milestone*
-*Researched: 2026-02-28*
+*Stack research for: Procivo BPM — v2.0 Production-Ready Features*
+*Researched: 2026-03-01*

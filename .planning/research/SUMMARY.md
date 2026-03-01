@@ -1,17 +1,17 @@
 # Project Research Summary
 
-**Project:** Procivo — BPM Workflow-Task Integration Milestone
-**Domain:** Business Process Management (BPM) — workflow engine integration with human task management
-**Researched:** 2026-02-28
+**Project:** Procivo BPM Platform — v2.0 Production-Ready Milestone
+**Domain:** Business Process Management (BPM) — operational features on top of shipped v1.0 engine
+**Researched:** 2026-03-01
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone integrates two existing modules — the Workflow Engine (token-based BPMN execution) and the TaskManager (CRUD tasks, kanban, comments, files) — into a unified BPM platform where process execution drives task creation, dynamic form rendering, and structured decision capture. The foundational architecture is already well-established: the token model, `WorkflowTaskLink` bridge, `ExpressionEvaluator`, `AssignmentResolver`, and `DynamicFormField.vue` all exist. The work is wiring these components together along the critical data path: process designer configures forms per action → task node activation embeds the form schema → user submits form data through an action dialog → backend validates and merges into process variables → XOR gateway evaluates conditions and routes the token. Every piece exists; none are connected end-to-end.
+Procivo v1.0 delivered a complete BPM loop (design → publish → start → tasks → XOR routing → complete) on top of a mature Modular Monolith with Clean Architecture, DDD, CQRS, and three Messenger buses. The v2.0 milestone is not about reinventing the platform — it is about closing the gap between a working prototype and a production-ready tool. Research across four dimensions (stack, features, architecture, pitfalls) consistently converges on the same seven operational concerns that every mature BPM platform (Camunda 8, Flowable, IBM BPM, ProcessMaker) provides at this layer: audit trail, notifications, dashboard, user profiles, timer node execution, super admin impersonation, and CI/CD automation. All of these can be built without adding major infrastructure — the core stack (Symfony 8, RabbitMQ, Mercure, S3, PostgreSQL) already supports every required pattern.
 
-The recommended approach is strict bottom-up implementation following the architectural layer dependency chain: database migrations first, domain entity updates second, application services third, command/event handlers fourth, API endpoints fifth, and frontend last. This order is non-negotiable — building the frontend form dialog before the backend stores form_schema in the task entity will produce dead-end work. Two architectural decisions are already locked in and must not be reversed: (1) form schema is snapshotted onto each Task at creation time, never fetched live from the process definition; (2) submitted form data is namespaced by node ID when merged into process variables to prevent collision across stages. These decisions directly prevent the two highest-cost pitfalls identified in research.
+The recommended approach is incremental: start with the two features that everything else depends on (user profile/avatar and audit logging), then layer notifications, dashboard, and timer execution on top of that foundation. The existing domain event infrastructure (`event.bus`, `DispatchDomainEventsMiddleware`, async transport) is the backbone of this milestone — audit logging is a pure event consumer, notifications extend an existing module, and the dashboard reads from tables already populated by existing projections. Timer node execution is nearly complete in code; the work is primarily verification, testing, and adding a persistent fallback table. CI/CD is pure infrastructure that can be set up independently at any time and should be established early.
 
-The key risks are all implementation-time correctness problems, not architectural unknowns. The most dangerous is silent wrong-path routing when an XOR gateway condition references a variable that is absent from process variables — Symfony ExpressionLanguage resolves undefined names as null rather than throwing, causing the gateway to always take the rejection path without any error. Close behind is the race condition on pool task claim, which requires a pessimistic database lock (`LockMode::PESSIMISTIC_WRITE`) to prevent double-assignment. Both must be addressed in the first implementation session, before any frontend work begins.
+The top risks are architectural traps that appear correct but fail in production: writing audit logs inside the business transaction (they must be async), using Symfony's built-in `switch_user` for impersonation (incompatible with stateless JWT firewalls), relying solely on RabbitMQ `DelayStamp` for timer reliability (plugin archived, messages lost on restart), and broadcasting Mercure notifications on organization-wide topics (leaks private content to other users). Each pitfall has a documented prevention strategy that must be applied from the start of the relevant phase — retrofitting is expensive.
 
 ---
 
@@ -19,186 +19,258 @@ The key risks are all implementation-time correctness problems, not architectura
 
 ### Recommended Stack
 
-No new packages are required. The entire milestone can be built using libraries already installed: `symfony/expression-language`, `symfony/validator`, `symfony/messenger`, Doctrine ORM with JSONB, PrimeVue 4, Zod 4, and Pinia 3. The stack is mature, verified against official Symfony 8 and Vue 3 documentation, and already proven in the codebase.
+The core stack requires only two net-new packages for v2.0: `symfony/scheduler` (timer node date-based execution) and `chart.js` (required peer dependency for PrimeVue's Chart component). Everything else is already installed. The `aws/aws-sdk-php` SDK needed for S3 presigned avatar upload URLs is already present as a transitive dependency via `league/flysystem-aws-s3-v3`. Symfony Mailer, Mercure bundle, and RabbitMQ Messenger are all in place for async email and real-time notifications. Development tooling additions (lefthook for pre-commit hooks, GitHub Actions actions) require no composer/npm changes beyond one `devDependency`.
 
-**Core technologies:**
-- `symfony/expression-language 8.0.*`: Gateway condition evaluation — sandboxed, supports all needed operators (`==`, `in`, `and/or`, `matches`, null-coalescing). Already integrated in `ExpressionEvaluator`. No custom parser needed.
-- `symfony/validator 8.0.*` + `Assert\Collection`: Dynamic backend form validation — build constraint collection programmatically from `FormFieldDefinition[]` schema. Replaces the current minimal required-only check.
-- Doctrine ORM `json` type (PostgreSQL JSONB): Stores `form_schema`, `variables`, `config` on task and process entities — already in use across the codebase. Zero additional setup.
-- `zod 4.3.6`: Frontend dynamic schema building — `buildZodSchema(fields: FormFieldDefinition[])` produces type-safe validation before API submission. `safeParse()` returns field-level errors consumable by `DynamicFormField.vue`.
-- `symfony/messenger 8.0.*` (3-bus CQRS): Routing pattern already established — commands to `command.bus`, queries to `query.bus`, domain events to `event.bus` (async via RabbitMQ).
+**Core technologies (new for v2.0):**
+- `symfony/scheduler 8.0.*`: Date-based timer node execution — polls for overdue timers every minute via Symfony Messenger; no external cron required
+- `chart.js ^4.4.9`: Dashboard chart rendering — PrimeVue 4 `<Chart>` component wraps it but does NOT bundle it; must be installed separately
+- Symfony Messenger `DelayStamp` (already installed): Duration-based timer delays via RabbitMQ Dead Letter Exchange/TTL — replaces the archived `rabbitmq-delayed-message-exchange` plugin
+- `lefthook` (devDependency): Pre-commit hooks for polyglot repo (PHP + TypeScript) — Go binary, parallel execution, single YAML config
+- `shivammathur/setup-php@v2` + `actions/cache@v4`: GitHub Actions PHP 8.4 CI environment — industry standard for Symfony projects in 2025-2026
 
-See `.planning/research/STACK.md` for code patterns for each integration.
+**Critical version constraints:**
+- Do NOT use `chart.js ^5.0` (alpha, not stable, PrimeVue 4 targets v4)
+- Do NOT add `rabbitmq-delayed-message-exchange` Docker plugin (archived January 29, 2026; breaks on RabbitMQ 4.3+ Mnesia removal)
+- Do NOT use `switch_user: true` in security.yaml (incompatible with stateless JWT firewall; documented in official Symfony docs and LexikJWT issues #652/#1196)
+
+---
 
 ### Expected Features
 
-Research against Camunda 8, Flowable, Appian, ProcessMaker, and Bonita confirms the feature set. The distinction between table stakes (expected in any BPM platform) and differentiators (where Procivo exceeds the baseline) is clear.
+Research compared Procivo's planned features against Camunda 8, Flowable, IBM BPM, ProcessMaker, and Oracle BPM. The seven feature categories each have a clear table-stakes baseline and a set of v2.0-appropriate differentiators.
 
-**Must have (table stakes) — v1:**
-- Dynamic form rendering on task detail, with fields derived from process node configuration
-- Per-action form fields: different fields shown based on which decision button is clicked (Approve/Reject/etc.)
-- Backend form data validation on task completion — not just frontend; backend is the authority
-- Form data merged into process variables so XOR gateways can evaluate conditions
-- XOR gateway condition evaluation against submitted variables (end-to-end, not just engine logic in isolation)
-- Pool task claim/unclaim mechanism with candidate role/department validation
-- "Available" task filter tab showing claimable pool tasks scoped to the current user's roles
-- Assignment strategy configuration in the Workflow Designer (TaskNodeConfig.vue) — unassigned, specific user, by role, by department
-- Process context badge on task cards (process name + stage name)
-- Start process from the Tasks page without navigating to the workflow designer
+**Must have (table stakes for v2.0):**
+- Async audit logging of task lifecycle, process lifecycle, auth events, and admin operations — every compliance-oriented BPM platform provides this
+- Task-assigned notification (in-app via Mercure + email via Symfony Mailer) — without this, users must poll the task list; the single most impactful notification
+- Bell icon with unread count + notification inbox page — the visible surface for all in-app notifications
+- Dashboard: "My Tasks", "Active Processes I Started", "Recent Activity" feed — home screen context on login
+- Avatar upload (S3 presigned URL flow) + display on task cards and navigation bar
+- Timer node execution: duration timers (ISO 8601 `PT1H`, `P1D`) and date timers (absolute datetime) — core BPMN feature; currently unimplemented at execution level
+- Super admin impersonation with persistent banner, exit button, and audit log entry — support capability for any multi-user deployment
+- GitHub Actions CI pipeline: CS Fixer + PHPStan + PHPUnit + frontend type-check/lint
 
-**Should have (differentiators) — v1.x:**
-- Process history timeline on task detail (audit trail of node completions)
-- Process graph monitoring view with active token positions (files already started)
-- Conditional field visibility (`visibleIf` expression on `FormFieldDefinition`)
-- Next assignee selector in action form (ad-hoc delegation via `_assignee_for_{nodeId}` variable)
-- Draft variable saving via browser localStorage
+**Should have (v2.0 differentiators):**
+- Per-user notification preferences (opt-in/out per event type and channel) — prevents email flood, which is a critical anti-pattern
+- Process completed notification to initiator
+- Dashboard team workload widget (manager view) with bar chart via Chart.js
+- Impersonation reason field (logged in audit entry) — low complexity, high accountability value
+- Pre-commit hooks (lefthook) for CS Fixer + ESLint on staged files
 
-**Defer (v2+):**
-- Previous performer and By Manager assignment strategies (requires org hierarchy traversal)
-- SLA / deadline escalation (requires Symfony Scheduler integration)
-- File upload form field type (requires S3-to-dynamic-form wiring design)
-- Real-time task list updates via Mercure (separate milestone)
-- Substitution / authority transfer (touches all modules)
+**Defer to v2.x / v3.0:**
+- Timer Boundary Events on task nodes (deadline/escalation pattern) — architectural complexity significantly higher than intermediate timers
+- Notification digest/grouping — scheduling state and grouping logic are a separate scope
+- @-mention notifications in comments — text parsing + fan-out
+- Playwright e2e smoke tests in CI — high setup cost; add after CI is stable
+- Time-limited impersonation sessions — custom Symfony middleware
+- Dashboard process cycle time chart — meaningful only after sufficient data accumulates
 
-See `.planning/research/FEATURES.md` for full competitor analysis and dependency graph.
+**Feature dependency order (critical for phase sequencing):**
+- Audit Logging must precede Impersonation (impersonation events require an established audit trail)
+- Notifications depend on Mercure module (exists) and Mailer (exists)
+- Dashboard depends on Audit Logging for the activity feed (reads `audit_log` table)
+- User Profile/Avatar is independent but unblocks avatar display in Dashboard, Notifications, and AuditLog UI
+- Timer Execution is independent of all above (needs only RabbitMQ + Workflow module, both done)
+- CI/CD is fully independent and should be set up early
+
+---
 
 ### Architecture Approach
 
-The architecture follows Clean Architecture strictly: domain services (`WorkflowEngine`, `ExpressionEvaluator`) are pure PHP with no I/O; application handlers coordinate domain services and I/O-bound operations; the `WorkflowTaskLink` bridge entity in the Workflow module is the only coupling point between modules; `OrganizationQueryPort` (interface in TaskManager's Application/Port) provides an anti-corruption layer for org data access. The most important constraint: the `WorkflowEngine` must never be called from the Presentation layer — all task completion flows through `ExecuteTaskActionCommand` on the command bus.
+The existing architecture is a well-structured Modular Monolith with 9 modules (Shared, Identity, Organization, TaskManager, Workflow, Notification, Resource, Directory, Search), each following Clean Architecture layers. Cross-module communication uses four established patterns: domain events via `event.bus`, Port/Adapter interfaces for synchronous cross-module queries, direct DBAL in Infrastructure adapters for simple reads, and async routing via RabbitMQ for expensive work. All new v2.0 features fit cleanly into this existing structure — two new modules (AuditLog, Dashboard), two module extensions (Identity for profile/avatar, Notification for email+Mercure push), one completion task (Workflow timer execution), and one pure infrastructure addition (CI/CD).
 
-**Major components:**
-1. `WorkflowEngine` (Workflow/Domain) — token lifecycle, gateway evaluation, process advancement; pure logic with no I/O
-2. `ProcessInstance` (Workflow/Domain) — event-sourced aggregate; holds tokens + JSONB variables; reconstituted from EventStore
-3. `WorkflowTaskLink` (Workflow/Domain) — bridge entity mapping `(processInstanceId, tokenId)` to `taskId`; token-scoped, not process-scoped
-4. `OnTaskNodeActivated` (Workflow/Application) — listens on async event bus; builds `form_schema` from node config + transitions; resolves assignment strategy; dispatches `CreateTaskCommand`
-5. `ExecuteTaskActionHandler` (Workflow/Application) — validates submitted form data, merges into process variables, calls `WorkflowEngine.executeAction()`
-6. `AssignmentResolver` (TaskManager/Application) — resolves assignment strategy to `AssignmentResult`; uses `OrganizationQueryPort`
-7. `Task` (TaskManager/Domain) — stores snapshotted `form_schema` as JSONB; holds `candidateRoleId` / `candidateDepartmentId` for pool tasks
+**Major components (new/extended for v2.0):**
+1. `AuditLog` module (NEW) — pure event consumer; subscribes to domain events from all modules on `event.bus` async transport; persists `AuditEntry` with actor, entity, action, JSONB payload, `occurred_at`; exposes `GET /api/v1/audit-log` query endpoint
+2. `Notification` module (EXTENDED) — add `NotificationMercurePublisher` for per-user SSE topics (`/users/{userId}/notifications`), `EmailNotificationPort` + `SymfonyEmailNotificationSender`, `NotificationPreference` entity, and new event handlers for `ProcessStarted`/`ProcessCompleted`
+3. `Dashboard` module (NEW) — query-only; `GetDashboardSummaryHandler` uses raw DBAL queries against existing tables (`task_manager_tasks`, `workflow_process_instances_view`, `notification`) to avoid cross-module ORM coupling; separate `GetActivityFeedHandler` reads `audit_log`
+4. `Identity` module (EXTENDED) — `avatarUrl` field on `User`, `UpdateUserProfileCommand`, `UploadUserAvatarCommand` with S3 presigned URL flow, `FileStorageInterface` port (mirrors TaskManager pattern)
+5. `Workflow` module (COMPLETED) — timer infrastructure exists (`RabbitMqTimerService`, `OnTimerScheduled`, `FireTimerHandler`); gaps are: persistent `workflow_scheduled_timers` table as fallback, ISO duration parsing verification, and integration test coverage
+6. `.github/workflows/` (INFRA) — `ci.yml` with parallel PHP/frontend jobs using `shivammathur/setup-php@v2`
 
-See `.planning/research/ARCHITECTURE.md` for complete data flows and build-order dependency graph.
+**Key patterns to enforce:**
+- All AuditLog event handlers must be routed to `async` transport BEFORE writing any handler (prevents same-transaction write pitfall)
+- Dashboard uses `Connection` (DBAL), never module repositories (prevents bounded context violation and N+1 queries)
+- Mercure topics: organization-wide (`/organizations/{orgId}/activity`) for board updates; per-user (`/users/{userId}/notifications`) for personal notifications only
+- Actor context must be embedded in domain event payloads (`actorId`, `actorEmail`) — Symfony Security token is null inside async workers
+
+---
 
 ### Critical Pitfalls
 
-1. **Form schema as live reference instead of snapshot** — Task detail queries process definition on every open. Fix: snapshot full `form_schema` into `Task` at creation time in `OnTaskNodeActivated`. Never re-read from process definition. Existing tasks show the schema they were born with, even after definition updates. Address in Session 2.
+1. **Audit log writes inside the business transaction** — If `AuditLog` event handlers are not explicitly routed to `async` transport, they execute synchronously within the `doctrine_transaction` middleware scope. An audit write failure rolls back the business command; a business rollback silently drops the audit entry. Prevention: add `App\AuditLog\Application\EventHandler\*: async` to `messenger.yaml` BEFORE registering any audit handler.
 
-2. **Variable key collisions across stages** — Two task nodes with a field named `comment` silently overwrite each other in `ProcessInstance.variables`. Fix: namespace all merged variables by node ID at merge time (e.g., `review_docs.comment`). Establish this convention in Session 1 before any form data flows. Recovery cost is HIGH.
+2. **Symfony `switch_user` incompatible with stateless JWT firewall** — `switch_user` requires session state that stateless JWT firewalls do not provide. Impersonation works only for a single request; subsequent requests lose impersonation context silently. Prevention: implement `POST /api/v1/admin/impersonate/{userId}` that issues a short-lived impersonation JWT with `impersonated_by` claim; frontend stores separately and shows banner.
 
-3. **ExpressionEvaluator silently routing to wrong path** — Undefined variable in condition expression resolves to `null` (no exception); XOR gateway silently takes rejection path for all instances. Fix: (a) log a structured warning when expression references absent variable; (b) validate condition expressions against known field namespaces at process definition publish time. Address in Session 1.
+3. **RabbitMQ `DelayStamp` as sole timer mechanism** — The `rabbitmq-delayed-message-exchange` plugin was archived January 29, 2026 and will break on RabbitMQ 4.3+ (Mnesia removal). More critically: delayed messages are lost on RabbitMQ restart with no recovery path, leaving process tokens stuck forever. Prevention: create `workflow_scheduled_timers` persistent table as source of truth; `DelayStamp` message is an accelerator only; a Symfony Scheduler job re-dispatches overdue timers every 1-5 minutes as fallback.
 
-4. **Race condition on pool task claim** — Two users claim the same task simultaneously; both succeed; task has two effective assignees. Fix: pessimistic lock (`LockMode::PESSIMISTIC_WRITE`) in `ClaimTaskHandler`. Address in the claim/unclaim handler session.
+4. **Mercure topic leaks between users** — Publishing notifications to the organization-wide topic exposes private notification content (HR decisions, salary approvals) to all org members. Prevention: use per-user topic `/users/{userId}/notifications` exclusively for personal notifications; subscriber JWT must enumerate exact topics, never wildcard.
 
-5. **Token-task link broken by loops and parallel branches** — `findLatestByProcessInstanceId` reuses the same link when a process visits a task node twice (rejection loop). Fix: change all link resolution to token-scoped (`findByProcessInstanceIdAndTokenId`). One link per token activation. Address in Session 2.
+5. **Actor null in async audit handlers** — Symfony Security context is unavailable inside async Messenger workers. Calling `$security->getUser()` in an async audit handler returns null. Prevention: every domain event that requires audit attribution must carry `actorId` and `actorEmail` as explicit payload fields, set at command dispatch time.
 
-6. **Frontend-only form validation** — Backend completes the task with empty `formData`, corrupting process variables and leaving the process instance in an unrecoverable state. Fix: `ExecuteTaskActionHandler` reads the Task's `form_schema` and validates submitted data server-side using `Assert\Collection`. Address in Session 3.
+6. **Dashboard crossing module boundaries via ORM repositories** — Injecting `TaskRepositoryInterface` and `ProcessInstanceRepositoryInterface` into a single `DashboardQueryHandler` violates bounded context isolation and hides N+1 query patterns. Prevention: `DashboardQueryHandler` injects only Doctrine `Connection`; raw DBAL queries only; all queries scoped by `organization_id`.
 
-See `.planning/research/PITFALLS.md` for security and UX pitfalls, integration gotchas, and recovery strategies.
+7. **S3 avatar MIME type not validated server-side** — Browser-supplied `Content-Type` is untrusted. `UploadedFile::getMimeType()` reflects client claim, not file content. Prevention: validate with `finfo_buffer()` server-side; enforce 5MB max; generate UUID-based S3 key (never original filename); use public bucket ACL or 24h presigned URL for avatars (the current 1h expiry used for task attachments is wrong for display assets).
 
 ---
 
 ## Implications for Roadmap
 
-The research reveals a clean, dependency-ordered 5-session breakdown. The critical insight is that all of the hard backend wiring must precede any frontend polish. The session structure below follows the layered build order in ARCHITECTURE.md.
+Based on combined research findings, the following phase structure is recommended. Ordering respects feature dependencies, delivers value incrementally, and sequences pitfall prevention before the feature that would trigger each pitfall.
 
-### Session 1: Backend Foundation — Variables, Gateways, and Validation Architecture
+### Phase 1: Foundation — User Profile + CI/CD
 
-**Rationale:** The entire milestone depends on process variables flowing correctly from form submission through to gateway evaluation. If variable namespacing is established incorrectly here, the recovery cost is HIGH (affects all running instances). The `ExpressionEvaluator` silent-error pitfall and variable key collision pitfall must both be solved before any form data exists in the system.
+**Rationale:** User profile/avatar is self-contained (extends Identity module only), has no upstream dependencies, and unblocks avatar display in every subsequent phase (AuditLog UI, Dashboard task cards, Notification items). CI/CD is fully independent and should be established immediately to provide regression safety as other features are added. These two items deliver visible, demo-able progress with zero architectural risk.
 
 **Delivers:**
-- Namespaced variable merge strategy established in `ProcessInstance.mergeVariables(nodeId, actionKey, formData)`
-- `ExpressionEvaluator` enhanced with undefined-variable warning and validation at publish time
-- `Assert\Collection`-based backend validation foundation in `FormSchemaValidator` (pure domain service)
-- All database migrations applied: `ProcessInstance.variables`, `Transition.form_fields`, `Task.candidate_role_id`, `Task.candidate_department_id`, `Task.form_schema`
+- `ProfilePage.vue` with avatar upload via S3 presigned URL flow
+- `avatarUrl` on `User` entity, propagated to JWT claims and all relevant DTOs
+- `UpdateUserProfileCommand` + `UploadUserAvatarCommand` in Identity module with `FileStorageInterface` port and `S3UserAvatarStorage` implementation
+- `.github/workflows/ci.yml` with parallel PHP (CS Fixer + PHPStan + PHPUnit) and frontend (type-check + lint + test:unit) jobs
+- `lefthook.yml` pre-commit hooks (CS Fixer on staged PHP, ESLint on staged TS/Vue)
 
-**Addresses from FEATURES.md:** XOR gateway condition evaluation, required field backend validation
-**Avoids from PITFALLS.md:** Variable key collisions (Pitfall 2), ExpressionEvaluator silent errors (Pitfall 3)
-**Research flag:** Standard patterns — well-documented Symfony APIs, no additional research needed
+**Addresses:** User Profile + Avatar (table stakes), CI/CD pipeline (table stakes)
+
+**Avoids:** S3 MIME type pitfall — implement `finfo_buffer()` server-side validation and 24h presigned URL expiry for avatar display assets from the start
+
+**Research flag:** Standard patterns — no additional research needed. S3 presigned URL flow mirrors existing `S3FileStorage.php` in TaskManager. `shivammathur/setup-php@v2` is de-facto standard.
 
 ---
 
-### Session 2: Task Form Schema — Creation-Time Embedding and Pool Task Infrastructure
+### Phase 2: Audit Logging
 
-**Rationale:** With migrations applied and the merge strategy established, `OnTaskNodeActivated` can now build and persist the full `form_schema` snapshot. Token-scoped link resolution must also be fixed here, because the form schema embedding and the link strategy are both part of the task creation path in the same handler.
+**Rationale:** Audit logging must be built before Super Admin Impersonation (impersonation events require an established audit trail) and before Dashboard (activity feed reads `audit_log`). Building it second ensures the infrastructure is in place for everything that depends on it. The AuditLog module is architecturally low-risk — pure event consumer, no changes to existing modules, follows the established `Notification/Application/EventHandler/` pattern exactly.
 
 **Delivers:**
-- `OnTaskNodeActivated` updated: builds `form_schema` from node config + outgoing transition fields, stores in `Task.form_schema` JSONB at creation time
-- Token-scoped link resolution: `findByProcessInstanceIdAndTokenId` replaces `findLatestByProcessInstanceId`
-- `AssignmentResolver` wired into `OnTaskNodeActivated` — all 4 strategies produce `candidateRoleId` / `candidateDepartmentId` correctly
-- `OrganizationQueryPort` interface + `DoctrineOrganizationQueryAdapter` implementation
-- `GetTaskWorkflowContextHandler` query returns `TaskWorkflowContextDTO` (process name, stage name, form_schema)
+- New `AuditLog` module with `AuditEntry` entity, Doctrine XML mapping, `DoctrineAuditEntryRepository`
+- Event handlers for: `TaskCreated`, `TaskStatusChanged`, `TaskAssigned`, `ProcessStarted`, `ProcessCompleted`, `ProcessCancelled`, `CommentAdded`, authentication events (login, logout, failed attempt)
+- `audit_log` table with BRIN index on `occurred_at`, no FK constraints, monthly range partitioning (initial migration must include schema)
+- `messenger.yaml` routing additions for all audit-relevant events to `async` transport
+- `GET /api/v1/audit-log` query endpoint (filterable by entity type, actor, date range)
+- `AuditTimeline.vue` component (reusable, embedded on process and task detail pages)
 
-**Addresses from FEATURES.md:** Form schema structure, process context on tasks, assignment strategy resolution
-**Avoids from PITFALLS.md:** Form schema snapshot vs live reference (Pitfall 1), token-task link breaks on loops (Pitfall 5)
-**Research flag:** Standard patterns — direct codebase integration, no external research needed
+**Addresses:** Audit Logging (all table stakes), audit trail infrastructure for subsequent impersonation feature
+
+**Avoids:**
+- Same-transaction write pitfall — `async` routing set in `messenger.yaml` before first handler is written
+- Actor null pitfall — all domain events verified to carry `actorId` and `actorEmail` as explicit fields
+- Write bottleneck pitfall — BRIN index and monthly partitioning required in initial migration (cannot be added later without table rebuild)
+
+**Research flag:** Standard patterns — domain event consumer pattern is already established in the codebase. No additional research needed.
 
 ---
 
-### Session 3: Task Completion API and Claim/Unclaim
+### Phase 3: Notification System Enhancement
 
-**Rationale:** With form_schema embedded in tasks and the workflow context query working, the completion and claim endpoints can be implemented. Backend validation must be added here using the `FormSchemaValidator` from Session 1 — the API must be hardened before the frontend calls it.
+**Rationale:** The Notification module exists but is missing Mercure push, email delivery, and several event handler types. After Phase 2 (audit log established), notifications can reference audit context. This phase introduces email via Symfony Mailer. `NotificationPreference` entity must be built together with email delivery — it is not a "nice to have" but the only thing preventing an email flood (the critical anti-pattern documented in PITFALLS.md).
 
 **Delivers:**
-- `POST /tasks/{id}/complete` — `ExecuteTaskActionHandler` validates form data against `Task.form_schema`, merges into process variables, advances token
-- `POST /tasks/{id}/claim` — pessimistic lock, candidate pool membership validation, `Task.claim()` domain event
-- `POST /tasks/{id}/unclaim` — `Task.unclaim()` domain event
-- `GET /tasks/{id}/workflow-context` API endpoint
-- `ListTasks` query updated with `available` filter (pool tasks matching current user's roles/departments)
-- RBAC / org boundary checks on complete and claim handlers
+- `NotificationMercurePublisher` publishing exclusively to `/users/{userId}/notifications` (per-user topic)
+- Mercure subscriber JWT scoped to exact topics (`/organizations/{orgId}/activity` + `/users/{userId}/notifications`) — no wildcard
+- `EmailNotificationPort` interface + `SymfonyEmailNotificationSender` implementation
+- `NotificationPreference` entity (per-user, per-event-type opt-in/out); email is opt-in by default
+- `SendEmailMessage` routing to `async` transport in `messenger.yaml`
+- New event handlers: `OnProcessCompleted` (notify initiator), `OnProcessCancelled`, `OnTimerFired` (notify next assignee)
+- Updated `NotificationBell.vue` with SSE subscription to per-user Mercure topic
+- `NotificationPreferences.vue` panel on user profile page (links to `NotificationPreference` entity)
 
-**Addresses from FEATURES.md:** Task completion with action + form data, pool task claim, available task filter
-**Avoids from PITFALLS.md:** Frontend-only form validation (Pitfall 6), race condition on claim (Pitfall 4), org boundary security mistake
-**Research flag:** Standard patterns — Doctrine pessimistic lock is well-documented; no novel architecture
+**Addresses:** Notification system (all table stakes + notification preferences differentiator)
+
+**Avoids:**
+- Notification flood pitfall — `NotificationPreference` entity and email opt-in by default built together with email delivery
+- Mercure topic leak pitfall — per-user topics enforced from first publisher implementation
+
+**Research flag:** Standard patterns — Mercure SSE, Symfony Mailer async routing, and notification preference entity patterns are well-documented and aligned with existing codebase patterns.
 
 ---
 
-### Session 4: Frontend Task Integration
+### Phase 4: Dashboard
 
-**Rationale:** All backend APIs are now functional. Frontend can be built against real endpoints. The task detail layout, action form dialog, and pool task UI are all unblocked.
+**Rationale:** Dashboard depends on both the `audit_log` table (for activity feed, Phase 2) and notification unread count (Phase 3). Building it fourth ensures all data sources exist. The DBAL-direct query approach avoids the cross-module ORM coupling anti-pattern and keeps the Dashboard module architecturally clean.
 
 **Delivers:**
-- `TaskDetailContent.vue` renders process badge, shared fields always visible, action buttons derived from `form_schema.actions`
-- `ActionFormDialog.vue` polished — action-specific fields, Zod dynamic schema validation, field-level error display
-- Pool task banner in task detail: "Assign to Me" / "Unclaim" button with candidate context
-- `TaskListPanel` updated with "Available" tab and process context badge on `TaskCard`
-- "Start Process" button in TasksPage (dropdown: standalone task vs. start process)
-- Collapse single-action task to one "Complete" button without dialog (when `actions.length === 1` and no action-specific fields)
+- New `Dashboard` module — query-only, no domain entities, no module repositories
+- `GetDashboardSummaryHandler` with raw DBAL queries: my tasks count, overdue tasks count, active processes count, unread notifications count
+- `GetActivityFeedHandler` reading `audit_log` table for recent activity (last 20 entries scoped to user's objects)
+- `GET /api/v1/organizations/{orgId}/dashboard` endpoint
+- `DashboardPage.vue` with PrimeVue Card widgets, Chart.js bar chart (task completion trend), doughnut chart (processes by status)
+- `useDashboardStore` (Pinia) with 60-second auto-refresh
+- Redis cache on dashboard summary (30-second TTL, keyed by `organization_id`) — Redis already wired in `services.yaml`
 
-**Addresses from FEATURES.md:** Task detail page, pool task UI, process context badge, start process from tasks
-**Avoids from PITFALLS.md:** UX pitfalls — shared field validation before action buttons, no drag-to-complete for workflow tasks
-**Research flag:** Standard patterns — PrimeVue 4 and Zod patterns already documented in STACK.md
+**Addresses:** Dashboard (all table stakes + task completion trend chart differentiator)
+
+**Avoids:**
+- Cross-module ORM coupling — `DashboardQueryHandler` injects only `Connection`; verified by architecture review during implementation
+- Missing `organization_id` filter — every DBAL query scoped; verified by test asserting no cross-org data leakage
+
+**Research flag:** Standard patterns — `ProcessInstanceProjection` in the existing codebase already demonstrates the DBAL read model pattern. `chart.js` integration via PrimeVue `<Chart>` is documented in PrimeVue 4 official docs.
 
 ---
 
-### Session 5: Workflow Designer — Assignment Configuration and Transition Forms
+### Phase 5: Timer Node Execution
 
-**Rationale:** Without designer configuration, process designers must edit JSON directly to set assignment strategies and per-action form fields. This session closes the full loop: designer configures → process runs → task created → user completes → process advances.
+**Rationale:** Timer execution infrastructure exists in the Workflow module (`RabbitMqTimerService`, `OnTimerScheduled`, `FireTimerHandler`) but has two critical gaps: no persistent fallback table (messages lost on RabbitMQ restart) and unverified ISO duration parsing in WorkflowEngine. This phase closes those gaps with targeted verification, the persistent `workflow_scheduled_timers` table, and integration test coverage. It can run in parallel with Phases 3-4 if schedule allows.
 
 **Delivers:**
-- `TaskNodeConfig.vue` updated: assignment strategy dropdown (unassigned, specific user, by role, by department) with conditional selectors for role/dept/employee
-- Transition property panel: form fields builder per transition (`TransitionPropertyPanel` or within `NodePropertyPanel`)
-- `StartNodeConfig.vue` review: ensure process initiator variable (`_task_creator_id`) is injected into initial variables at start
-- End-to-end smoke test: design a 3-stage approval process in the designer, start it, complete each stage with different actions, verify XOR routing works
+- `workflow_scheduled_timers` migration: `(id, process_instance_id, token_id, node_id, fire_at, status, scheduled_at, fired_at nullable)`
+- `OnTimerScheduled` updated to INSERT into persistent table AND dispatch `DelayStamp` message (message is accelerator, table is source of truth)
+- `FireTimerHandler` updated to mark timer row as `fired`; idempotency guard on duplicate firings
+- `app:workflow:fire-overdue-timers` console command for cron fallback (queries `fire_at <= NOW() AND status = pending`)
+- `symfony/scheduler` integration polling overdue timers every minute
+- ISO 8601 duration parsing verification in `WorkflowEngine` (`\DateInterval::createFromDateString()`)
+- Integration tests: duration timer fires, date timer fires, timer cancelled with process, timer survives RabbitMQ restart (fallback fires within 5 minutes)
+- Designer timer config serialization verification
 
-**Addresses from FEATURES.md:** Assignment strategy configuration in designer, per-action form fields in designer
-**Avoids from PITFALLS.md:** Undefined variables from mis-configured conditions caught by publish-time validation (Pitfall 3)
-**Research flag:** Standard patterns — organization APIs already exist; `vue-flow` node config pattern already established
+**Addresses:** Timer Node Execution (all table stakes: duration, date, variable expressions, cancellation)
+
+**Avoids:**
+- RabbitMQ DelayStamp reliability pitfall — persistent table is source of truth from day one; fallback command tested with RabbitMQ restart scenario
+
+**Research flag:** Verify RabbitMQ Docker image plugin status before starting. If `rabbitmq-delayed-message-exchange` is currently enabled in `docker-compose.yml`, plan for configuration migration to DLX/TTL built-in mechanism (plugin archived, cannot be used going forward).
+
+---
+
+### Phase 6: Super Admin Impersonation
+
+**Rationale:** Impersonation requires the AuditLog infrastructure from Phase 2 (impersonation events must be logged with `impersonated_by` in every audit entry during the session). Building it last among the core features ensures the audit trail is production-ready before enabling this sensitive capability.
+
+**Delivers:**
+- `POST /api/v1/admin/impersonate/{userId}` endpoint — ROLE_SUPER_ADMIN only; returns short-lived impersonation JWT with `impersonated_by` claim
+- `ImpersonationVoter` preventing impersonating another super admin (privilege escalation guard)
+- Pre-impersonation reason modal; reason logged in `impersonation.started` audit entry
+- `impersonation.started` and `impersonation.ended` audit log entries (both actor IDs present)
+- All audit entries written during impersonation carry `actor_id` (impersonated user) and `impersonated_by` (admin)
+- Persistent orange banner in `AppTopbar.vue` when impersonation JWT is active
+- Frontend stores impersonation JWT separately; exit button discards it and restores original admin JWT
+
+**Addresses:** Super Admin Impersonation (all table stakes + impersonation reason differentiator)
+
+**Avoids:**
+- JWT/stateless incompatibility pitfall — custom JWT endpoint, NOT `switch_user: true` in `security.yaml`
+- Missing audit trail — reason field and both actor IDs in every audit entry
+- Privilege escalation — voter blocks impersonating other super admins; endpoint restricted to ROLE_SUPER_ADMIN
+
+**Research flag:** Standard patterns — custom JWT impersonation approach fully researched. `JWTManager::create()` API from `lexik/jwt-authentication-bundle` confirmed to support custom payload claims.
 
 ---
 
 ### Phase Ordering Rationale
 
-- Session 1 before everything else because variable namespacing is a foundational data contract. Changing it after form data exists requires a data migration on production records.
-- Session 2 before Session 3 because the completion handler reads `Task.form_schema` — that column must be populated before the endpoint can validate data.
-- Session 3 before Session 4 because frontend forms must call real endpoints during development to catch integration bugs. Mock data hides contract mismatches.
-- Session 4 before Session 5 because the designer improvements (Session 5) produce process definitions that run through the full Session 1-4 stack. Integration smoke testing requires Sessions 1-4 to be complete first.
-- This order directly mirrors the architectural layer dependency chain documented in ARCHITECTURE.md (Layer 1 → 6).
+- **Profile before everything:** Avatar URL must be on `User` entity before it can appear in AuditLog actor display and Dashboard task cards; CI/CD provides regression safety for all subsequent work.
+- **Audit before Dashboard and Impersonation:** Dashboard activity feed reads `audit_log`; impersonation events require an established audit trail.
+- **Notifications before Dashboard:** Dashboard unread count widget reads from the Notification module's data.
+- **Timer can run in parallel:** No dependency on Audit, Notifications, or Dashboard. Can be done alongside Phases 3-4 as a separate work stream.
+- **Impersonation last:** Requires Audit Logging to be complete; is the most security-sensitive feature and benefits from established audit patterns.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **None identified.** All sessions use proven patterns from the existing codebase or verified official documentation. The ARCHITECTURE.md contains production-quality code examples for every novel integration.
+Phases likely needing targeted investigation during planning:
+- **Phase 5 (Timer):** Verify Docker RabbitMQ image plugin status before starting (`grep -r "delayed" docker-compose.yml`). If plugin is currently enabled, plan for configuration migration to DLX/TTL built-in approach.
 
-Phases with standard patterns (research-phase can be skipped):
-- **All 5 sessions:** Stack is fixed, patterns are documented, architecture is established. The research files provide sufficient implementation guidance without additional /gsd:research-phase calls.
+Phases with well-established patterns (no additional research needed):
+- **Phase 1 (Profile + CI/CD):** S3 presigned URL and GitHub Actions patterns are fully documented and already used in the codebase.
+- **Phase 2 (Audit Logging):** Domain event consumer pattern already established in `Notification/Application/EventHandler/`.
+- **Phase 3 (Notifications):** Mercure, Mailer, and preference entity patterns are standard; existing `NotificationBell.vue` provides the starting point.
+- **Phase 4 (Dashboard):** DBAL read model pattern already demonstrated by `ProcessInstanceProjection`.
+- **Phase 6 (Impersonation):** Custom JWT approach fully researched; LexikJWT `create()` API confirmed.
 
 ---
 
@@ -206,44 +278,53 @@ Phases with standard patterns (research-phase can be skipped):
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All libraries already installed and verified. No new dependencies. Code patterns verified against official Symfony 8 and Vue 3 docs. |
-| Features | HIGH | Core table stakes verified against Camunda 8 official docs. Differentiator features cross-referenced with existing project specs (TASK_ASSIGNMENT_SPEC.md, WORKFLOW_TASKS_INTEGRATION_PLAN.md). |
-| Architecture | HIGH | Based on direct codebase analysis of the existing Procivo modules. All component boundaries and data flows derived from actual code, not inference. |
-| Pitfalls | HIGH | 5 of 6 critical pitfalls identified from direct code inspection (ExpressionEvaluator catch pattern, findLatestByProcessInstanceId usage, absence of pessimistic lock, etc.). One pitfall (frontend-only validation) from standard BPM security analysis. |
+| Stack | HIGH | Verified against official Symfony 8 docs, PrimeVue 4 docs, AWS SDK PHP v3 docs, packagist; codebase `composer.json` and `package.json` confirmed; RabbitMQ plugin archive status verified on GitHub |
+| Features | HIGH | Core requirements verified against Camunda 8, Flowable, IBM BPM, Oracle BPM official docs; CI/CD stage ordering from Symfony community sources (MEDIUM for some CI ordering rationale) |
+| Architecture | HIGH | Based on direct codebase analysis of all 9 modules, `messenger.yaml`, `security.yaml`, `DispatchDomainEventsMiddleware`, `ProcessInstanceProjection`, and `RabbitMqTimerService`; Symfony official docs for all patterns |
+| Pitfalls | HIGH | All critical pitfalls grounded in existing codebase code paths and official docs; RabbitMQ reliability confirmed via CloudAMQP blog and GitHub archive notice; JWT impersonation incompatibility confirmed in LexikJWT issues #652/#1196 |
 
 **Overall confidence: HIGH**
 
 ### Gaps to Address
 
-- **Expression publish-time validation scope:** Research recommends validating condition expressions against the variable namespace produced by upstream task nodes at process definition publish time. The exact query to reconstruct the variable namespace from the process graph (which nodes produce which variable keys) needs to be designed during Session 1 implementation.
-- **`AssignmentResolver` organization-scope queries:** All `by_role` and `by_department` queries must be scoped to `organizationId`. The `OrganizationQueryPort` interface definition must include `orgId` on all methods. Verify the existing `DoctrineOrganizationQueryAdapter` (untracked file) includes this scoping before Session 2.
-- **Parallel gateway task visibility:** Parallel branches create multiple simultaneous tasks. FEATURES.md explicitly defers the UX complexity, but the backend token-scoped link fix in Session 2 must handle the parallel case correctly (two `TaskNodeActivatedEvents` with different tokenIds for the same process instance). Add a targeted integration test.
-- **Zod 4.3.6 import compatibility:** Zod 4.x changed some import patterns from Zod 3.x. Verify that the existing `import { z } from 'zod'` syntax used in the codebase is compatible with the installed 4.3.6 version before building the dynamic schema builder in Session 4.
+- **RabbitMQ plugin status in docker-compose.yml:** STACK.md notes the `rabbitmq-delayed-message-exchange` plugin is archived but does not confirm whether the current Docker setup has it enabled. Before Phase 5 planning: check `docker-compose.yml` for plugin references and plan migration if needed.
+- **Notification module persistent storage:** ARCHITECTURE.md notes the existing Notification module saves to DB, but this needs verification during Phase 3 planning — specifically whether `Notification` entity has an active migration and persistent repository, or if it relies on Mercure-only delivery.
+- **Timer node designer config serialization:** ARCHITECTURE.md notes the designer timer config serialization "likely already exists" but needs verification that the UI correctly serializes `fire_at` values before Phase 5 implementation begins.
+- **`composer audit` baseline:** CI pipeline recommends a `composer audit` step but current dependency CVE status is unknown. Run `composer audit` during Phase 1 CI setup to establish the baseline.
 
 ---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- Official Symfony 8.0 ExpressionLanguage docs — https://symfony.com/doc/current/components/expression_language.html — operators, syntax, custom providers
-- Official Symfony 8.0 Validator docs — https://symfony.com/doc/current/validation.html — `Assert\Collection` programmatic pattern
-- Official Symfony 8.0 Messenger docs — https://symfony.com/doc/current/messenger.html — multi-bus CQRS configuration
-- Official Camunda 8 User Tasks docs — https://docs.camunda.io/docs/components/modeler/bpmn/user-tasks/ — assignment model, claim API
-- Official Camunda 8 Exclusive Gateways docs — https://docs.camunda.io/docs/components/modeler/bpmn/exclusive-gateways/ — FEEL expressions as reference point
-- Procivo codebase direct analysis — `/Users/leleka/Projects/procivo/backend/` and `/Users/leleka/Projects/procivo/frontend/` — all existing implementations
+
+- Symfony 8 Scheduler docs — `symfony.com/doc/current/scheduler.html` — timer node date-based approach, `RecurringMessage` API
+- Symfony 8 Messenger docs — `symfony.com/doc/current/messenger.html` — `DelayStamp`, AMQP DLX/TTL, async routing
+- Symfony Security — Impersonating a User — `symfony.com/doc/current/security/impersonating_user.html` — confirmed JWT stateless incompatibility
+- PrimeVue 4 Chart docs — `primevue.org/chart/` — confirmed Chart.js peer dependency required separately
+- AWS SDK PHP v3 presigned URL docs — `docs.aws.amazon.com/sdk-for-php/v3/developer-guide/s3-presigned-url.html` — `createPresignedRequest` API
+- `rabbitmq/rabbitmq-delayed-message-exchange` GitHub — archived January 29, 2026, Mnesia-dependent
+- Camunda 8 Timer Events — `docs.camunda.io/docs/components/modeler/bpmn/timer-events/` — timer feature baseline
+- Procivo codebase direct analysis — all 9 modules, `messenger.yaml`, `security.yaml`, `RabbitMqTimerService.php`, `ProcessInstanceProjection.php`, `TaskMercurePublisher.php`, `S3FileStorage.php`, `composer.json`, `package.json`
 
 ### Secondary (MEDIUM confidence)
-- Camunda form-js GitHub README — form field type list
-- Flowable user task documentation — UEL expression pattern
-- Activiti/Flowable community — variable scoping is the #1 source of production bugs in custom BPMN engines
-- Zod GitHub releases — v4.3.6 confirmed latest stable; `z.fromJSONSchema()` added in 4.3.0
 
-### Tertiary (supporting project docs)
-- `/Users/leleka/Projects/procivo/docs/TASK_ASSIGNMENT_SPEC.md` — competitor patterns (Camunda, Jira, Appian, Bitrix24, ProcessMaker, Bonita, BPMN 2.0 spec)
-- `/Users/leleka/Projects/procivo/docs/WORKFLOW_TASKS_INTEGRATION_PLAN.md` — architectural decisions and data flow (project-authored)
-- `/Users/leleka/Projects/procivo/.planning/codebase/CONCERNS.md` — identified architectural concerns
+- CloudAMQP — "Pitfalls of the Delayed Message Exchange" — Mnesia reliability, memory exhaustion, node failure data loss
+- LexikJWTAuthenticationBundle issues #652 and #1196 — JWT + `switch_user` failure mode confirmation
+- OpsHub Signal — Audit Trail Best Practices — audit entry schema fields and compliance requirements
+- `shivammathur/setup-php@v2` GitHub Marketplace — de-facto standard for Symfony CI in 2025-2026
+- KissFlow BPM Platform features 2026 — dashboard metrics baseline
+- Authress Knowledge Base — impersonation chaining risk and privilege escalation patterns
+- Medium — "Production-Ready Audit Logs in PostgreSQL" — BRIN index, monthly partitioning strategy for append-only tables
+- Mercure spec — `mercure.rocks/spec` — subscriber JWT topic selectors for per-user security
+
+### Tertiary (supporting reference)
+
+- Oracle BPM notifications docs — notification preference patterns
+- Vegam BPM Metrics and KPIs — cycle time chart rationale
+- IBM BPM Process Portal — dashboard baseline feature comparison
+- Detectify Labs — S3 upload policy bypass attack vectors (avatar MIME type validation rationale)
 
 ---
-
-*Research completed: 2026-02-28*
+*Research completed: 2026-03-01*
 *Ready for roadmap: yes*

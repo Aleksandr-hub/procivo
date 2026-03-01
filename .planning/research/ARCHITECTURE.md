@@ -1,532 +1,841 @@
 # Architecture Research
 
-**Domain:** BPM Workflow-Task Integration (Procivo)
-**Researched:** 2026-02-28
-**Confidence:** HIGH — based on direct codebase analysis + established BPM industry patterns
+**Domain:** BPM Platform — v2.0 Production-Ready Features (Procivo)
+**Researched:** 2026-03-01
+**Confidence:** HIGH — based on direct codebase analysis of all 9 modules + verified against Symfony official docs
 
 ---
 
-## Standard Architecture
+## Context: What Already Exists
 
-### System Overview
+The codebase is a well-structured Modular Monolith with Clean Architecture, DDD, CQRS. Before documenting
+new integration points, the existing module structure must be understood.
 
-```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        Presentation Layer                                     │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────────┐   │
-│  │  TaskController  │  │  ProcessInstance  │  │  ProcessDefinition       │   │
-│  │  /tasks/{id}     │  │  Controller       │  │  Controller              │   │
-│  │  /tasks/{id}/    │  │                   │  │                          │   │
-│  │  complete        │  │                   │  │                          │   │
-│  └────────┬─────────┘  └────────┬──────────┘  └──────────────┬───────────┘  │
-└───────────┼─────────────────────┼─────────────────────────────┼──────────────┘
-            │  Commands/Queries   │                             │
-┌───────────┼─────────────────────┼─────────────────────────────┼──────────────┐
-│           │    Application Layer │                             │              │
-│  ┌────────▼──────────────────┐  │  ┌──────────────────────────▼───────────┐  │
-│  │  ExecuteTaskActionHandler  │  │  │  GetTaskWorkflowContextHandler        │  │
-│  │  (command.bus)             │  │  │  (query.bus)                         │  │
-│  │  • Validates form data     │  │  │  • Returns form_schema               │  │
-│  │  • Merges variables        │  │  │  • Returns process context           │  │
-│  │  • Calls WorkflowEngine    │  │  └──────────────────────────────────────┘  │
-│  └────────┬───────────────────┘  │                                            │
-│           │                      │  ┌──────────────────────────────────────┐  │
-│  ┌────────▼───────────────────┐  │  │  OnTaskNodeActivated (event.bus)      │  │
-│  │  AssignmentResolver         │  │  │  • Builds form_schema from config    │  │
-│  │  (Application Service)      │  │  │  • Resolves assignment strategy      │  │
-│  │  • Resolves strategy →      │  │  │  • Dispatches CreateTaskCommand       │  │
-│  │    assigneeId + candidates  │  │  └──────────────────────────────────────┘  │
-│  └────────┬───────────────────┘  │                                            │
-└───────────┼──────────────────────┼────────────────────────────────────────────┘
-            │                      │
-┌───────────┼──────────────────────┼────────────────────────────────────────────┐
-│           │     Domain Layer      │                                            │
-│  ┌────────▼───────────────────┐  │  ┌──────────────────────────────────────┐  │
-│  │  WorkflowEngine             │  │  │  ProcessInstance (Event Sourced)      │  │
-│  │  • advanceToken()           │  │  │  • variables: JSONB                  │  │
-│  │  • executeAction()          │  │  │  • tokens: active/waiting/completed  │  │
-│  │  • handleExclusive          │  │  │  • mergeVariables()                  │  │
-│  │    Gateway() via Expr.Eval  │  │  └──────────────────────────────────────┘  │
-│  └─────────────────────────────┘  │                                            │
-│  ┌──────────────────────────────┐  │  ┌──────────────────────────────────────┐  │
-│  │  ExpressionEvaluator         │  │  │  Task (AggregateRoot)                │  │
-│  │  • Symfony ExpressionLang.   │  │  │  • candidateRoleId                   │  │
-│  │  • Evaluates gateway conds   │  │  │  • candidateDepartmentId             │  │
-│  └──────────────────────────────┘  │  │  • form_schema: JSONB                │  │
-│  ┌──────────────────────────────┐  │  └──────────────────────────────────────┘  │
-│  │  WorkflowTaskLink             │  │                                            │
-│  │  • processInstanceId          │  │  ┌──────────────────────────────────────┐  │
-│  │  • tokenId                    │  │  │  AssignmentStrategy (ValueObject)    │  │
-│  │  • taskId                     │  │  │  • unassigned / specific_user /      │  │
-│  │  • isCompleted                │  │  │    by_role / by_department /         │  │
-│  └──────────────────────────────┘  │  │    process_initiator / from_variable  │  │
-└────────────────────────────────────┴────────────────────────────────────────────┘
-            │
-┌───────────▼────────────────────────────────────────────────────────────────────┐
-│                        Infrastructure Layer                                     │
-│  PostgreSQL (ProcessInstance EventStore + Task JSONB) • Redis (cache) •        │
-│  RabbitMQ (async events) • Mercure (real-time push)                            │
-└────────────────────────────────────────────────────────────────────────────────┘
-```
+### Current Module Inventory
 
-### Component Responsibilities
+| Module | Role | Key Entities | Domain Events |
+|--------|------|-------------|---------------|
+| Shared | Cross-cutting kernel | AggregateRoot, DomainEvent, buses | — |
+| Identity | User auth + JWT | User | UserRegistered, UserActivated, PasswordChanged |
+| Organization | Org structure + RBAC | Organization, Department, Employee, Role | SeedDefaultRoles, AssignDefaultRole |
+| TaskManager | Tasks + boards + kanban | Task, Board, Comment, TaskAttachment | TaskAssigned, TaskStatusChanged, CommentAdded, TaskClaimed |
+| Workflow | BPMN engine + definitions | ProcessDefinition, ProcessInstance, Token, WorkflowTaskLink | ProcessStarted, ProcessCompleted, TimerScheduled, TaskNodeActivated, ... |
+| Notification | In-app notifications | Notification | — (consumer only) |
+| Resource | Resource management | (present, lower use) | — |
+| Directory | Dynamic definitions | (present, lower use) | — |
+| Search | Elasticsearch | (stub) | — |
 
-| Component | Responsibility | Implementation |
-|-----------|----------------|----------------|
-| `WorkflowEngine` | Token lifecycle — advance, evaluate gateways, schedule timers | Domain service; pure PHP, no I/O |
-| `ExpressionEvaluator` | Evaluate Symfony ExpressionLanguage conditions against process variables | Domain service wrapping Symfony EL |
-| `ProcessInstance` | Event-sourced aggregate — holds tokens, variables, process state | AggregateRoot; reconstituted from EventStore |
-| `WorkflowTaskLink` | Bridge entity: maps (processInstanceId, tokenId) → taskId | Workflow module domain entity; read by both modules |
-| `Task` (TaskManager) | Holds form_schema JSONB, candidate pool columns, assignment state | TaskManager AggregateRoot; Doctrine XML mapping |
-| `AssignmentResolver` | Resolves assignment strategy to assigneeId + candidates using Organization queries | Application service; uses OrganizationQueryPort |
-| `OnTaskNodeActivated` | Listens to event, builds form_schema, dispatches CreateTaskCommand | Application event handler (event.bus) |
-| `ExecuteTaskActionHandler` | Validates form data, merges variables, calls WorkflowEngine.executeAction | Application command handler (command.bus) |
-| `FormFieldCollector` | Traverses ProcessGraph to collect fields for a given action key | Application service; used during validation |
-| `GetTaskWorkflowContextHandler` | Returns form_schema + process context for task detail page | Application query handler (query.bus) |
+### Current Cross-Module Communication Patterns
+
+**Pattern 1 — Domain Events via event.bus (primary)**
+Domain events are raised inside `AggregateRoot.recordEvent()`, pulled by `DispatchDomainEventsMiddleware`
+after the command handler commits, then dispatched to `event.bus`. Other modules subscribe via
+`#[AsMessageHandler(bus: 'event.bus')]`. Example: `Notification::OnTaskAssigned` listens to
+`TaskManager::TaskAssignedEvent`.
+
+**Pattern 2 — Port/Adapter interface (for synchronous cross-module queries)**
+When Module A needs data from Module B synchronously (not via events), it defines an interface
+in its own `Application/Port/` layer. Module B's Infrastructure provides the implementation
+(adapter). Example: `TaskManager::OrganizationQueryPort` → `DoctrineOrganizationQueryAdapter`
+reads Organization repositories directly.
+
+**Pattern 3 — Direct repository injection across modules (Infrastructure only)**
+Infrastructure adapters in one module inject repositories from another module. Used only when
+Port/Adapter would be over-engineering for simple reads. Example: `OnTaskAssigned` injects
+`TaskRepositoryInterface` from TaskManager to read the task title.
+
+**Pattern 4 — Async via RabbitMQ (for expensive or non-blocking work)**
+Certain events are routed to the `async` transport in `messenger.yaml`. This offloads work from
+the HTTP request cycle. Example: `TaskAssignedEvent`, `TaskStatusChangedEvent`, `CommentAddedEvent`
+are all routed async. `FireTimerMessage` uses `DelayStamp` for delayed execution.
+
+**Pattern 5 — Read model projections (for query performance)**
+`ProcessInstanceProjection` in `Workflow/Infrastructure/ReadModel/` subscribes to Workflow events
+and maintains a denormalized `workflow_process_instances_view` table using raw DBAL. Avoids
+replaying the event store for every list query.
 
 ---
 
-## Component Boundaries
-
-### What Talks to What
+## System Overview
 
 ```
-Frontend
-  │
-  ├── GET /tasks/{id}                    → TaskController → GetTaskHandler
-  │                                         Returns: TaskDetailDTO (includes workflow_summary)
-  │
-  ├── GET /tasks/{id}/workflow-context   → TaskController → GetTaskWorkflowContextHandler
-  │                                         Returns: form_schema + process_name + node_name
-  │
-  ├── POST /tasks/{id}/complete          → TaskController → ExecuteTaskActionCommand
-  │     { action_key, form_data }           Handler: validates → merges → engine.executeAction
-  │                                         Side effect: new TaskNodeActivatedEvent → new Task
-  │
-  ├── POST /tasks/{id}/claim             → TaskController → ClaimTaskCommand
-  │                                         Validates candidate pool membership
-  │
-  └── POST /tasks/{id}/unclaim          → TaskController → UnclaimTaskCommand
-
-Workflow Module
-  │
-  ├── WorkflowEngine (Domain)           → Pure logic only; no I/O
-  │   • Called by: ExecuteTaskActionHandler
-  │   • Emits events onto ProcessInstance (not dispatched directly)
-  │
-  ├── ProcessInstance (Domain)          → Event-sourced; state reconstructed from EventStore
-  │   • TaskNodeActivatedEvent recorded here
-  │   • Variables stored as JSONB (mergeVariables called by handler)
-  │
-  ├── OnTaskNodeActivated (App)         → Listens on event.bus (async)
-  │   • Reads ProcessGraph to build form_schema
-  │   • Dispatches CreateTaskCommand to TaskManager
-  │   • Creates WorkflowTaskLink
-  │
-  └── ExecuteTaskActionHandler (App)    → Listens on command.bus (sync)
-      • Reads WorkflowTaskLink to find process context
-      • Calls FormFieldCollector (reads ProcessGraph)
-      • Calls WorkflowEngine.executeAction
-      • Saves ProcessInstance (triggers more events)
-
-TaskManager Module
-  │
-  ├── Task entity                       → Stores form_schema (JSONB), candidateRoleId, candidateDepartmentId
-  │
-  ├── CreateTaskHandler                 → Accepts form_schema via command metadata
-  │
-  ├── ClaimTaskHandler                  → Validates candidate via OrganizationQueryPort
-  │
-  └── AssignmentResolver (App Service) → Called by OnTaskNodeActivated
-      • Uses OrganizationQueryPort to find employees by role/department
-
-Organization Module (read-only from TaskManager/Workflow)
-  │
-  └── OrganizationQueryPort             → Interface in TaskManager/Application/Port
-      • Implementation: Infrastructure/Organization/DoctrineOrganizationQueryAdapter
-      • Used by: AssignmentResolver, ClaimTaskHandler (candidate validation)
+┌──────────────────────────────────────────────────────────────────────────┐
+│                     Presentation Layer (HTTP Controllers)                 │
+│  Identity  │ Organization │ TaskManager │ Workflow │ Notification │ ...   │
+│  Controller│  Controller  │  Controller │ Controller│  Controller  │ NEW  │
+└────────────┴──────────────┴─────────────┴──────────┴──────────────┴──────┘
+             │ CommandBus / QueryBus (synchronous within HTTP request)
+┌────────────┴──────────────────────────────────────────────────────────────┐
+│                     Application Layer (Handlers, EventHandlers)            │
+│  Command Handlers       Query Handlers        Event Handlers               │
+│  (write side)           (read side)           (#[AsMessageHandler]         │
+│                                                bus: 'event.bus')           │
+└────────────┬──────────────────────────────────────────────────────────────┘
+             │ DomainEvents pulled by DispatchDomainEventsMiddleware
+┌────────────┴──────────────────────────────────────────────────────────────┐
+│                     Domain Layer (Entities, Events, Repositories)          │
+│  AggregateRoot → recordEvent() → pulled by middleware → event.bus          │
+└────────────┬──────────────────────────────────────────────────────────────┘
+             │ Doctrine XML mappings / Raw DBAL / S3 / Mercure / RabbitMQ
+┌────────────┴──────────────────────────────────────────────────────────────┐
+│                     Infrastructure Layer                                    │
+│  PostgreSQL │ Redis │ RabbitMQ (async transport) │ Mercure SSE │ S3        │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## New Feature Integration Points
+
+### Feature 1: Audit Logging
+
+**Verdict: New `AuditLog` module, fed exclusively by existing domain events.**
+
+The codebase already emits rich domain events from every significant action. Audit logging
+is a pure consumer of these events — it does not need to change any existing module.
+
+**New module location:** `backend/src/AuditLog/`
+
+```
+AuditLog/
+├── Domain/
+│   ├── Entity/
+│   │   └── AuditEntry.php           # id, actor_id, actor_name, action, module, entity_id, payload (JSON), occurred_at
+│   ├── Repository/
+│   │   └── AuditEntryRepositoryInterface.php
+│   └── ValueObject/
+│       └── AuditAction.php          # enum: created, updated, deleted, transition, process_started, etc.
+├── Application/
+│   └── EventHandler/
+│       ├── OnTaskCreated.php        # listens TaskCreatedEvent → writes AuditEntry
+│       ├── OnTaskStatusChanged.php  # listens TaskStatusChangedEvent → writes AuditEntry
+│       ├── OnTaskAssigned.php       # listens TaskAssignedEvent → writes AuditEntry
+│       ├── OnProcessStarted.php     # listens ProcessStartedEvent → writes AuditEntry
+│       ├── OnProcessCompleted.php   # listens ProcessCompletedEvent → writes AuditEntry
+│       └── OnCommentAdded.php       # listens CommentAddedEvent → writes AuditEntry
+├── Infrastructure/
+│   ├── Persistence/Doctrine/Mapping/
+│   │   └── AuditEntry.orm.xml
+│   └── Repository/
+│       └── DoctrineAuditEntryRepository.php
+└── Presentation/
+    └── Controller/
+        └── AuditLogController.php   # GET /api/v1/audit-log?entity_id=X&module=Y
+```
+
+**Integration pattern:** All `OnXxx` event handlers follow the same pattern already used in
+`Notification/Application/EventHandler/`. Each handler is tagged `#[AsMessageHandler(bus: 'event.bus')]`.
+
+**What goes in `AuditEntry`:**
+- `actor_id` (string UUID) — the user who triggered the action
+- `actor_name` (string) — denormalized name for historical display (snapshot)
+- `action` (enum string) — e.g. `task.assigned`, `process.started`, `task.status_changed`
+- `module` (string) — e.g. `TaskManager`, `Workflow`
+- `entity_id` (string UUID) — the affected entity (task ID, process instance ID)
+- `entity_type` (string) — e.g. `Task`, `ProcessInstance`
+- `payload` (JSONB) — relevant snapshot data (old/new status, assignee ID, etc.)
+- `occurred_at` (datetime) — from `DomainEvent::occurredAt()`
+- `organization_id` (string) — for multi-tenant scoping
+
+**Async routing:** Add audit event handlers to the `async` transport in `messenger.yaml`:
+```yaml
+App\AuditLog\Application\EventHandler\*: async
+```
+This prevents audit writes from adding latency to the HTTP request.
+
+**Critical decision:** Do NOT use Doctrine lifecycle listeners (postPersist, postUpdate). These
+capture all entity changes including internal state that has no user-visible meaning. Domain events
+capture business-meaningful actions — the right granularity for audit logs.
+
+**messenger.yaml additions needed:**
+```yaml
+routing:
+  App\TaskManager\Domain\Event\TaskCreatedEvent: async     # currently missing
+  App\TaskManager\Domain\Event\TaskDeletedEvent: async     # currently missing
+  App\TaskManager\Domain\Event\CommentAddedEvent: async    # already present
+  App\TaskManager\Domain\Event\TaskAssignedEvent: async    # already present
+  App\TaskManager\Domain\Event\TaskStatusChangedEvent: async  # already present
+  App\Workflow\Domain\Event\ProcessStartedEvent: async    # new routing needed
+  App\Workflow\Domain\Event\ProcessCompletedEvent: async  # new routing needed
+  App\Workflow\Domain\Event\ProcessCancelledEvent: async  # new routing needed
+```
+
+**Frontend:** New `audit-log` module or sub-feature inside tasks/workflow pages showing
+a timeline component. Can be a simple query-only view with PrimeVue `Timeline` component.
+
+---
+
+### Feature 2: Notification System (Enhancement)
+
+**Verdict: Notification module already exists — extend it, do not create new.**
+
+The existing `Notification` module has `Notification` entity, 3 event handlers, list/count/mark-read
+API, and `NotificationBell.vue` on the frontend. What is missing for v2.0:
+
+**Missing backend capabilities:**
+1. Email delivery — add `EmailNotificationPort` interface in `Notification/Application/Port/`
+   and implement via Symfony Mailer in `Notification/Infrastructure/Mailer/`
+2. User preferences — add `NotificationPreference` entity (user_id, type, channel: in_app|email|both)
+3. Mercure real-time push — currently Notification saves to DB but does NOT push via Mercure
+
+**Missing event handlers (new `NotificationType` values needed):**
+- `OnProcessStarted` → notify process initiator
+- `OnProcessCompleted` → notify initiator + participants
+- `OnTaskClaimed` → notify task creator
+
+**Mercure integration for Notification:**
+Currently `TaskMercurePublisher` in TaskManager pushes to `/organizations/{id}/tasks`. Add
+`NotificationMercurePublisher` in `Notification/Infrastructure/Mercure/` that pushes to the
+user-specific topic `/users/{recipientId}/notifications`. The `Notification::create()` call
+already happens in `OnTaskAssigned` — add a Mercure publish call right after the DB save.
+
+```
+Notification/Infrastructure/Mercure/
+└── NotificationMercurePublisher.php   # publishes to /users/{userId}/notifications
+```
+
+**Frontend additions:**
+- `NotificationBell.vue` already exists — add SSE subscription via EventSource to
+  `/api/.well-known/mercure?topic=/users/{userId}/notifications`
+- Add `NotificationPreferences.vue` panel in user profile section
+- Add email notification toggle per notification type
+
+**New `NotificationType` enum values:**
+```php
+case ProcessStarted = 'process_started';
+case ProcessCompleted = 'process_completed';
+case TaskClaimed = 'task_claimed';
+case TimerFired = 'timer_fired';
+```
+
+---
+
+### Feature 3: Dashboard
+
+**Verdict: New `Dashboard` module — query-only, cross-module read via DBAL adapters.**
+
+Dashboard requires data from multiple modules: tasks (assigned to me, overdue), process instances
+(active, by definition), notifications (unread count). This is pure read — no writes.
+
+**Approach: Dedicated Dashboard query handler using raw DBAL**
+
+Do NOT inject repositories from multiple modules into a single handler. Instead, create a
+dedicated `Dashboard` module with query handlers that access the underlying tables directly via
+DBAL (same approach as `ProcessInstanceProjection`).
+
+```
+Dashboard/
+├── Application/
+│   └── Query/
+│       ├── GetDashboardSummary/
+│       │   ├── GetDashboardSummaryQuery.php    # { userId, organizationId }
+│       │   └── GetDashboardSummaryHandler.php  # DBAL multi-table query
+│       └── GetActivityFeed/
+│           ├── GetActivityFeedQuery.php         # { organizationId, limit }
+│           └── GetActivityFeedHandler.php       # reads audit_log table
+└── Presentation/
+    └── Controller/
+        └── DashboardController.php              # GET /api/v1/organizations/{id}/dashboard
+```
+
+**`GetDashboardSummaryHandler` data sources (via DBAL, not repositories):**
+- `task_manager_tasks` — count assigned-to-me tasks by status
+- `task_manager_tasks` — count overdue tasks (due_date < NOW() AND status != done)
+- `workflow_process_instances_view` — count active processes started by me or my org
+- `notification` table — unread count (could also come from `Notification` module's query handler)
+
+**Why DBAL over injecting repositories:** Injecting repositories from 3 modules into one handler
+violates bounded context isolation. DBAL reads denormalized tables directly — the same approach
+already used by `ProcessInstanceProjection`. For a dashboard, raw SQL is appropriate and fast.
+
+**Alternative rejected:** A `DashboardQueryPort` in each source module that Dashboard implements.
+This adds 3 cross-module port interfaces for essentially a thin wrapper around SELECT COUNT(*).
+Overkill for a dashboard at this scale.
+
+**Frontend:** New `dashboard` module with:
+- `/organizations/:orgId/dashboard` route
+- `DashboardPage.vue` with PrimeVue `Card`, `Chart` (for process counts), `DataTable` (for tasks)
+- `useDashboardStore` (Pinia) for fetch + cache
+
+---
+
+### Feature 4: User Profile + Avatar
+
+**Verdict: Extend `Identity` module — add `avatarUrl` field to `User` entity and S3 upload port.**
+
+User profile (avatar, display name) belongs to the Identity bounded context. The `User` entity
+already has `firstName`, `lastName`, `email`. Adding avatar URL is an extension of the same entity.
+
+**Backend changes to Identity module:**
+
+1. Add `avatarUrl` field to `User` entity (nullable string, stored in `identity_users.avatar_url`)
+2. Add `UserAvatar.orm.xml` field to `User.orm.xml` — single `<field name="avatarUrl" ...>`
+3. New command: `UpdateUserProfile` → `UpdateUserProfileHandler` (updates firstName, lastName, avatarUrl)
+4. New command: `UploadUserAvatar` → `UploadUserAvatarHandler` (uploads to S3, saves URL to User)
+5. New port: `Identity/Application/Port/FileStorageInterface.php` (mirrors TaskManager's pattern)
+6. Infrastructure: `Identity/Infrastructure/Storage/S3UserAvatarStorage.php`
+
+```
+Identity/Application/Command/
+├── UpdateUserProfile/
+│   ├── UpdateUserProfileCommand.php   # { userId, firstName, lastName, bio? }
+│   └── UpdateUserProfileHandler.php
+└── UploadUserAvatar/
+    ├── UploadUserAvatarCommand.php    # { userId, fileContent, mimeType }
+    └── UploadUserAvatarHandler.php    # calls FileStorageInterface → saves avatarUrl to User
+
+Identity/Application/Port/
+└── FileStorageInterface.php           # store(content, mimeType): string (returns URL)
+
+Identity/Infrastructure/Storage/
+└── S3UserAvatarStorage.php            # uses same AWS SDK already in composer.json
+```
+
+**S3 key pattern:** `avatars/{userId}.{ext}` — simple, deterministic, easy to invalidate.
+
+**Frontend:**
+- Extend `useAuthStore` to include `avatarUrl` field from `GetCurrentUser` API response
+- Add `UserAvatar.vue` shared component — shows avatar or initials fallback
+- Add `ProfilePage.vue` in `modules/auth/pages/` with `FileUpload` (PrimeVue) for avatar
+- Update `AppTopbar.vue` to show avatar + name
+
+**UserDTO extension:**
+```php
+public string $avatarUrl;  // nullable string → empty string if null
+```
+
+**Cross-module concern:** Other modules that display user names/avatars (TaskManager, Workflow) should
+get avatarUrl from the JWT claims or from a shared query. Recommendation: add `avatarUrl` to JWT
+payload via `JwtCreatedListener` (already exists in Identity/Infrastructure/Security/).
+
+---
+
+### Feature 5: Timer Node Execution
+
+**Verdict: Already partially built in Workflow module — complete the execution gap.**
+
+The timer infrastructure is almost complete. What exists:
+- `TimerServiceInterface` + `RabbitMqTimerService` — schedules `FireTimerMessage` with `DelayStamp`
+- `OnTimerScheduled` event handler — calls `timerService.scheduleTimer()`
+- `FireTimerHandler` — receives `FireTimerMessage`, calls `instance.fireTimer()` + `engine.resumeToken()`
+- `ProcessInstanceProjection` — handles `TimerScheduledEvent` and `TimerFiredEvent` to update view
+
+**What is missing for full timer execution:**
+
+1. **Timer node config parsing** — `TimerScheduledEvent` fires but the `fireAt` datetime must be
+   derived from the timer node's config (ISO duration like `PT1H`, or a specific datetime). The
+   `OnTimerScheduled` event handler does `new \DateTimeImmutable($event->fireAt)` which means the
+   event already carries the calculated `fireAt`. Need to verify that the WorkflowEngine correctly
+   calculates `fireAt` from the node config when it activates a Timer node.
+
+2. **Duration parsing** — ISO 8601 duration (`PT1H`, `P1D`) → `\DateInterval` → add to `new \DateTimeImmutable()`.
+   PHP's `\DateInterval::createFromDateString()` handles this. No extra library needed.
+
+3. **Test coverage** — `FireTimerHandler` needs integration tests verifying the token resumes correctly
+   after timer fires.
+
+4. **Designer config** — Timer node property panel needs duration/datetime picker. Likely this
+   already exists in the designer (since `TimerScheduledEvent` carries a `fireAt` value), but needs
+   verification that the UI correctly serializes the value.
+
+**RabbitMQ `DelayStamp` concern:** The existing implementation uses Symfony's `DelayStamp` which
+relies on the `x-delay` header (requires `rabbitmq_delayed_message_exchange` plugin) or falls back
+to dead-letter exchange TTL. Verify the Docker RabbitMQ image has the delayed message exchange
+plugin enabled. If not, the fallback (DLE + TTL) works but has a 1-second granularity floor.
+
+```yaml
+# docker-compose.yml — RabbitMQ should use:
+image: rabbitmq:4-management
+# AND either:
+# - rabbitmq-delayed-message-exchange plugin (requires community image)
+# - OR: accept DLE TTL-based delays (simpler, sufficient for HR/process timers)
+```
+
+**No new files needed in Workflow module** — architecture is correct. Work is:
+- Verify node config → `fireAt` computation in WorkflowEngine
+- Add tests for timer flow (TimerScheduled → FireTimer → token resumes)
+- Possibly fix designer timer config serialization
+
+---
+
+### Feature 6: CI/CD Pipeline
+
+**Verdict: New `.github/workflows/` directory — no module changes needed.**
+
+CI/CD is infrastructure-only. The Makefile already defines all quality targets (`test`, `lint`, `fix`, `stan`).
+
+**Recommended pipeline structure:**
+
+```
+.github/
+└── workflows/
+    ├── ci.yml          # runs on every PR: lint, stan, test
+    └── cd.yml          # runs on merge to main: build Docker image (optional for pet project)
+```
+
+**`ci.yml` steps:**
+```yaml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env: { POSTGRES_DB: procivo_test, POSTGRES_USER: app, POSTGRES_PASSWORD: secret }
+        ports: ['5432:5432']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.4', extensions: 'amqp, redis, pdo_pgsql' }
+      - run: cd backend && composer install --no-interaction
+      - run: cd backend && vendor/bin/php-cs-fixer fix --dry-run --diff
+      - run: cd backend && vendor/bin/phpstan analyse
+      - run: cd backend && vendor/bin/phpunit
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '24' }
+      - run: cd frontend && npm ci
+      - run: cd frontend && npm run type-check
+      - run: cd frontend && npm run lint
+      - run: cd frontend && npm run test:unit
+```
+
+**Pre-commit hooks:** Add `.pre-commit-config.yaml` or use a simple `Makefile` hook. For pet
+project pace, GitHub Actions CI is sufficient — local pre-commit hooks are optional.
+
+---
+
+### Feature 7: Super Admin Impersonation
+
+**Verdict: Pure Security layer concern — extend `Identity` module's security config only.**
+
+Symfony has native `switch_user` impersonation built into the security firewall. No new module needed.
+
+**Implementation:**
+
+1. Add `ROLE_SUPER_ADMIN` to `User.roles` JSON field
+2. Configure `switch_user` in `security.yaml`:
+   ```yaml
+   security:
+     firewalls:
+       main:
+         switch_user: { role: CAN_SWITCH_USER }
+   ```
+3. Create `ImpersonationVoter` in `Identity/Infrastructure/Security/`:
+   ```php
+   class ImpersonationVoter extends Voter
+   {
+       protected function supports(string $attribute, mixed $subject): bool
+       {
+           return 'CAN_SWITCH_USER' === $attribute;
+       }
+       protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
+       {
+           return in_array('ROLE_SUPER_ADMIN', $token->getRoleNames(), true);
+       }
+   }
+   ```
+4. Add `IS_IMPERSONATOR` attribute check to relevant controllers for audit trail
+5. Add `UserImpersonatedEvent` (domain event) to record in AuditLog
+
+**Frontend:** Add impersonation notice banner in `AppTopbar.vue` when `IS_IMPERSONATOR` is true
+(detectable via a flag in the JWT or a `/me` API response field).
+
+---
+
+## Component Boundaries Summary
+
+| New/Modified | Module | Action | Communicates With |
+|-------------|--------|--------|-------------------|
+| AuditLog | NEW | Consumes domain events, writes AuditEntry | Listens to: Identity, TaskManager, Workflow events |
+| Notification | EXTEND | Add email port, Mercure push, new event handlers | Listens to: TaskManager, Workflow; Publishes: Mercure |
+| Dashboard | NEW | Read-only DBAL queries across modules | Reads: task_manager_*, workflow_*, audit_log, notification tables |
+| Identity | EXTEND | Add avatarUrl to User, S3 upload port, profile commands | Publishes: UserProfileUpdated event |
+| Workflow | COMPLETE | Timer node execution already structured | No new cross-module deps |
+| CI/CD | INFRA | GitHub Actions workflow files | None |
+| Identity | EXTEND | Impersonation voter + ROLE_SUPER_ADMIN | AuditLog (via event) |
 
 ---
 
 ## Data Flow
 
-### Primary Flow: Task Completion Advances Process
+### Audit Log Flow
 
 ```
-User clicks "Approve" in ActionFormDialog
-    │
-    ▼ POST /tasks/{id}/complete { action_key: "approve", form_data: { comment: "OK" } }
-    │
-    ▼ TaskController → dispatches ExecuteTaskActionCommand(taskId, actionKey, formData)
-    │
-    ▼ ExecuteTaskActionHandler (command.bus — sync, transactional)
-    │   1. Finds WorkflowTaskLink by taskId → gets (processInstanceId, tokenId)
-    │   2. Loads ProcessInstance (replays EventStore)
-    │   3. Loads ProcessDefinitionVersion → builds ProcessGraph
-    │   4. FormFieldCollector.collectForValidation(graph, nodeId, actionKey) → all fields
-    │   5. Validates formData against required fields → throws FormValidationException if invalid
-    │   6. ProcessInstance.mergeVariables(nodeId, actionKey, formData) → records event
-    │   7. WorkflowEngine.executeAction(instance, tokenId, graph, actionKey)
-    │       a. Finds outgoing transition for actionKey
-    │       b. Moves token: source node → target node
-    │       c. Calls advanceToken on target:
-    │          - If task node → ProcessInstance.activateTaskNode() → records TaskNodeActivatedEvent
-    │          - If XOR gateway → ExpressionEvaluator.evaluate(condition, variables) → picks path
-    │          - If End → completes token, maybe completes process
-    │   8. InstanceRepository.save(instance) → persists all recorded events to EventStore
-    │   9. WorkflowTaskLink.markCompleted() → saved
-    │
-    ▼ DispatchDomainEventsMiddleware extracts events from UnitOfWork
-    │
-    ▼ EventBus dispatches TaskNodeActivatedEvent (async via RabbitMQ)
-    │
-    ▼ OnTaskNodeActivated handler (event.bus — async)
-        1. Reads instance.variables (loads from EventStore)
-        2. Reads ProcessGraph → finds node config + outgoing transitions
-        3. Builds form_schema: { shared_fields: nodeConfig.formFields, actions: transitions.formFields }
-        4. Resolves assignment (AssignmentResolver)
-        5. Dispatches CreateTaskCommand → new Task created in TaskManager
-        6. Creates new WorkflowTaskLink
+HTTP Request (e.g. CompleteTask)
+  → CommandBus → ExecuteTaskActionHandler
+    → ProcessInstance.executeAction() → recordEvent(ProcessCompletedEvent)
+    → DispatchDomainEventsMiddleware pulls events → EventBus.dispatch(ProcessCompletedEvent)
+      → [async transport → RabbitMQ]
+        → Consumer → AuditLog::OnProcessCompleted → AuditEntry saved to DB
+        → AuditLog::... → multiple handlers for same event (allowed by event.bus config)
 ```
 
-### Secondary Flow: Loading Task Detail with Form Schema
+### Notification + Real-Time Flow
 
 ```
-User opens task detail page
-    │
-    ▼ GET /tasks/{id}/workflow-context
-    │
-    ▼ GetTaskWorkflowContextHandler (query.bus)
-    │   1. Loads Task (to check workflowSummary)
-    │   2. Finds WorkflowTaskLink by taskId
-    │   3. Loads ProcessInstance → gets variables
-    │   4. Loads ProcessDefinitionVersion → builds ProcessGraph
-    │   5. Reads nodeConfig.formFields (shared_fields)
-    │   6. Reads all outgoing transitions → collects each transition's formFields + actionKey + label
-    │   7. Returns TaskWorkflowContextDTO {
-    │        process_name, node_name, is_completed,
-    │        form_schema: { shared_fields, actions: [{key, label, form_fields}] }
-    │      }
-    │
-    ▼ Frontend: task.types.ts TaskWorkflowContextDTO
-    │
-    ▼ TaskDetailContent.vue renders:
-        - Process badge (process_name + node_name)
-        - Shared fields always visible
-        - Action buttons: one per actions[]
-        - Click action → ActionFormDialog shows action-specific fields
+TaskAssignedEvent dispatched to event.bus (async)
+  → Notification::OnTaskAssigned
+    → Notification::create() → repository.save()
+    → NotificationMercurePublisher.publish('/users/{recipientId}/notifications', payload)
+      → Frontend EventSource receives push → NotificationBell badge increments
 ```
 
-### Assignment Resolution Flow
+### Dashboard Flow
 
 ```
-OnTaskNodeActivated fires
-    │
-    ▼ AssignmentResolver.resolve(strategy, config, variables, organizationId)
-    │
-    ▼ Strategy dispatch:
-    │   'specific_user'    → assigneeId = config.assignee_employee_id
-    │   'process_initiator'→ assigneeId = variables['_task_creator_id']
-    │   'from_variable'    → assigneeId = variables['_assignee_for_{nodeId}']
-    │   'by_role'          → OrganizationQueryPort.findEmployeesByRole(roleId, orgId)
-    │                         count==1 → direct assign
-    │                         count>1  → candidateRoleId set, assigneeId=null (pool)
-    │                         count==0 → assigneeId=null, log warning
-    │   'by_department'    → OrganizationQueryPort.findEmployeesByDepartment(deptId, orgId)
-    │                         same pool logic
-    │   'unassigned'       → assigneeId=null, no candidates
-    │
-    ▼ Returns AssignmentResult { assigneeId, candidateRoleId, candidateDepartmentId }
-    │
-    ▼ Passed into CreateTaskCommand
+Frontend: GET /api/v1/organizations/{orgId}/dashboard
+  → DashboardController → QueryBus → GetDashboardSummaryHandler
+    → DBAL: SELECT COUNT(*) FROM task_manager_tasks WHERE assignee_id = ? AND status != 'done'
+    → DBAL: SELECT COUNT(*) FROM workflow_process_instances_view WHERE organization_id = ? AND status = 'running'
+    → DBAL: SELECT COUNT(*) FROM notification WHERE recipient_id = ? AND is_read = false
+    → Returns aggregated DTO
 ```
 
-### Claim Flow
+### Timer Execution Flow
 
 ```
-User clicks "Assign to Me" on pool task
-    │
-    ▼ POST /tasks/{id}/claim
-    │
-    ▼ ClaimTaskHandler
-    │   1. Loads Task → checks isPoolTask, existing assignee
-    │   2. If already assigned → throws TaskClaimException (409)
-    │   3. Validates current user is in candidate pool:
-    │      - candidateRoleId? → check employee has that role (OrganizationQueryPort)
-    │      - candidateDepartmentId? → check employee in department
-    │   4. Task.claim(employeeId) → records TaskClaimedEvent
-    │   5. TaskRepository.save(task)
-    │
-    ▼ Mercure publishes task update → other users see "Claimed by Alice"
+WorkflowEngine activates Timer node
+  → ProcessInstance.recordEvent(TimerScheduledEvent { fireAt })
+  → event.bus → Workflow::OnTimerScheduled
+    → RabbitMqTimerService.scheduleTimer() → dispatch FireTimerMessage with DelayStamp
+      → [RabbitMQ holds message until TTL expires]
+        → Consumer → FireTimerHandler
+          → instance.fireTimer() → engine.resumeToken()
+          → Saves instance → DispatchDomainEventsMiddleware → TimerFiredEvent dispatched
+            → ProcessInstanceProjection updates view (token status = active)
 ```
 
 ---
 
-## Suggested Build Order (Dependencies Between Components)
-
-Dependencies flow strictly downward — each item requires the items above it to be complete.
-
-### Layer 1 — Data Schema (no code dependencies)
+## Recommended Project Structure (new additions only)
 
 ```
-1a. Migration: ProcessInstance.variables JSONB column
-1b. Migration: Transition.form_fields JSONB column
-1c. Migration: Task.candidate_role_id + candidate_department_id columns
-1d. Migration: Task.form_schema JSONB column
-```
+backend/src/
+├── AuditLog/                                   # NEW module
+│   ├── Domain/
+│   │   ├── Entity/AuditEntry.php
+│   │   ├── Repository/AuditEntryRepositoryInterface.php
+│   │   └── ValueObject/AuditAction.php
+│   ├── Application/
+│   │   └── EventHandler/
+│   │       ├── OnTaskCreated.php
+│   │       ├── OnTaskStatusChanged.php
+│   │       ├── OnTaskAssigned.php
+│   │       ├── OnProcessStarted.php
+│   │       ├── OnProcessCompleted.php
+│   │       └── OnCommentAdded.php
+│   ├── Infrastructure/
+│   │   ├── Persistence/Doctrine/Mapping/AuditEntry.orm.xml
+│   │   └── Repository/DoctrineAuditEntryRepository.php
+│   └── Presentation/
+│       └── Controller/AuditLogController.php
+│
+├── Dashboard/                                  # NEW module (query-only)
+│   ├── Application/
+│   │   └── Query/
+│   │       ├── GetDashboardSummary/
+│   │       │   ├── GetDashboardSummaryQuery.php
+│   │       │   └── GetDashboardSummaryHandler.php  # DBAL
+│   │       └── GetActivityFeed/
+│   │           ├── GetActivityFeedQuery.php
+│   │           └── GetActivityFeedHandler.php      # reads audit_log
+│   └── Presentation/
+│       └── Controller/DashboardController.php
+│
+├── Identity/                                   # EXTENDED
+│   ├── Application/
+│   │   ├── Command/
+│   │   │   ├── UpdateUserProfile/             # new
+│   │   │   └── UploadUserAvatar/              # new
+│   │   └── Port/
+│   │       └── FileStorageInterface.php       # new (mirrors TaskManager pattern)
+│   └── Infrastructure/
+│       └── Storage/
+│           └── S3UserAvatarStorage.php        # new
+│
+├── Notification/                              # EXTENDED (email + Mercure push)
+│   ├── Application/
+│   │   ├── EventHandler/
+│   │   │   ├── OnProcessStarted.php           # new
+│   │   │   └── OnProcessCompleted.php         # new
+│   │   └── Port/
+│   │       └── EmailNotificationPort.php      # new (interface)
+│   └── Infrastructure/
+│       ├── Mailer/
+│       │   └── SymfonyEmailNotificationSender.php  # new
+│       └── Mercure/
+│           └── NotificationMercurePublisher.php    # new
+│
+└── Workflow/                                   # NO NEW FILES — complete existing timer logic
+    └── (verify TimerNode config → fireAt calculation in WorkflowEngine)
 
-All migrations are independent of each other and can be applied together.
-
-### Layer 2 — Domain Entities (requires migrations)
-
-```
-2a. ProcessInstance: add variables(), mergeVariables() methods + variable-related events
-2b. Task: add candidateRoleId, candidateDepartmentId, formSchema fields + getters
-2c. AssignmentStrategy enum: complete all strategy values
-2d. WorkflowTaskLink: ensure isCompleted flag persists correctly
-```
-
-`2a` and `2b` are independent. `2c` is used by `2b`. `2d` is standalone.
-
-### Layer 3 — Application Services (requires Layer 2)
-
-```
-3a. OrganizationQueryPort interface + DoctrineOrganizationQueryAdapter
-    → Required by: AssignmentResolver, ClaimTaskHandler
-3b. AssignmentResolver service
-    → Requires: 3a, 2c
-3c. FormFieldCollector service (may already exist partially)
-    → Requires: ProcessGraph API (already done)
-3d. GetTaskWorkflowContextHandler query
-    → Requires: 2a, 2b, ProcessGraph
-```
-
-`3a` must come before `3b`. Others are parallel once Layer 2 is done.
-
-### Layer 4 — Command/Event Handlers (requires Layer 3)
-
-```
-4a. OnTaskNodeActivated: add form_schema building + AssignmentResolver call
-    → Requires: 3b, 3c, 2b
-4b. CreateTaskHandler: accept form_schema in command, persist to Task entity
-    → Requires: 2b, 4a (command shape change)
-4c. ExecuteTaskActionHandler: add formData validation + variable merge
-    → Requires: 3c, 2a
-4d. ClaimTaskHandler: implement + validate candidate pool via 3a
-    → Requires: 3a, 2b
-4e. UnclaimTaskHandler: implement
-    → Requires: 2b
-```
-
-### Layer 5 — API Endpoints (requires Layer 4)
-
-```
-5a. GET /tasks/{id}/workflow-context endpoint
-    → Requires: 3d
-5b. POST /tasks/{id}/complete endpoint
-    → Requires: 4c
-5c. POST /tasks/{id}/claim endpoint
-    → Requires: 4d
-5d. POST /tasks/{id}/unclaim endpoint
-    → Requires: 4e
-5e. ListTasks: add "available" filter (pool tasks visible to candidates)
-    → Requires: 2b
-```
-
-### Layer 6 — Frontend (requires Layer 5 APIs)
-
-```
-6a. ActionFormDialog.vue (already exists, may need polish)
-    → Requires: 5a, 5b
-6b. TaskDetailContent.vue: render workflow context + form schema
-    → Requires: 5a
-6c. TaskDetailPanel/TaskDetailFullPage routing
-    → Requires: 6b
-6d. Pool task UI: claim/unclaim buttons + candidate list
-    → Requires: 5c, 5d
-6e. TaskListPanel: "Available" tab filter
-    → Requires: 5e
-6f. "Start Process" button in TasksPage
-    → Requires: existing StartProcess endpoint
-6g. Process context badge on TaskCard
-    → Requires: workflow_summary on TaskDTO (already in types)
-6h. TaskNodeConfig.vue: Assignment strategy dropdown + conditional selectors
-    → Requires: Org roles/departments APIs (already exist)
-6i. Transition form fields in designer (TransitionPropertyPanel)
-    → Requires: 1b migration + backend transition update API
+frontend/src/modules/
+├── dashboard/                                  # NEW module
+│   ├── api/dashboard.api.ts
+│   ├── pages/DashboardPage.vue
+│   ├── stores/dashboard.store.ts
+│   └── types/dashboard.types.ts
+│
+├── audit-log/                                  # NEW module (or sub-page of tasks/workflow)
+│   ├── api/audit-log.api.ts
+│   └── components/AuditTimeline.vue
+│
+├── auth/                                       # EXTENDED
+│   └── pages/
+│       └── ProfilePage.vue                     # new (avatar upload + name edit)
+│
+└── notifications/                              # EXTENDED
+    └── components/
+        └── NotificationPreferences.vue         # new
 ```
 
 ---
 
-## Architectural Patterns in Use
+## Architectural Patterns
 
-### Pattern 1: Form Schema per Action (not per Task)
+### Pattern 1: Event Handler as Cross-Module Bridge
 
-**What:** Each outgoing transition from a task node defines its own `formFields` array. Shared fields live on the task node config. The backend assembles the full `form_schema` at task creation time and stores it as JSONB on the Task entity.
+**What:** An event handler in Module B subscribes to a domain event from Module A. The handler
+lives in Module B's `Application/EventHandler/`. It may inject Module A's repositories for
+additional data lookups (acceptable), but must NOT call Module A's commands.
 
-**When to use:** Whenever the UI needs to show different fields based on which button the user clicks. Approval flows where "Approve" and "Reject" require different data.
+**When to use:** Any side effect in Module B triggered by something happening in Module A.
+Notification on task assignment, AuditLog on process start, etc.
 
-**Trade-offs:**
-- Pro: Form schema travels with the task; no need to re-read process definition on every task open
-- Pro: Works even if process definition is updated after tasks are created
-- Con: form_schema duplicated on every task (acceptable — JSONB is cheap at task scale)
-
-**Implementation in Procivo:**
+**Example (new OnProcessCompleted in Notification module):**
 ```php
-// OnTaskNodeActivated builds and stores this structure:
-$formSchema = [
-    'shared_fields' => $nodeConfig['formFields'] ?? [],
-    'actions' => array_map(fn($t) => [
-        'key'        => $t['action_key'] ?? 'complete',
-        'label'      => $t['label'] ?? 'Complete',
-        'form_fields' => $t['form_fields'] ?? [],
-    ], $graph->outgoingTransitions($nodeId)),
-];
-// Stored in Task.metadata or Task.form_schema JSONB column
-```
-
-### Pattern 2: WorkflowTaskLink as Cross-Module Bridge
-
-**What:** A dedicated entity in the Workflow module stores the (processInstanceId, tokenId, taskId) triple. Neither module directly references the other's entities — the link is the seam.
-
-**When to use:** When two bounded contexts need loose coupling. The TaskManager module knows nothing about ProcessInstances; the Workflow module knows nothing about Task state machine.
-
-**Trade-offs:**
-- Pro: Modules can evolve independently; future microservice split is clean
-- Con: Cross-module queries require joining through the link (acceptable)
-- Con: Link integrity must be maintained manually (no FK across module boundaries)
-
-**Key invariant:** One WorkflowTaskLink per (processInstanceId, tokenId) pair. When a token is reused (e.g., parallel re-entry), a new link is created.
-
-### Pattern 3: Event-Sourced ProcessInstance with JSONB Variables
-
-**What:** ProcessInstance state is reconstructed by replaying events from the EventStore. Process variables (form data submitted by users) are stored as a JSONB column alongside the event stream, updated on each `VariablesMergedEvent`.
-
-**When to use:** Audit trail + replay is needed for process debugging. JSONB variables give flexibility for dynamic form schemas.
-
-**Trade-offs:**
-- Pro: Full audit trail of every step; variables have a clear write point
-- Pro: XOR gateway can always read latest variables
-- Con: Full replay on every read (snapshots needed at scale)
-
-**Implementation note:** The `mergeVariables()` method on ProcessInstance records a domain event, which is then stored in the EventStore. Variables are NOT stored as a separate event sourcing stream — they are a denormalized JSONB column updated atomically.
-
-### Pattern 4: OrganizationQueryPort — Anti-Corruption Layer
-
-**What:** TaskManager defines an interface (`OrganizationQueryPort`) in its Application/Port directory. Infrastructure provides a Doctrine adapter (`DoctrineOrganizationQueryAdapter`) that queries the Organization module's tables.
-
-**When to use:** When Module A needs data from Module B but must not couple to Module B's domain or repository interfaces.
-
-**Trade-offs:**
-- Pro: TaskManager stays decoupled from Organization module internals
-- Pro: Port can be mocked in unit tests
-- Con: Adds an abstraction layer; must keep port interface stable
-
-```php
-// In TaskManager/Application/Port/
-interface OrganizationQueryPort {
-    /** @return list<string> employee IDs */
-    public function findEmployeeIdsByRole(string $roleId, string $orgId): array;
-    public function findEmployeeIdsByDepartment(string $deptId, string $orgId): array;
-    public function findManagerIdOfEmployee(string $employeeId, string $orgId): ?string;
-}
-
-// In TaskManager/Infrastructure/Organization/
-class DoctrineOrganizationQueryAdapter implements OrganizationQueryPort {
-    // Direct SQL/Doctrine queries on organization tables
-}
-```
-
-### Pattern 5: Assignment Result as Value Object
-
-**What:** `AssignmentResolver` returns an `AssignmentResult` value object containing `assigneeId`, `candidateRoleId`, `candidateDepartmentId`. This is passed directly into `CreateTaskCommand`.
-
-**When to use:** When resolution logic is complex and the result must carry multiple related values without ambiguity.
-
-```php
-final readonly class AssignmentResult {
+#[AsMessageHandler(bus: 'event.bus')]
+final readonly class OnProcessCompleted
+{
     public function __construct(
-        public readonly ?string $assigneeId,
-        public readonly ?string $candidateRoleId,
-        public readonly ?string $candidateDepartmentId,
+        private NotificationRepositoryInterface $notificationRepository,
+        private NotificationMercurePublisher $mercurePublisher,
     ) {}
 
-    public function isPoolTask(): bool {
-        return null === $this->assigneeId
-            && (null !== $this->candidateRoleId || null !== $this->candidateDepartmentId);
+    public function __invoke(ProcessCompletedEvent $event): void
+    {
+        $notification = Notification::create(
+            NotificationId::generate(),
+            $event->startedBy,
+            NotificationType::ProcessCompleted,
+            'Process completed',
+            sprintf('Process "%s" has completed.', $event->processDefinitionId),
+            $event->processInstanceId,
+        );
+        $this->notificationRepository->save($notification);
+        $this->mercurePublisher->publishToUser($event->startedBy, $notification);
     }
 }
 ```
 
+**Trade-offs:** Handler count grows with number of cross-module concerns. Keep handlers focused —
+one handler per concern per event (AuditLog's `OnProcessCompleted` is separate from Notification's).
+
+### Pattern 2: Port/Adapter for Synchronous Cross-Module Data
+
+**What:** Module A defines an interface in `Application/Port/`. Module B's Infrastructure
+implements it. Symfony DI wires the alias.
+
+**When to use:** When Module A needs to call Module B synchronously during a command, and the
+data needed is not available in Module A's domain.
+
+**Example (new UserQueryPort for Dashboard or AuditLog):**
+```php
+// AuditLog/Application/Port/UserQueryPort.php
+interface UserQueryPort
+{
+    public function getUserDisplayName(string $userId): string;  // returns "John Doe" or "Unknown"
+}
+
+// AuditLog/Infrastructure/Identity/DoctrineUserQueryAdapter.php
+final readonly class DoctrineUserQueryAdapter implements UserQueryPort
+{
+    public function __construct(private Connection $connection) {}
+
+    public function getUserDisplayName(string $userId): string
+    {
+        $row = $this->connection->fetchAssociative(
+            'SELECT first_name, last_name FROM identity_users WHERE id = ?',
+            [$userId]
+        );
+        return $row ? trim($row['first_name'] . ' ' . $row['last_name']) : 'Unknown';
+    }
+}
+```
+
+**Trade-offs:** Clean boundary — Module A has no compile-time dependency on Module B. Requires
+a new interface + adapter pair per cross-module need. For Dashboard, where reads are from many
+modules, prefer raw DBAL in a dedicated query handler instead.
+
+### Pattern 3: DBAL Read Model for Cross-Module Queries
+
+**What:** Query handlers read directly from DB tables (raw SQL / DBAL) without going through
+domain repositories or entity managers. Used by `ProcessInstanceProjection` and recommended for
+`GetDashboardSummaryHandler`.
+
+**When to use:** Dashboard-style aggregations that span multiple modules. Read-only. Performance-critical.
+
+**Example (Dashboard handler):**
+```php
+final readonly class GetDashboardSummaryHandler
+{
+    public function __construct(private Connection $connection) {}
+
+    public function __invoke(GetDashboardSummaryQuery $query): DashboardSummaryDTO
+    {
+        $myTaskCount = (int) $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM task_manager_tasks t
+             JOIN task_manager_task_assignments ta ON ta.task_id = t.id
+             WHERE ta.assignee_id = ? AND t.status NOT IN (\'done\', \'cancelled\')',
+            [$query->userId]
+        );
+
+        $activeProcesses = (int) $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM workflow_process_instances_view
+             WHERE organization_id = ? AND status = \'running\'',
+            [$query->organizationId]
+        );
+
+        return new DashboardSummaryDTO(myTaskCount: $myTaskCount, activeProcesses: $activeProcesses);
+    }
+}
+```
+
+**Trade-offs:** Tight coupling to table names (they change with migrations). Document table names
+as contracts between modules. Fast — no ORM overhead.
+
 ---
 
-## Integration Points
+## Anti-Patterns
 
-### Internal Module Boundaries
+### Anti-Pattern 1: Doctrine Lifecycle Listeners for Audit Logging
 
-| Boundary | Communication Pattern | Direction | Notes |
-|----------|-----------------------|-----------|-------|
-| Workflow → TaskManager | Command dispatch via CommandBus | Workflow → TaskManager | OnTaskNodeActivated dispatches CreateTaskCommand |
-| TaskManager → Workflow | Via ExecuteTaskActionCommand | TaskManager → Workflow | TaskController dispatches the command; handler reads WorkflowTaskLink |
-| Workflow ↔ TaskManager | WorkflowTaskLink entity (Workflow module) | Bidirectional read | Both modules query this bridge entity |
-| TaskManager → Organization | OrganizationQueryPort interface | TaskManager reads Organization | Doctrine adapter queries org tables directly |
-| Workflow → EventStore | DoctrineEventStore | Workflow writes, reads | Event sourcing persistence |
-| Any handler → Mercure | TaskMercurePublisher | Push after mutations | Real-time task updates to frontend |
+**What people do:** Add a Doctrine `postPersist`/`postUpdate` listener that writes to audit_log
+for every entity change.
 
-### Key Data Ownership
+**Why it's wrong:** Captures low-level ORM noise (internal state changes, intermediate states
+during command execution). No actor information available inside a Doctrine listener. Creates a
+dependency on the ORM cycle rather than the business event. Hard to filter meaningful actions.
 
-| Data | Owner | Stored In | Accessed By |
-|------|-------|-----------|-------------|
-| Process variables | Workflow/ProcessInstance | EventStore + JSONB column | WorkflowEngine, ExpressionEvaluator |
-| Form schema | TaskManager/Task | Task.form_schema JSONB | Frontend via GetTaskWorkflowContext |
-| Assignment candidates | TaskManager/Task | Task columns | ClaimTaskHandler, ListTasksHandler |
-| Token state | Workflow/ProcessInstance | EventStore | WorkflowEngine |
-| Process ↔ Task mapping | Workflow/WorkflowTaskLink | workflow_task_links table | Both modules |
+**Do this instead:** Use domain events (`recordEvent()` in AggregateRoot). Domain events carry
+intent and actor context. The `DispatchDomainEventsMiddleware` already handles dispatch.
+
+### Anti-Pattern 2: Dashboard Handler Injecting Multiple Module Repositories
+
+**What people do:** Inject `TaskRepositoryInterface`, `ProcessInstanceRepositoryInterface`,
+and `NotificationRepositoryInterface` into a single `GetDashboardSummaryHandler`.
+
+**Why it's wrong:** Breaks bounded context isolation — the handler depends on 3 modules' domain
+layers. Repository interfaces are defined in Domain layers, which should not cross module boundaries.
+Makes the handler a god object that knows about all modules.
+
+**Do this instead:** Use raw DBAL queries in a dedicated `Dashboard` module handler. Access the
+underlying tables directly. This is the same pattern used by `ProcessInstanceProjection`.
+
+### Anti-Pattern 3: Storing Avatar on Filesystem Instead of S3
+
+**What people do:** Save avatar files to the local filesystem (`/var/www/uploads/`).
+
+**Why it's wrong:** The project already uses S3 for TaskManager attachments. Docker containers
+are ephemeral — local filesystem writes are lost on restart. S3 is the established pattern.
+
+**Do this instead:** Reuse the S3 pattern already established by `TaskManager/Infrastructure/Storage/S3FileStorage.php`.
+Create an identical `S3UserAvatarStorage.php` in Identity/Infrastructure/Storage/.
+
+### Anti-Pattern 4: Storing Notification Preferences in a Separate Micro-Service
+
+**What people do:** Over-engineer notification preferences into a separate microservice.
+
+**Why it's wrong:** The project is a Modular Monolith moving toward microservices later. Preferences
+are a simple entity in the Notification module — one table, one entity, one repository.
+
+**Do this instead:** Add `NotificationPreference` entity to the Notification module. Simple CRUD.
+Export as a migration. No separate service.
+
+### Anti-Pattern 5: Using Symfony Messenger's `async` transport without explicit routing
+
+**What people do:** Route all domain events to `async` globally.
+
+**Why it's wrong:** Some events need synchronous handling within the same HTTP request (e.g., seeding
+default roles on org creation in `SeedDefaultRolesOnOrganizationCreated`). Global async routing
+would break these.
+
+**Do this instead:** Route only side-effect events (notification, audit) to `async`. Keep command-
+triggered state changes synchronous. The existing `messenger.yaml` routing table demonstrates this
+correctly — extend it per-event.
 
 ---
 
-## Anti-Patterns to Avoid
+## Build Order (dependency-aware)
 
-### Anti-Pattern 1: Direct Repository Calls Across Module Boundaries
+This ordering considers which features block others and which are independent:
 
-**What people do:** `TaskRepository` directly calls `EmployeeRepository` from the Organization module.
+```
+Phase 1: Process Polish + Tech Debt (no new modules — fix existing)
+  - Fix formSchema snapshot vs live read
+  - Dedup FormSchemaBuilder
+  - from_variable enum gap
+  - No architecture changes needed
 
-**Why it's wrong:** Couples bounded contexts; prevents future microservice split; Organization module's internals leak into TaskManager.
+Phase 2: User Profile + Avatar (Identity extension)
+  - Self-contained Identity module extension
+  - No new cross-module deps
+  - Unblocks: avatar display in AuditLog, Dashboard, Notifications
 
-**Do this instead:** Use `OrganizationQueryPort` interface with a dedicated adapter. Port defines the contract in terms TaskManager cares about (employee IDs), not Organization internals.
+Phase 3: Notification Enhancement (extend existing Notification module)
+  - Add Mercure push (NotificationMercurePublisher)
+  - Add email port + implementation
+  - Add new event handlers (OnProcessStarted, OnProcessCompleted)
+  - Depends on: Phase 2 (avatarUrl in notification display)
+  - Unblocks: real-time updates for Dashboard
 
-### Anti-Pattern 2: Storing Form Schema Only in Process Definition
+Phase 4: AuditLog Module (new module, pure event consumer)
+  - Independent of all above phases
+  - Can run parallel with Phase 3 if team allows
+  - Depends on: messenger.yaml routing additions for Workflow events
 
-**What people do:** Task detail page loads the current process definition to get form fields, not what the task was created with.
+Phase 5: Dashboard (new module, query-only)
+  - Depends on: AuditLog table existing (for activity feed)
+  - Depends on: Notification badge working (for unread count in summary)
+  - Best built after Phase 3 + 4
 
-**Why it's wrong:** If the process definition is updated while tasks are in flight, users see the wrong form fields. New version fields applied to old tasks, breaking validation.
+Phase 6: Timer Node Execution (Workflow completion)
+  - Verify and test existing timer infrastructure
+  - No architecture changes — verification + test work
+  - Can run parallel with Phases 3-5
 
-**Do this instead:** Snapshot form_schema onto the Task entity at creation time (in OnTaskNodeActivated). Task is self-contained. Historical tasks always show the schema they were created with.
+Phase 7: Super Admin Impersonation (Identity security extension)
+  - Lightweight — security.yaml + Voter + ROLE_SUPER_ADMIN
+  - Depends on: AuditLog (to log impersonation events)
+  - Build after Phase 4
 
-### Anti-Pattern 3: Synchronous Assignment Resolution in WorkflowEngine
+Phase 8: CI/CD Pipeline
+  - Pure infrastructure — no module changes
+  - Can be set up at any point after Phase 1
+  - Recommended: set up early (Phase 1 or 2) to catch regressions
+```
 
-**What people do:** Call `AssignmentResolver` from inside `WorkflowEngine` during token advance.
+---
 
-**Why it's wrong:** WorkflowEngine is a pure domain service with no I/O. Injecting I/O-bound queries violates Clean Architecture. It also makes the engine hard to test.
+## Integration Points Summary
 
-**Do this instead:** Resolution happens in `OnTaskNodeActivated` (Application layer). WorkflowEngine emits `TaskNodeActivatedEvent`; the event handler does the resolution. Engine stays pure.
-
-### Anti-Pattern 4: Task Status and Workflow Completion Out of Sync
-
-**What people do:** Task is marked "done" via the Symfony Workflow state machine, independent of workflow token completion.
-
-**Why it's wrong:** Task status diverges from actual process state. ProcessInstance may still be running while the Task shows "done". This is documented as an existing bug in the codebase.
-
-**Do this instead:** Task completion must flow through `ExecuteTaskActionCommand` which atomically: updates task, marks WorkflowTaskLink completed, and advances the workflow token. The Symfony Workflow `TransitionTask` command should only manage the status machine, not the cross-module completion.
-
-### Anti-Pattern 5: Calling WorkflowEngine Directly from TaskController
-
-**What people do:** TaskController injects WorkflowEngine and calls it directly.
-
-**Why it's wrong:** Controller is in Presentation layer; WorkflowEngine is in Workflow/Domain layer. This violates module boundaries and bypasses command bus (losing transaction wrapping, middleware).
-
-**Do this instead:** Controller dispatches `ExecuteTaskActionCommand` to the command bus. Handler does everything.
+| Feature | New Module? | Extends Which? | New Domain Events? | Async? | Frontend Module |
+|---------|-------------|---------------|-------------------|--------|-----------------|
+| Audit Logging | YES (AuditLog) | — | No (consumes existing) | YES | audit-log/ (simple timeline) |
+| Notifications | NO | Notification | ProcessStarted, ProcessCompleted consumers | YES (email) | notifications/ (extend) |
+| Dashboard | YES (Dashboard) | — | No | NO (synchronous reads) | dashboard/ (new) |
+| User Profile | NO | Identity | UserProfileUpdated (optional) | NO | auth/ (ProfilePage) |
+| Timer Node | NO | Workflow | No (already exists) | YES (DelayStamp) | None (backend only) |
+| CI/CD | NO (infra) | — | No | No | No |
+| Impersonation | NO | Identity | UserImpersonated (new) | NO | Topbar banner |
 
 ---
 
@@ -534,30 +843,33 @@ final readonly class AssignmentResult {
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 0-100 processes | Current architecture is fine. EventStore replay is fast for short processes. |
-| 100-10k processes | Add ProcessInstance snapshot every 100 events. Cache form_schema computation. |
-| 10k-100k active tasks | Add read models: denormalized task list table for ListTasks queries. Avoid joining EventStore on reads. |
-| 100k+ | Separate Workflow and TaskManager into microservices. WorkflowTaskLink becomes a message contract. |
+| 0-1k users (current) | Modular monolith fine. Single PostgreSQL. Async via RabbitMQ for notifications. |
+| 1k-10k users | AuditLog table grows fast (index on organization_id + occurred_at + entity_id). Notification table needs pruning strategy (archive read > 30d). Dashboard queries need indexes. |
+| 10k+ users | AuditLog → separate read replica or separate DB. Notifications → push only (no polling). ProcessInstanceProjection → Redis cache. |
 
-### Scaling Priorities
+### First Bottleneck
 
-1. **First bottleneck:** ProcessInstance full event replay. Fix: snapshot at N events (every 100-500). Cache in Redis by instanceId.
-2. **Second bottleneck:** Assignment resolution — N+1 org queries. Fix: batch query for all candidates; cache role membership.
-3. **Third bottleneck:** ListTasks with complex RBAC filters. Fix: materialized task view with pre-computed visibility flags.
+AuditLog will be the first performance concern — every significant action writes a row. Add a
+composite index `(organization_id, entity_id, occurred_at DESC)` from day one. Consider a
+retention policy (archive entries older than 90 days to cold storage).
+
+### Second Bottleneck
+
+Dashboard DBAL queries run on every page load. Cache with Redis (`symfony/cache`, 30-second TTL)
+keyed by `organization_id`. The existing Redis service is already wired in `services.yaml`.
 
 ---
 
 ## Sources
 
-- Direct codebase analysis: `/Users/leleka/Projects/procivo/backend/src/Workflow/` and `/Users/leleka/Projects/procivo/backend/src/TaskManager/`
-- Project plan: `/Users/leleka/Projects/procivo/.planning/PROJECT.md`
-- Existing architecture analysis: `/Users/leleka/Projects/procivo/.planning/codebase/ARCHITECTURE.md`
-- Existing integration plan: `/Users/leleka/Projects/procivo/docs/WORKFLOW_TASKS_INTEGRATION_PLAN.md` (HIGH confidence — authored by project team)
-- Assignment specification: `/Users/leleka/Projects/procivo/docs/TASK_ASSIGNMENT_SPEC.md` (HIGH confidence — references Camunda, Appian, BPMN 2.0 spec)
-- Concerns analysis: `/Users/leleka/Projects/procivo/.planning/codebase/CONCERNS.md` (HIGH confidence — direct code analysis)
-- BPM industry patterns: Camunda 8 worker model, Flowable task listener pattern, BPMN 2.0 humanPerformer/potentialOwner (MEDIUM confidence — training knowledge, verified against existing spec)
+- Codebase direct analysis — all 9 modules, event handlers, Doctrine mappings, messenger.yaml (HIGH confidence)
+- [Symfony Messenger — official docs](https://symfony.com/doc/current/messenger.html) (HIGH confidence)
+- [Symfony Security — Impersonation](https://symfony.com/doc/current/security/impersonating_user.html) (HIGH confidence)
+- [Domain Events pattern via DispatchDomainEventsMiddleware — existing code](backend/src/Shared/Infrastructure/Bus/Middleware/DispatchDomainEventsMiddleware.php) (HIGH confidence)
+- [RabbitMQ Delayed Message Exchange plugin](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange) — needed if DelayStamp precision required (MEDIUM confidence — plugin availability in Docker image unverified)
+- [ProcessInstanceProjection DBAL pattern — existing code](backend/src/Workflow/Infrastructure/ReadModel/ProcessInstanceProjection.php) (HIGH confidence)
 
 ---
 
-*Architecture research for: BPM Workflow-Task Integration (Procivo)*
-*Researched: 2026-02-28*
+*Architecture research for: Procivo v2.0 Production-Ready BPM Features*
+*Researched: 2026-03-01*
