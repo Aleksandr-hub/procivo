@@ -53,6 +53,22 @@ Plans:
 - [ ] 06-03-PLAN.md — Process instance search and server-side pagination
 - [ ] 06-04-PLAN.md — Cancel confirmation dialog + task detail UI polish
 
+### Phase 06.1: Process Definition Versioning — Event-Sourced Migration + Admin UI (INSERTED)
+
+**Goal:** Migration of running process instances actually changes engine execution version (event-sourced, not read-model-only), with enhanced compatibility validation and a frontend admin UI for version history and migration
+**Depends on:** Phase 6
+**Requirements**: VER-01, VER-02, VER-03
+**Success Criteria** (what must be TRUE):
+  1. After migration, engine reconstitutes ProcessInstance with the new versionId — CompleteTaskNodeHandler loads the target version's snapshot, not the original
+  2. Migration validates that active task nodes have outgoing transitions in the target version (action_key compatibility)
+  3. GET /versions returns running_instance_count per version
+  4. Admin can open a Version History drawer from the Designer page, see version list with running instance counts, and trigger migration with confirmation
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06.1-01-PLAN.md — Event-sourced migration (ProcessInstanceMigratedEvent) + action_key validation + running instance count in versions API
+- [ ] 06.1-02-PLAN.md — Version History admin UI (VersionHistoryDrawer + migrate flow in Designer)
+
 ### Phase 7: User Profile + CI/CD
 **Goal**: Users have a profile with avatar visible across the platform, and developers have automated quality gates from day one
 **Depends on**: Phase 6
@@ -135,6 +151,7 @@ Plans:
 | 4. Frontend Task Integration | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
+| 6.1 Process Definition Versioning | v2.0 | 0/2 | Planned | - |
 | 7. User Profile + CI/CD | v2.0 | 0/TBD | Not started | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |

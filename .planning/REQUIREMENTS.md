@@ -17,6 +17,12 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **PLSH-06**: Task detail page UI aligned with design intent (spacing, layout polish)
 - [x] **PLSH-07**: Version history API + instance migration endpoint + Designer deploy flow with version indicator
 
+### Process Definition Versioning (Phase 06.1)
+
+- [ ] **VER-01**: Event-sourced migration — ProcessInstanceMigratedEvent updates aggregate versionId so engine uses target version for execution after migration
+- [ ] **VER-02**: GET /versions returns running_instance_count per version; action_key compatibility validated before migration
+- [ ] **VER-03**: Admin can view version history and trigger migration from Designer page via VersionHistoryDrawer with confirmation dialog
+
 ### User Profile
 
 - [ ] **PROF-01**: User can view and edit profile (firstName, lastName, email) on a dedicated profile page
@@ -115,6 +121,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLSH-05 | Phase 6 | Complete |
 | PLSH-06 | Phase 6 | Complete |
 | PLSH-07 | Phase 6 | Complete |
+| VER-01 | Phase 6.1 | Pending |
+| VER-02 | Phase 6.1 | Pending |
+| VER-03 | Phase 6.1 | Pending |
 | PROF-01 | Phase 7 | Pending |
 | PROF-02 | Phase 7 | Pending |
 | PROF-03 | Phase 7 | Pending |
@@ -146,10 +155,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADMN-05 | Phase 7 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 33 total
-- Mapped to phases: 33
+- v2.0 requirements: 36 total
+- Mapped to phases: 36
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 — traceability populated after roadmap creation*
+*Last updated: 2026-03-01 — Phase 06.1 VER requirements added*
