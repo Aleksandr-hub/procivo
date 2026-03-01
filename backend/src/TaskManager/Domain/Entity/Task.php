@@ -38,6 +38,12 @@ class Task extends AggregateRoot
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
 
+    /**
+     * Transient actor context for Symfony Workflow-triggered status changes.
+     * Set before calling $workflow->apply(), consumed in setStatus(), not persisted.
+     */
+    private ?string $pendingActorId = null;
+
     private function __construct()
     {
     }
@@ -97,14 +103,14 @@ class Task extends AggregateRoot
         $this->updatedAt = new \DateTimeImmutable();
     }
 
-    public function assign(?string $assigneeId): void
+    public function assign(?string $assigneeId, string $actorId): void
     {
         $this->assigneeId = $assigneeId;
         $this->updatedAt = new \DateTimeImmutable();
-        $this->recordEvent(new TaskAssignedEvent($this->id, $assigneeId));
+        $this->recordEvent(new TaskAssignedEvent($this->id, $assigneeId, $actorId));
     }
 
-    public function claim(string $employeeId): void
+    public function claim(string $employeeId, string $actorId): void
     {
         if (!$this->isPoolTask()) {
             throw TaskClaimException::notAPoolTask($this->id);
@@ -116,10 +122,10 @@ class Task extends AggregateRoot
 
         $this->assigneeId = $employeeId;
         $this->updatedAt = new \DateTimeImmutable();
-        $this->recordEvent(new TaskClaimedEvent($this->id, $employeeId));
+        $this->recordEvent(new TaskClaimedEvent($this->id, $employeeId, $actorId));
     }
 
-    public function unclaim(): void
+    public function unclaim(string $actorId): void
     {
         if (null === $this->assigneeId) {
             throw TaskClaimException::notClaimed($this->id);
@@ -128,7 +134,7 @@ class Task extends AggregateRoot
         $previousAssigneeId = $this->assigneeId;
         $this->assigneeId = null;
         $this->updatedAt = new \DateTimeImmutable();
-        $this->recordEvent(new TaskUnclaimedEvent($this->id, $previousAssigneeId));
+        $this->recordEvent(new TaskUnclaimedEvent($this->id, $previousAssigneeId, $actorId));
     }
 
     public function isPoolTask(): bool
@@ -136,9 +142,18 @@ class Task extends AggregateRoot
         return null !== $this->candidateRoleId || null !== $this->candidateDepartmentId;
     }
 
-    public function markDeleted(): void
+    public function markDeleted(string $actorId): void
     {
-        $this->recordEvent(new TaskDeletedEvent($this->id, $this->organizationId));
+        $this->recordEvent(new TaskDeletedEvent($this->id, $this->organizationId, $actorId));
+    }
+
+    /**
+     * Set transient actor context before calling Symfony Workflow apply().
+     * This actor ID will be consumed by setStatus() and cleared afterwards.
+     */
+    public function withActorId(string $actorId): void
+    {
+        $this->pendingActorId = $actorId;
     }
 
     /**
@@ -151,13 +166,16 @@ class Task extends AggregateRoot
 
     /**
      * Called by Symfony Workflow marking store (getStatus/setStatus).
+     * Consumes pendingActorId set via withActorId() before workflow->apply().
      */
     public function setStatus(string $status): void
     {
         $oldStatus = $this->status;
         $this->status = $status;
         $this->updatedAt = new \DateTimeImmutable();
-        $this->recordEvent(new TaskStatusChangedEvent($this->id, $oldStatus, $status));
+        $actorId = $this->pendingActorId ?? 'system';
+        $this->pendingActorId = null;
+        $this->recordEvent(new TaskStatusChangedEvent($this->id, $oldStatus, $status, $actorId));
     }
 
     public function id(): TaskId

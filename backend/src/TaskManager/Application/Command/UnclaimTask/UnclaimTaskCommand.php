@@ -11,6 +11,7 @@ final readonly class UnclaimTaskCommand implements CommandInterface
     public function __construct(
         public string $taskId,
         public string $employeeId,
+        public string $actorId,
     ) {
     }
 }

@@ -11,6 +11,7 @@ final readonly class TaskDeletedEvent implements DomainEvent
     public function __construct(
         public string $taskId,
         public string $organizationId,
+        public string $actorId,
         private \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
     }

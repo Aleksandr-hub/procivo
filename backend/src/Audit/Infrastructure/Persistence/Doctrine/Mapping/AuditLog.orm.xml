@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Audit\Domain\Entity\AuditLog"
+            table="audit_log">
+
+        <id name="id" type="string" length="36">
+            <generator strategy="NONE"/>
+        </id>
+
+        <field name="eventType" column="event_type" type="string" length="100"/>
+        <field name="actorId" column="actor_id" type="string" length="36" nullable="true"/>
+        <field name="entityType" column="entity_type" type="string" length="50"/>
+        <field name="entityId" column="entity_id" type="string" length="36"/>
+        <field name="organizationId" column="organization_id" type="string" length="36" nullable="true"/>
+        <field name="changes" column="changes" type="json" nullable="true"/>
+        <field name="occurredAt" column="occurred_at" type="datetime_immutable"/>
+
+        <indexes>
+            <index name="idx_audit_log_entity" columns="entity_type,entity_id,occurred_at"/>
+            <index name="idx_audit_log_actor" columns="actor_id,occurred_at"/>
+            <index name="idx_audit_log_org" columns="organization_id,occurred_at"/>
+        </indexes>
+
+    </entity>
+</doctrine-mapping>

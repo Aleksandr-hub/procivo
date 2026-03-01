@@ -11,6 +11,7 @@ final readonly class TransitionTaskCommand implements CommandInterface
     public function __construct(
         public string $taskId,
         public string $transition,
+        public string $actorId,
     ) {
     }
 }

@@ -25,7 +25,7 @@ final readonly class AssignTaskHandler
             throw TaskNotFoundException::withId($command->taskId);
         }
 
-        $task->assign($command->assigneeId);
+        $task->assign($command->assigneeId, $command->actorId);
 
         $this->taskRepository->save($task);
     }

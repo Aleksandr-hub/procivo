@@ -25,7 +25,7 @@ final readonly class DeleteTaskHandler
             throw TaskNotFoundException::withId($command->taskId);
         }
 
-        $task->markDeleted();
+        $task->markDeleted($command->actorId);
 
         $this->taskRepository->remove($task);
     }

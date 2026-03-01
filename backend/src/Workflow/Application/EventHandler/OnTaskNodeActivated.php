@@ -142,6 +142,7 @@ final readonly class OnTaskNodeActivated
             $this->commandBus->dispatch(new TransitionTaskCommand(
                 taskId: $taskId,
                 transition: 'open',
+                actorId: 'system',
             ));
         }
 

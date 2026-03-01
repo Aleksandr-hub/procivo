@@ -11,6 +11,7 @@ final readonly class TaskUnclaimedEvent implements DomainEvent
     public function __construct(
         public string $taskId,
         public string $previousAssigneeId,
+        public string $actorId,
         private \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
     }

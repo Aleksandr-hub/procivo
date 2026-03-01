@@ -32,6 +32,7 @@ final readonly class TransitionTaskHandler
             throw InvalidTaskTransitionException::forTransition($command->transition, $task->getStatus());
         }
 
+        $task->withActorId($command->actorId);
         $this->taskStateMachine->apply($task, $command->transition);
 
         $this->taskRepository->save($task);

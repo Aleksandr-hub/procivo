@@ -39,7 +39,7 @@ final readonly class UnclaimTaskHandler
                 throw TaskClaimException::notClaimed($command->taskId);
             }
 
-            $task->unclaim();
+            $task->unclaim($command->actorId);
             // No explicit save — wrapInTransaction calls flush() before commit
         });
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\TaskManager\Presentation\Controller;
 
+use App\Organization\Application\Port\CurrentUserProviderInterface;
 use App\Organization\Presentation\Security\OrganizationAuthorizer;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
@@ -34,6 +35,7 @@ final readonly class TaskController
         private CommandBusInterface $commandBus,
         private QueryBusInterface $queryBus,
         private OrganizationAuthorizer $authorizer,
+        private CurrentUserProviderInterface $currentUserProvider,
     ) {
     }
 
@@ -169,6 +171,7 @@ final readonly class TaskController
         $this->commandBus->dispatch(new TransitionTaskCommand(
             taskId: $taskId,
             transition: $data['transition'] ?? '',
+            actorId: $this->currentUserProvider->getUserId(),
         ));
 
         return new JsonResponse(['message' => 'Task status updated.']);
@@ -183,6 +186,7 @@ final readonly class TaskController
         $this->commandBus->dispatch(new AssignTaskCommand(
             taskId: $taskId,
             assigneeId: isset($data['assignee_id']) && \is_string($data['assignee_id']) ? $data['assignee_id'] : null,
+            actorId: $this->currentUserProvider->getUserId(),
         ));
 
         return new JsonResponse(['message' => 'Task assignee updated.']);
@@ -197,6 +201,7 @@ final readonly class TaskController
         $this->commandBus->dispatch(new ClaimTaskCommand(
             taskId: $taskId,
             employeeId: isset($data['employee_id']) && \is_string($data['employee_id']) ? $data['employee_id'] : '',
+            actorId: $this->currentUserProvider->getUserId(),
         ));
 
         return new JsonResponse(['message' => 'Task claimed.']);
@@ -211,6 +216,7 @@ final readonly class TaskController
         $this->commandBus->dispatch(new UnclaimTaskCommand(
             taskId: $taskId,
             employeeId: isset($data['employee_id']) && \is_string($data['employee_id']) ? $data['employee_id'] : '',
+            actorId: $this->currentUserProvider->getUserId(),
         ));
 
         return new JsonResponse(['message' => 'Task returned to queue.']);
@@ -221,7 +227,10 @@ final readonly class TaskController
     {
         $this->authorizer->authorize($organizationId, 'TASK_DELETE');
 
-        $this->commandBus->dispatch(new DeleteTaskCommand($taskId));
+        $this->commandBus->dispatch(new DeleteTaskCommand(
+            taskId: $taskId,
+            actorId: $this->currentUserProvider->getUserId(),
+        ));
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }

@@ -43,7 +43,7 @@ final readonly class ClaimTaskHandler
 
             $this->validateEligibility($command->employeeId, $task);
 
-            $task->claim($command->employeeId);
+            $task->claim($command->employeeId, $command->actorId);
             // No explicit save — wrapInTransaction calls flush() before commit
         });
     }

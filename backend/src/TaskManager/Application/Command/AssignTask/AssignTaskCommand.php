@@ -11,6 +11,7 @@ final readonly class AssignTaskCommand implements CommandInterface
     public function __construct(
         public string $taskId,
         public ?string $assigneeId,
+        public string $actorId,
     ) {
     }
 }

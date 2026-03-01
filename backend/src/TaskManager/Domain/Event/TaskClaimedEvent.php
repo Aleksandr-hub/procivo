@@ -11,6 +11,7 @@ final readonly class TaskClaimedEvent implements DomainEvent
     public function __construct(
         public string $taskId,
         public string $employeeId,
+        public string $actorId,
         private \DateTimeImmutable $occurredAt = new \DateTimeImmutable(),
     ) {
     }

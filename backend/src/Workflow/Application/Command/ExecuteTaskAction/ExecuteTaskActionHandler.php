@@ -83,11 +83,12 @@ final readonly class ExecuteTaskActionHandler
         $link->markCompleted();
         $this->linkRepository->save($link);
 
-        // Transition the TaskManager task to done
+        // Transition the TaskManager task to done (workflow-initiated, actor = system)
         try {
             $this->commandBus->dispatch(new TransitionTaskCommand(
                 taskId: $command->taskId,
                 transition: 'workflow_complete',
+                actorId: 'system',
             ));
         } catch (\Throwable) {
             // Task may already be in 'done' or 'cancelled' state — log but don't fail workflow completion
