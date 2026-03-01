@@ -40,17 +40,17 @@ final readonly class OnTaskNodeActivated
         );
         $variables = $instance?->variables() ?? [];
 
-        // Fallback chain: taskConfig → process variables → default
-        $title = (string) ($taskConfig['task_title_template']
-            ?? $variables['_task_title']
+        // Fallback chain: process variables (runtime input) → taskConfig (designer defaults) → node name
+        $title = (string) ($variables['_task_title']
+            ?? $taskConfig['task_title_template']
             ?? $event->nodeName);
 
-        $description = isset($taskConfig['task_description_template'])
-            ? (string) $taskConfig['task_description_template']
-            : (isset($variables['_task_description']) ? (string) $variables['_task_description'] : null);
+        $description = isset($variables['_task_description'])
+            ? (string) $variables['_task_description']
+            : (isset($taskConfig['task_description_template']) ? (string) $taskConfig['task_description_template'] : null);
 
-        $priority = (string) ($taskConfig['priority']
-            ?? $variables['_task_priority']
+        $priority = (string) ($variables['_task_priority']
+            ?? $taskConfig['priority']
             ?? 'medium');
 
         // Assignment strategy from config (new) or fallback to legacy assignee_value

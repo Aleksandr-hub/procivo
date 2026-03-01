@@ -50,13 +50,16 @@ final readonly class StartProcessHandler
         $startNodeId = NodeId::fromString($graph->startNodeId());
 
         $instanceId = ProcessInstanceId::fromString($command->id);
+        $variables = $command->variables;
+        $variables['_task_creator_id'] = $command->startedBy;
+
         $instance = ProcessInstance::start(
             id: $instanceId,
             processDefinitionId: $defId,
             versionId: $version->id(),
             organizationId: $command->organizationId,
             startedBy: $command->startedBy,
-            variables: $command->variables,
+            variables: $variables,
             startNodeId: $startNodeId,
         );
 

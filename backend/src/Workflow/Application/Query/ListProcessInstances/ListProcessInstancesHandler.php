@@ -22,11 +22,9 @@ final readonly class ListProcessInstancesHandler
     public function __invoke(ListProcessInstancesQuery $query): array
     {
         $qb = $this->connection->createQueryBuilder()
-            ->select('*')
             ->from('workflow_process_instances_view')
             ->where('organization_id = :orgId')
-            ->setParameter('orgId', $query->organizationId)
-            ->orderBy('started_at', 'DESC');
+            ->setParameter('orgId', $query->organizationId);
 
         if (null !== $query->status) {
             $qb->andWhere('status = :status')
@@ -42,7 +40,10 @@ final readonly class ListProcessInstancesHandler
         $total = (int) $countQb->select('COUNT(*)')->executeQuery()->fetchOne();
 
         $offset = ($query->page - 1) * $query->limit;
-        $qb->setMaxResults($query->limit)->setFirstResult($offset);
+        $qb->select('*')
+            ->orderBy('started_at', 'DESC')
+            ->setMaxResults($query->limit)
+            ->setFirstResult($offset);
 
         /** @var list<array<string, mixed>> $rows */
         $rows = $qb->executeQuery()->fetchAllAssociative();
