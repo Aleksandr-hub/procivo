@@ -55,9 +55,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Designer Configuration
 
-- [ ] **DSGN-01**: Assignment strategy selector in TaskNodeConfig (dropdown: unassigned, specific_employee, by_role, by_department)
-- [ ] **DSGN-02**: Dynamic sub-fields based on strategy (employee selector, role selector, department selector)
-- [ ] **DSGN-03**: Per-transition form field builder in designer (FormFieldsBuilder.vue already exists — wire to backend save)
+- [x] **DSGN-01**: Assignment strategy selector in TaskNodeConfig (dropdown: unassigned, specific_employee, by_role, by_department)
+- [x] **DSGN-02**: Dynamic sub-fields based on strategy (employee selector, role selector, department selector)
+- [x] **DSGN-03**: Per-transition form field builder in designer (FormFieldsBuilder.vue already exists — wire to backend save)
 
 ## v2 Requirements
 
@@ -134,9 +134,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEND-09 | Phase 4 | Complete |
 | FEND-10 | Phase 4 | Complete |
 | FEND-11 | Phase 4 | Complete |
-| DSGN-01 | Phase 5 | Pending |
-| DSGN-02 | Phase 5 | Pending |
-| DSGN-03 | Phase 5 | Pending |
+| DSGN-01 | Phase 5 | Complete |
+| DSGN-02 | Phase 5 | Complete |
+| DSGN-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 34 total
