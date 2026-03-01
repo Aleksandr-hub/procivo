@@ -107,47 +107,47 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLSH-01 | — | Pending |
-| PLSH-02 | — | Pending |
-| PLSH-03 | — | Pending |
-| PLSH-04 | — | Pending |
-| PLSH-05 | — | Pending |
-| PLSH-06 | — | Pending |
-| PROF-01 | — | Pending |
-| PROF-02 | — | Pending |
-| PROF-03 | — | Pending |
-| PROF-04 | — | Pending |
-| PROF-05 | — | Pending |
-| AUDT-01 | — | Pending |
-| AUDT-02 | — | Pending |
-| AUDT-03 | — | Pending |
-| AUDT-04 | — | Pending |
-| NOTF-01 | — | Pending |
-| NOTF-02 | — | Pending |
-| NOTF-03 | — | Pending |
-| NOTF-04 | — | Pending |
-| NOTF-05 | — | Pending |
-| NOTF-06 | — | Pending |
-| NOTF-07 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
-| DASH-04 | — | Pending |
-| TIMR-01 | — | Pending |
-| TIMR-02 | — | Pending |
-| TIMR-03 | — | Pending |
-| TIMR-04 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| ADMN-03 | — | Pending |
-| ADMN-04 | — | Pending |
-| ADMN-05 | — | Pending |
+| PLSH-01 | Phase 6 | Pending |
+| PLSH-02 | Phase 6 | Pending |
+| PLSH-03 | Phase 6 | Pending |
+| PLSH-04 | Phase 6 | Pending |
+| PLSH-05 | Phase 6 | Pending |
+| PLSH-06 | Phase 6 | Pending |
+| PROF-01 | Phase 7 | Pending |
+| PROF-02 | Phase 7 | Pending |
+| PROF-03 | Phase 7 | Pending |
+| PROF-04 | Phase 7 | Pending |
+| PROF-05 | Phase 7 | Pending |
+| AUDT-01 | Phase 8 | Pending |
+| AUDT-02 | Phase 8 | Pending |
+| AUDT-03 | Phase 8 | Pending |
+| AUDT-04 | Phase 8 | Pending |
+| NOTF-01 | Phase 9 | Pending |
+| NOTF-02 | Phase 9 | Pending |
+| NOTF-03 | Phase 9 | Pending |
+| NOTF-04 | Phase 9 | Pending |
+| NOTF-05 | Phase 9 | Pending |
+| NOTF-06 | Phase 9 | Pending |
+| NOTF-07 | Phase 9 | Pending |
+| DASH-01 | Phase 10 | Pending |
+| DASH-02 | Phase 10 | Pending |
+| DASH-03 | Phase 10 | Pending |
+| DASH-04 | Phase 10 | Pending |
+| TIMR-01 | Phase 11 | Pending |
+| TIMR-02 | Phase 11 | Pending |
+| TIMR-03 | Phase 11 | Pending |
+| TIMR-04 | Phase 11 | Pending |
+| ADMN-01 | Phase 12 | Pending |
+| ADMN-02 | Phase 12 | Pending |
+| ADMN-03 | Phase 7 | Pending |
+| ADMN-04 | Phase 7 | Pending |
+| ADMN-05 | Phase 7 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 32 total
-- Mapped to phases: 0
-- Unmapped: 32
+- Mapped to phases: 32
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 — traceability populated after roadmap creation*
