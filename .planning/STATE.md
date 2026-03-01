@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
+milestone: v1.0
 milestone_name: Production-Ready BPM
-status: active
-last_updated: "2026-03-01"
+status: unknown
+last_updated: "2026-03-01T13:45:06.520Z"
 progress:
-  total_phases: 7
+  total_phases: 1
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 6 of 12 (Process Polish) — first v2.0 phase
-Plan: 0 of TBD
-Status: Ready to plan
-Last activity: 2026-03-01 — Roadmap created for v2.0 milestone (7 phases, 32 requirements)
+Plan: 3 of 4 (completed)
+Status: In Progress
+Last activity: 2026-03-01 — Completed 06-03: search + pagination for process instances (PLSH-05)
 
-Progress: [░░░░░░░░░░] 0% (v2.0 milestone)
+Progress: [██░░░░░░░░] 2/4 plans complete in Phase 6 (v2.0 milestone)
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [░░░░░░░░░░] 0% (v2.0 milestone)
 | 5. Designer Configuration | 2/2 | Complete |
 
 *v2.0 metrics reset — updated after each plan completion*
+| Phase 06-process-polish P03 | 22 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -58,6 +59,8 @@ Key architectural constraints for v2.0 (from research):
 - Phase 9 (Notifications): Mercure topics must be per-user (/users/{userId}/notifications) — never org-wide for personal notifications
 - Phase 11 (Timers): workflow_scheduled_timers table is source of truth; DelayStamp is accelerator only — plugin archived
 - Phase 12 (Impersonation): Custom JWT endpoint, NOT switch_user — JWT firewall is stateless
+- [Phase 06-process-polish]: Clone QueryBuilder for COUNT before LIMIT/OFFSET to avoid subquery complexity in ILIKE pagination
+- [Phase 06-process-polish]: PrimeVue DataTable page event is 0-indexed; translate to 1-indexed for backend API
 
 ### Pending Todos
 
@@ -70,6 +73,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Roadmap creation complete — 7 phases (6-12), 32 requirements mapped
+Stopped at: Completed 06-03-PLAN.md — server-side search and pagination for process instances
 Resume file: None
-Next action: `/gsd:plan-phase 6` to plan Process Polish
+Next action: Execute 06-04-PLAN.md (next plan in Phase 6)

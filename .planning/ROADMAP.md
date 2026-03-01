@@ -46,7 +46,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
   5. User can cancel a running process instance from the ProcessInstanceDetailPage and the token stops advancing
   6. User can filter and search the process instance list by status and name, with paginated results
   7. Task detail page visual layout matches design intent — correct spacing, card structure, and field alignment
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 Plans:
 - [ ] 06-01-PLAN.md — Backend versioning refactor + FormSchemaBuilder dedup + snapshot serving + FromVariable enum
 - [ ] 06-02-PLAN.md — Version history API + instance migration + Designer deploy flow
@@ -134,7 +134,7 @@ Plans:
 | 3. Completion and Claim APIs | v1.0 | 2/2 | Complete | 2026-02-28 |
 | 4. Frontend Task Integration | v1.0 | 5/5 | Complete | 2026-02-28 |
 | 5. Designer Configuration | v1.0 | 2/2 | Complete | 2026-03-01 |
-| 6. Process Polish | v2.0 | 0/4 | Not started | - |
+| 6. Process Polish | 2/4 | In Progress|  | - |
 | 7. User Profile + CI/CD | v2.0 | 0/TBD | Not started | - |
 | 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
