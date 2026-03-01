@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T18:07:56.516Z"
+last_updated: "2026-03-01T18:39:39.853Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 11
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 07 (User Profile + CI/CD) — In Progress
-Plan: 2 of 4 (completed)
-Status: Plan 02 complete
-Last activity: 2026-03-01 — Completed 07-02: ProfilePage frontend with avatar upload, topbar + sidebar avatar integration
+Phase: 08 (Audit Logging) — In Progress
+Plan: 1 of 1 (completed)
+Status: Plan 01 complete
+Last activity: 2026-03-01 — Completed 08-01: Audit module backend with 12 async event handlers, actorId propagation, and REST API
 
-Progress: [████░░░░░░] Phase 07 in progress (2/4 plans)
+Progress: [████████░░] Phase 08 plan 01 complete
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [████░░░░░░] Phase 07 in progress (2/4 plans)
 | Phase 07-user-profile-cicd P03 | 1 | 2 tasks | 4 files |
 | Phase 07-user-profile-cicd P01 | 35 | 2 tasks | 13 files |
 | Phase 07-user-profile-cicd P02 | 3 | 2 tasks | 8 files |
+| Phase 08-audit-logging P01 | 11 | 2 tasks | 44 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 07-01]: UserDTO.fromEntity() accepts optional ?string avatarUrl = null — all existing callers unaffected
 - [Phase 07-02]: Avatar :image receives undefined (not null) — PrimeVue Avatar treats undefined correctly, falls back to :label
 - [Phase 07-02]: TaskDetailSidebar shows current user's avatar only when task.assigneeId === auth.user.id — avoids premature DTO extension before Phase 8
+- [Phase 08-audit-logging]: ProcessCompletedEvent NOT routed async: OnSubProcessCompleted must run synchronously for sub-process continuation
+- [Phase 08-audit-logging]: pendingActorId pattern in Task entity for Symfony Workflow setStatus() actor propagation
+- [Phase 08-audit-logging]: Workflow-initiated task transitions use actorId='system' (ExecuteTaskActionHandler, OnTaskNodeActivated)
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 07-02-PLAN.md — User profile frontend with ProfilePage, avatar upload, topbar/sidebar integration
+Stopped at: Completed 08-01-PLAN.md — Audit module backend with 12 async event handlers and REST API
 Resume file: None
-Next action: Execute Phase 07 Plan 03
+Next action: Execute Phase 07 Plans 03-04 (CI/CD remaining plans)

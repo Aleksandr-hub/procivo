@@ -33,9 +33,9 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 ### Audit Logging
 
-- [ ] **AUDT-01**: Domain events carry actorId (passed through command context for async workers)
-- [ ] **AUDT-02**: AuditLog entity persists event_type, actor, entity, changes JSONB, timestamp — async via event.bus
-- [ ] **AUDT-03**: User can view audit log via REST API with filters (entity, actor, date range)
+- [x] **AUDT-01**: Domain events carry actorId (passed through command context for async workers)
+- [x] **AUDT-02**: AuditLog entity persists event_type, actor, entity, changes JSONB, timestamp — async via event.bus
+- [x] **AUDT-03**: User can view audit log via REST API with filters (entity, actor, date range)
 - [ ] **AUDT-04**: Activity timeline displayed on task detail, process instance detail, and organization detail pages
 
 ### Notification System
@@ -129,9 +129,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROF-03 | Phase 7 | Complete |
 | PROF-04 | Phase 7 | Complete |
 | PROF-05 | Phase 7 | Complete |
-| AUDT-01 | Phase 8 | Pending |
-| AUDT-02 | Phase 8 | Pending |
-| AUDT-03 | Phase 8 | Pending |
+| AUDT-01 | Phase 8 | Complete |
+| AUDT-02 | Phase 8 | Complete |
+| AUDT-03 | Phase 8 | Complete |
 | AUDT-04 | Phase 8 | Pending |
 | NOTF-01 | Phase 9 | Pending |
 | NOTF-02 | Phase 9 | Pending |
