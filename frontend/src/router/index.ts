@@ -32,6 +32,11 @@ const router = createRouter({
           component: () => import('@/modules/auth/pages/ProfilePage.vue'),
         },
         {
+          path: 'notifications',
+          name: 'notifications',
+          component: () => import('@/modules/notifications/pages/NotificationsPage.vue'),
+        },
+        {
           path: '',
           name: 'organizations',
           component: () => import('@/modules/organization/pages/OrganizationsPage.vue'),

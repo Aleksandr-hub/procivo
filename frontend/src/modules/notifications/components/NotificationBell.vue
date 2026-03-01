@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
 
 const { t } = useI18n()
+const router = useRouter()
 const store = useNotificationStore()
 const menuRef = ref()
-const pollInterval = ref<ReturnType<typeof setInterval>>()
 
 onMounted(async () => {
   await store.fetchUnreadCount()
-  // Poll for new notifications every 30 seconds
-  pollInterval.value = setInterval(() => {
-    store.fetchUnreadCount()
-  }, 30000)
+  // Real-time updates handled by Mercure SSE (initialized in DashboardLayout)
 })
 
 function toggle(event: Event) {
@@ -29,6 +27,11 @@ async function onMarkAsRead(id: string) {
 
 async function onMarkAllAsRead() {
   await store.markAllAsRead()
+}
+
+function viewAll() {
+  menuRef.value?.hide()
+  router.push({ name: 'notifications' })
 }
 
 function formatTime(dateStr: string): string {
@@ -47,10 +50,20 @@ function getTypeIcon(type: string): string {
   switch (type) {
     case 'task_assigned':
       return 'pi pi-user-plus'
+    case 'task_completed':
+      return 'pi pi-check-circle'
     case 'task_status_changed':
       return 'pi pi-sync'
     case 'comment_added':
       return 'pi pi-comment'
+    case 'process_started':
+      return 'pi pi-play'
+    case 'process_completed':
+      return 'pi pi-check'
+    case 'process_cancelled':
+      return 'pi pi-times-circle'
+    case 'invitation_received':
+      return 'pi pi-envelope'
     default:
       return 'pi pi-bell'
   }
@@ -103,6 +116,17 @@ function getTypeIcon(type: string): string {
               <div class="notification-time">{{ formatTime(n.createdAt) }}</div>
             </div>
           </div>
+        </div>
+
+        <div class="notification-panel-footer">
+          <Button
+            :label="t('notifications.center.viewAll')"
+            text
+            size="small"
+            icon="pi pi-arrow-right"
+            icon-pos="right"
+            @click="viewAll"
+          />
         </div>
       </div>
     </Popover>
@@ -188,5 +212,13 @@ function getTypeIcon(type: string): string {
   font-size: 0.75rem;
   color: var(--p-text-muted-color);
   margin-top: 0.125rem;
+}
+
+.notification-panel-footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--p-content-border-color);
+  margin-top: 0.5rem;
 }
 </style>

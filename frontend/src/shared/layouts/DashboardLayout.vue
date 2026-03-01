@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import AppSidebar from '@/shared/components/AppSidebar.vue'
 import AppTopbar from '@/shared/components/AppTopbar.vue'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
 
+const authStore = useAuthStore()
+const notificationStore = useNotificationStore()
 const sidebarVisible = ref(true)
+
+// Initialize Mercure SSE when user is available, close on logout
+watch(
+  () => authStore.user,
+  (user) => {
+    if (user) {
+      notificationStore.initMercure(user.id)
+    } else {
+      notificationStore.closeMercure()
+    }
+  },
+  { immediate: true },
+)
 
 function toggleSidebar() {
   sidebarVisible.value = !sidebarVisible.value
