@@ -26,7 +26,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 
 - [x] **Phase 6: Process Polish** — Fix v1.0 tech debt: schema snapshot, FormSchemaBuilder dedup, from_variable, process cancel, filters, UI alignment (completed 2026-03-01)
 - [x] **Phase 7: User Profile + CI/CD** — Avatar upload to S3, profile editing, password change, CI pipeline, pre-commit hooks, developer setup docs (completed 2026-03-01)
-- [ ] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI
+- [x] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI (completed 2026-03-01)
 - [ ] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center
 - [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
@@ -97,7 +97,7 @@ Plans:
   2. AuditLog entries appear in the database for task lifecycle events, process lifecycle events, and auth events without any action on the business transaction
   3. User can query GET /api/v1/audit-log with filters for entity type, actor, and date range and receive paginated results
   4. Task detail, process instance detail, and organization detail pages each show an activity timeline built from audit log entries
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 08-01-PLAN.md — Backend Audit module (entity, actorId enrichment, event handlers, messenger routing, REST API)
 - [ ] 08-02-PLAN.md — Frontend AuditLogTimeline component + integration into detail pages
@@ -174,7 +174,7 @@ Plans:
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
 | 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
-| 8. Audit Logging | v2.0 | 0/2 | Not started | - |
+| 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
