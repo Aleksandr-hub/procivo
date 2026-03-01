@@ -741,7 +741,7 @@
     "transitionDeleted": "Transition deleted",
     "actionKey": "Action Key",
     "actionKeyPlaceholder": "e.g. approve, reject",
-    "actionKeyHelp": "Unique identifier for this action. Used in task forms as a button. Leave empty for default transitions.",
+    "actionKeyHelp": "The action key defines the button on the task form. E.g.: approve, reject. If empty, defaults to 'complete'",
 
     "formFields": "Form Fields",
     "formFieldsHelp": "Define the fields that the assignee must fill out to complete this stage.",
