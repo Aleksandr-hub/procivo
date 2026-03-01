@@ -21,7 +21,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 - [x] **VER-01**: Event-sourced migration — ProcessInstanceMigratedEvent updates aggregate versionId so engine uses target version for execution after migration
 - [x] **VER-02**: GET /versions returns running_instance_count per version; action_key compatibility validated before migration
-- [ ] **VER-03**: Admin can view version history and trigger migration from Designer page via VersionHistoryDrawer with confirmation dialog
+- [x] **VER-03**: Admin can view version history and trigger migration from Designer page via VersionHistoryDrawer with confirmation dialog
 
 ### User Profile
 
@@ -123,7 +123,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLSH-07 | Phase 6 | Complete |
 | VER-01 | Phase 6.1 | Complete |
 | VER-02 | Phase 6.1 | Complete |
-| VER-03 | Phase 6.1 | Pending |
+| VER-03 | Phase 6.1 | Complete |
 | PROF-01 | Phase 7 | Pending |
 | PROF-02 | Phase 7 | Pending |
 | PROF-03 | Phase 7 | Pending |

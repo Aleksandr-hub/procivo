@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-01T14:47:40.221Z"
+last_updated: "2026-03-01T14:53:39.465Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 06.1 (Process Definition Versioning)
-Plan: 1 of N (completed)
-Status: In Progress
-Last activity: 2026-03-01 — Completed 06.1-01: ProcessInstanceMigratedEvent, event-sourced migration, action_key validation, running instance count in versions API
+Phase: 06.1 (Process Definition Versioning) — COMPLETE
+Plan: 2 of 2 (completed)
+Status: Phase complete
+Last activity: 2026-03-01 — Completed 06.1-02: VersionHistoryDrawer admin UI, migrateInstances API+store, 10 i18n keys per locale
 
-Progress: [█░░░░░░░░░] 1 plan complete in Phase 06.1
+Progress: [██████████] Phase 06.1 complete (2/2 plans)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [█░░░░░░░░░] 1 plan complete in Phase 06.1
 | Phase 06-process-polish P04 | 3 | 2 tasks | 5 files |
 | Phase 06-process-polish P02 | 14 | 2 tasks | 11 files |
 | Phase 06.1-process-definition-versioning P01 | 3 | 2 tasks | 7 files |
+| Phase 06.1-process-definition-versioning P02 | 5 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,7 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 06-process-polish]: Deploy button always visible in Designer — no conditional Publish/RevertToDraft pair needed since publish() works from Published state (Plan 01)
 - [Phase 06.1-01]: Migration is event-sourced: ProcessInstanceMigratedEvent recorded in event store, projection updates read model — no direct SQL UPDATE in command handler
 - [Phase 06.1-01]: Action_key validation checks outgoing transitions count > 0, not exact key match — avoids per-instance current version load
+- [Phase 06.1-02]: VersionHistoryDrawer uses computed drawerVisible with get/set for v-model:visible — standard PrimeVue pattern for overlay components
 
 ### Pending Todos
 
@@ -84,6 +86,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 06.1-01-PLAN.md — ProcessInstanceMigratedEvent, event-sourced migration, action_key validation, running instance count
+Stopped at: Completed 06.1-02-PLAN.md — VersionHistoryDrawer with migration controls, migrateInstances API+store action, 10 i18n keys per locale
 Resume file: None
-Next action: Continue Phase 06.1 — proceed to Plan 02
+Next action: Phase 06.1 complete — plan next phase
