@@ -5,6 +5,7 @@ defineProps<{
   processName: string
   currentStageName: string
   completedStepCount: number
+  totalStepCount: number
   processInstanceUrl: string
   nextStepName?: string
 }>()
@@ -35,7 +36,7 @@ const { t } = useI18n()
       <div class="context-info step-info">
         <span class="step-text">{{ t('process.step', { n: completedStepCount }) }}</span>
         <ProgressBar
-          :value="completedStepCount * 10"
+          :value="totalStepCount > 0 ? Math.round((completedStepCount / totalStepCount) * 100) : 0"
           :show-value="false"
           class="step-progress"
         />
@@ -59,7 +60,7 @@ const { t } = useI18n()
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--p-purple-500) 5%, transparent) 0%,
@@ -119,7 +120,7 @@ const { t } = useI18n()
 }
 
 .context-label {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--p-text-muted-color);
   text-transform: uppercase;
   letter-spacing: 0.04em;

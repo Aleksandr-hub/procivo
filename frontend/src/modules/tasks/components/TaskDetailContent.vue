@@ -287,6 +287,8 @@ const completedStepCount = computed(() =>
   stepperSteps.value.filter(s => s.status === 'completed').length + 1
 )
 
+const totalStepCount = computed(() => stepperSteps.value.length || 1)
+
 const processInstanceUrl = computed(() => {
   if (!task.value?.workflow_context) return ''
   const orgId = props.orgId
@@ -537,6 +539,7 @@ onUnmounted(() => {
           :process-name="task.workflow_context.process_name"
           :current-stage-name="task.workflow_context.node_name"
           :completed-step-count="completedStepCount"
+          :total-step-count="totalStepCount"
           :process-instance-url="processInstanceUrl"
         />
 
@@ -770,7 +773,7 @@ onUnmounted(() => {
 }
 
 .section {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .section h4 {
