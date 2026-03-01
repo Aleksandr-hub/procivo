@@ -126,4 +126,16 @@ final class AssignmentResolverTest extends TestCase
         $this->assertNull($result->candidateRoleId);
         $this->assertNull($result->candidateDepartmentId);
     }
+
+    public function testFromVariableStrategyFallsBackToUnassigned(): void
+    {
+        $resolver = new AssignmentResolver($this->createStub(OrganizationQueryPort::class));
+
+        $result = $resolver->resolve('from_variable', 'org-1');
+
+        $this->assertSame(AssignmentStrategy::Unassigned, $result->strategy);
+        $this->assertNull($result->assigneeId);
+        $this->assertNull($result->candidateRoleId);
+        $this->assertNull($result->candidateDepartmentId);
+    }
 }

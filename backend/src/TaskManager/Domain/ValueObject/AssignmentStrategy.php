@@ -10,4 +10,5 @@ enum AssignmentStrategy: string
     case SpecificUser = 'specific_user';
     case ByRole = 'by_role';
     case ByDepartment = 'by_department';
+    case FromVariable = 'from_variable';
 }

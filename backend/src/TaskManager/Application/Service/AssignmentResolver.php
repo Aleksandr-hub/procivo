@@ -39,6 +39,14 @@ final readonly class AssignmentResolver
             ),
             AssignmentStrategy::ByRole => $this->resolveByRole($roleId, $organizationId),
             AssignmentStrategy::ByDepartment => $this->resolveByDepartment($departmentId),
+            // from_variable is pre-resolved to specific_user before CreateTaskCommand is dispatched;
+            // this branch acts as a defensive fallback only.
+            AssignmentStrategy::FromVariable => new AssignmentResult(
+                AssignmentStrategy::Unassigned,
+                null,
+                null,
+                null,
+            ),
         };
     }
 
