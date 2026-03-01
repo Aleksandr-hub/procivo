@@ -97,7 +97,10 @@ Plans:
   2. AuditLog entries appear in the database for task lifecycle events, process lifecycle events, and auth events without any action on the business transaction
   3. User can query GET /api/v1/audit-log with filters for entity type, actor, and date range and receive paginated results
   4. Task detail, process instance detail, and organization detail pages each show an activity timeline built from audit log entries
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — Backend Audit module (entity, actorId enrichment, event handlers, messenger routing, REST API)
+- [ ] 08-02-PLAN.md — Frontend AuditLogTimeline component + integration into detail pages
 
 ### Phase 9: Notification System
 **Goal**: Users receive real-time in-app and email notifications for relevant events, with control over what they receive
@@ -171,7 +174,7 @@ Plans:
 | 6. Process Polish | 4/4 | Complete   | 2026-03-01 | - |
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
 | 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
-| 8. Audit Logging | v2.0 | 0/TBD | Not started | - |
+| 8. Audit Logging | v2.0 | 0/2 | Not started | - |
 | 9. Notification System | v2.0 | 0/TBD | Not started | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
