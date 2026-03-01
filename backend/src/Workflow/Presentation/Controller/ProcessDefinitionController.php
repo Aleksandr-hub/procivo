@@ -10,12 +10,14 @@ use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
 use App\Workflow\Application\Command\CreateProcessDefinition\CreateProcessDefinitionCommand;
 use App\Workflow\Application\Command\DeleteProcessDefinition\DeleteProcessDefinitionCommand;
+use App\Workflow\Application\Command\MigrateProcessInstances\MigrateProcessInstancesCommand;
 use App\Workflow\Application\Command\PublishProcessDefinition\PublishProcessDefinitionCommand;
 use App\Workflow\Application\Command\RevertProcessDefinitionToDraft\RevertProcessDefinitionToDraftCommand;
 use App\Workflow\Application\Command\UpdateProcessDefinition\UpdateProcessDefinitionCommand;
 use App\Workflow\Application\Query\GetProcessDefinition\GetProcessDefinitionQuery;
 use App\Workflow\Application\Query\GetStartFormSchema\GetStartFormSchemaQuery;
 use App\Workflow\Application\Query\ListProcessDefinitions\ListProcessDefinitionsQuery;
+use App\Workflow\Application\Query\ListVersions\ListVersionsQuery;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionId;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -137,6 +139,30 @@ final readonly class ProcessDefinitionController
         ));
 
         return new JsonResponse(['message' => 'Process definition reverted to draft.']);
+    }
+
+    #[Route('/{definitionId}/versions', name: 'versions', methods: ['GET'])]
+    public function versions(string $organizationId, string $definitionId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_VIEW');
+
+        $versions = $this->queryBus->ask(new ListVersionsQuery($definitionId));
+
+        return new JsonResponse($versions);
+    }
+
+    #[Route('/{definitionId}/versions/{versionId}/migrate', name: 'migrate_instances', methods: ['POST'])]
+    public function migrateInstances(string $organizationId, string $definitionId, string $versionId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_UPDATE');
+
+        $this->commandBus->dispatch(new MigrateProcessInstancesCommand(
+            processDefinitionId: $definitionId,
+            targetVersionId: $versionId,
+            migratedBy: $this->currentUserProvider->getUserId(),
+        ));
+
+        return new JsonResponse(['message' => 'Running instances migrated to target version.']);
     }
 
     /**
