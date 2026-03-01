@@ -27,7 +27,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 6: Process Polish** — Fix v1.0 tech debt: schema snapshot, FormSchemaBuilder dedup, from_variable, process cancel, filters, UI alignment (completed 2026-03-01)
 - [x] **Phase 7: User Profile + CI/CD** — Avatar upload to S3, profile editing, password change, CI pipeline, pre-commit hooks, developer setup docs (completed 2026-03-01)
 - [x] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI (completed 2026-03-01)
-- [ ] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center
+- [x] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center (completed 2026-03-01)
 - [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
 - [ ] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view)
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
@@ -115,7 +115,7 @@ Plans:
   5. Bell icon in the topbar shows an unread count badge that updates in real-time via Mercure
   6. User can open a notification center page, filter by type, mark notifications as read, and click to navigate to the referenced entity
   7. Notifications fire for all seven trigger events: task assigned, task completed, process started, process completed, comment added, invitation received, and process cancelled
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 09-01-PLAN.md — Backend: domain model (channel/readAt/preferences), NotificationDispatcher, Mercure publisher, email mailer, 7 event handlers, preferences API
 - [ ] 09-02-PLAN.md — Frontend: Mercure SSE subscription, NotificationsPage, preferences UI in ProfilePage, i18n
@@ -200,7 +200,7 @@ Plans:
 | 6.1 Process Definition Versioning | 2/2 | Complete   | 2026-03-01 | - |
 | 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
 | 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
-| 9. Notification System | 1/2 | In Progress|  | - |
+| 9. Notification System | 2/2 | Complete   | 2026-03-01 | - |
 | 10. Dashboard | v2.0 | 0/TBD | Not started | - |
 | 10.1 Board Evolution | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |

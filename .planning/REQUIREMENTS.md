@@ -44,8 +44,8 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **NOTF-02**: In-app notifications delivered real-time via Mercure SSE (per-user topics)
 - [x] **NOTF-03**: Email notifications sent async via Symfony Mailer + RabbitMQ with Twig templates
 - [x] **NOTF-04**: User can configure notification preferences per event type per channel
-- [ ] **NOTF-05**: Bell icon in topbar with unread count badge
-- [ ] **NOTF-06**: Notification center page with list, filters, mark-read, click-to-navigate
+- [x] **NOTF-05**: Bell icon in topbar with unread count badge
+- [x] **NOTF-06**: Notification center page with list, filters, mark-read, click-to-navigate
 - [x] **NOTF-07**: Triggers: task assigned, task completed, process started/completed, comment added, invitation received
 
 ### Dashboard
@@ -137,8 +137,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-02 | Phase 9 | Complete |
 | NOTF-03 | Phase 9 | Complete |
 | NOTF-04 | Phase 9 | Complete |
-| NOTF-05 | Phase 9 | Pending |
-| NOTF-06 | Phase 9 | Pending |
+| NOTF-05 | Phase 9 | Complete |
+| NOTF-06 | Phase 9 | Complete |
 | NOTF-07 | Phase 9 | Complete |
 | DASH-01 | Phase 10 | Pending |
 | DASH-02 | Phase 10 | Pending |

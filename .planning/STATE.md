@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 09 (Notification System) — In Progress
-Plan: 1 of 2 (completed)
-Status: Phase 09 plan 01 complete — backend notification system done
-Last activity: 2026-03-01 — Completed 09-01: Backend notification system with NotificationDispatcher, Mercure SSE, email, 7 event handlers, preferences API
+Phase: 09 (Notification System) — Complete
+Plan: 2 of 2 (completed)
+Status: Phase 09 complete — full notification system delivered (backend + frontend)
+Last activity: 2026-03-01 — Completed 09-02: Notification frontend with Mercure SSE store, NotificationsPage, preferences toggle matrix in ProfilePage
 
-Progress: [█████░░░░░] Phase 09 plan 01/2 complete
+Progress: [██████████] Phase 09 complete (2/2 plans)
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [█████░░░░░] Phase 09 plan 01/2 complete
 | Phase 08-audit-logging P01 | 11 | 2 tasks | 44 files |
 | Phase 08-audit-logging P02 | 5 | 2 tasks | 8 files |
 | Phase 09-notification-system P01 | 8 | 3 tasks | 41 files |
+| Phase 09-notification-system P02 | 3 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 09-01]: email channel defaults to disabled (opt-in), in_app defaults to enabled (opt-out) — no preference row = use default
 - [Phase 09-01]: OnProcessCompleted uses DBAL not Doctrine — ProcessCompletedEvent is sync; DBAL fetchAssociative is lightweight
 - [Phase 09-01]: OnInvitationCreated sends in_app only if user exists — invitation email already sent by InviteUserHandler separately
+- [Phase 09-02]: DashboardLayout watches authStore.user with immediate:true to manage Mercure SSE lifecycle — handles page refresh + login/logout in one place
+- [Phase 09-02]: NotificationsPage navigation uses currentOrgId from organization.store — notifications don't carry orgId, org context is required for task/process links
+- [Phase 09-02]: getPreference/setPreference helpers with JSON deep-clone on mount — avoids reactive aliasing with nested preferences object
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Completed 09-01-PLAN.md — Backend notification system with NotificationDispatcher, Mercure SSE, email mailer, 7 event handlers, preferences CRUD API
+Stopped at: Completed 09-02-PLAN.md — Notification frontend with Mercure SSE store, NotificationsPage, preferences toggle matrix, i18n keys
 Resume file: None
-Next action: Proceed to Phase 09 Plan 02 (Notification frontend — bell icon, real-time SSE, preferences settings)
+Next action: Phase 09 complete — proceed to Phase 10 or next milestone planning
