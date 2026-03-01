@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useTheme } from '@/shared/composables/useTheme'
 import { useLocale } from '@/shared/composables/useLocale'
@@ -15,6 +16,10 @@ const auth = useAuthStore()
 const router = useRouter()
 const { isDark, toggle: toggleTheme } = useTheme()
 const { currentLocale, setLocale } = useLocale()
+
+const initials = computed(() =>
+  auth.user ? (auth.user.firstName[0] + auth.user.lastName[0]).toUpperCase() : '',
+)
 
 function toggleLocale() {
   setLocale(currentLocale.value === 'en' ? 'uk' : 'en')
@@ -37,9 +42,15 @@ async function handleLogout() {
       />
     </div>
     <div class="topbar-right">
-      <span v-if="auth.user" class="user-name">
-        {{ auth.user.firstName }} {{ auth.user.lastName }}
-      </span>
+      <div v-if="auth.user" class="user-info" @click="router.push('/profile')" style="cursor: pointer;">
+        <Avatar
+          :image="auth.user.avatarUrl ?? undefined"
+          :label="auth.user.avatarUrl ? undefined : initials"
+          shape="circle"
+          size="small"
+        />
+        <span class="user-name">{{ auth.user.firstName }} {{ auth.user.lastName }}</span>
+      </div>
       <NotificationBell />
       <Button
         :label="currentLocale.toUpperCase()"
@@ -86,6 +97,12 @@ async function handleLogout() {
 }
 
 .topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info {
   display: flex;
   align-items: center;
   gap: 0.5rem;

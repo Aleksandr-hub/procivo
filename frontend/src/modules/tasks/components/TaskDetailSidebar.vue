@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { taskStatusSeverity, taskPrioritySeverity } from '@/shared/utils/status-severity'
 import { formatDate, isOverdue } from '@/shared/utils/date-format'
 import type { TaskDetailDTO } from '@/modules/tasks/types/task.types'
@@ -20,6 +21,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const empStore = useEmployeeStore()
+const auth = useAuthStore()
 
 const statusLabelKeys: Record<string, string> = {
   draft: 'tasks.statusDraft',
@@ -52,6 +54,14 @@ const creatorInitials = computed(() => {
   }
   return '?'
 })
+
+const isCurrentUserAssignee = computed(
+  () => !!(auth.user && props.task.assigneeId && props.task.assigneeId === auth.user.id),
+)
+
+const isCurrentUserCreator = computed(
+  () => !!(auth.user && props.task.creatorId === auth.user.id),
+)
 </script>
 
 <template>
@@ -62,7 +72,12 @@ const creatorInitials = computed(() => {
       <div class="card-content">
         <template v-if="assigneeName">
           <div class="assignee-row">
-            <Avatar :label="assigneeName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)" shape="circle" size="small" />
+            <Avatar
+              :image="isCurrentUserAssignee ? auth.user?.avatarUrl ?? undefined : undefined"
+              :label="isCurrentUserAssignee && auth.user?.avatarUrl ? undefined : assigneeName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)"
+              shape="circle"
+              size="small"
+            />
             <span>{{ assigneeName }}</span>
           </div>
           <Button
@@ -175,7 +190,12 @@ const creatorInitials = computed(() => {
       <div class="card-label">{{ t('sidebar.creator') }}</div>
       <div class="card-content">
         <div class="creator-row">
-          <Avatar :label="creatorInitials" shape="circle" size="small" />
+          <Avatar
+            :image="isCurrentUserCreator ? auth.user?.avatarUrl ?? undefined : undefined"
+            :label="isCurrentUserCreator && auth.user?.avatarUrl ? undefined : creatorInitials"
+            shape="circle"
+            size="small"
+          />
           <span>{{ creatorName }}</span>
         </div>
       </div>
