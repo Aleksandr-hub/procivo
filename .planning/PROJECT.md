@@ -52,9 +52,20 @@ Users can execute BPMN processes end-to-end: design → publish → start → fi
 
 ### Active
 
-<!-- Current scope. Building toward these in next milestone. -->
+<!-- Current scope. Building toward these in v2.0 milestone. -->
 
-(To be defined in next milestone via `/gsd:new-milestone`)
+**Current Milestone: v2.0 Production-Ready BPM**
+
+**Goal:** Make the platform production-ready with notifications, audit trail, dashboard, user profiles, timer execution, and CI/CD — so small teams can actually use it.
+
+**Target features:**
+- Process polish (fix schema drift, dedup FormSchemaBuilder, from_variable, process cancel, filters)
+- User profile + avatar (S3 upload, display across UI)
+- Audit logging (domain events → audit_log, async, timeline UI)
+- Notification system (in-app via Mercure + email, preferences, bell icon)
+- Dashboard (my tasks, active processes, charts, activity feed)
+- Timer node execution (duration/date timers via RabbitMQ delayed messages)
+- Super Admin impersonation + CI/CD pipeline (GitHub Actions, pre-commit hooks)
 
 ### Out of Scope
 
@@ -109,4 +120,4 @@ Known tech debt from v1.0:
 | Definition re-fetch after save | Prevents stale state in designer | ✓ Good — parent page owns fetch, designer emits signal |
 
 ---
-*Last updated: 2026-03-01 after v1.0 milestone*
+*Last updated: 2026-03-01 after v2.0 milestone start*
