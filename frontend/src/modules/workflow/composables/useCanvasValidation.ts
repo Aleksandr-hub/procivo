@@ -82,7 +82,7 @@ export function useCanvasValidation(
 
       // Check for transitions with form_fields but no action_key
       for (const transition of transitions) {
-        if (transition.form_fields.length > 0 && !transition.action_key) {
+        if (transition.form_fields && transition.form_fields.length > 0 && !transition.action_key) {
           const sourceNode = ns.find((n) => n.id === transition.source_node_id)
           const sourceName = sourceNode ? (sourceNode.data.label as string) : transition.source_node_id
           errors.push({
