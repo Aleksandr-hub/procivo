@@ -540,7 +540,41 @@
     "markAllRead": "Mark all read",
     "justNow": "Just now",
     "minutesAgo": "{n} min ago",
-    "hoursAgo": "{n}h ago"
+    "hoursAgo": "{n}h ago",
+    "sidebar": "Notifications",
+    "center": {
+      "title": "Notifications",
+      "filterByType": "Filter by type",
+      "allTypes": "All types",
+      "noNotifications": "No notifications yet",
+      "viewAll": "View all notifications"
+    },
+    "preferences": {
+      "title": "Notification Preferences",
+      "inApp": "In-App",
+      "email": "Email",
+      "saved": "Notification preferences saved",
+      "save": "Save Preferences",
+      "types": {
+        "task_assigned": "Task Assigned",
+        "task_completed": "Task Completed",
+        "comment_added": "Comment Added",
+        "process_started": "Process Started",
+        "process_completed": "Process Completed",
+        "process_cancelled": "Process Cancelled",
+        "invitation_received": "Invitation Received"
+      }
+    },
+    "types": {
+      "task_assigned": "Task Assigned",
+      "task_completed": "Task Completed",
+      "task_status_changed": "Task Status Changed",
+      "comment_added": "Comment Added",
+      "process_started": "Process Started",
+      "process_completed": "Process Completed",
+      "process_cancelled": "Process Cancelled",
+      "invitation_received": "Invitation Received"
+    }
   },
   "kanban": {
     "title": "Kanban Board",

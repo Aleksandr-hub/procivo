@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useOrganizationStore } from '@/modules/organization/stores/organization.store'
 
 defineProps<{
   visible: boolean
@@ -9,8 +10,9 @@ defineProps<{
 
 const route = useRoute()
 const { t } = useI18n()
+const orgStore = useOrganizationStore()
 
-const orgId = computed(() => route.params.orgId as string | undefined)
+const orgId = computed(() => (route.params.orgId as string | undefined) ?? orgStore.currentOrgId ?? undefined)
 
 const menuItems = computed(() => {
   const items = [
@@ -18,6 +20,11 @@ const menuItems = computed(() => {
       label: t('nav.organizations'),
       icon: 'pi pi-building',
       to: '/',
+    },
+    {
+      label: t('notifications.sidebar'),
+      icon: 'pi pi-bell',
+      to: '/notifications',
     },
   ]
 

@@ -540,7 +540,41 @@
     "markAllRead": "Прочитати все",
     "justNow": "Щойно",
     "minutesAgo": "{n} хв тому",
-    "hoursAgo": "{n} год тому"
+    "hoursAgo": "{n} год тому",
+    "sidebar": "Сповіщення",
+    "center": {
+      "title": "Сповіщення",
+      "filterByType": "Фільтр за типом",
+      "allTypes": "Усі типи",
+      "noNotifications": "Сповіщень ще немає",
+      "viewAll": "Переглянути всі сповіщення"
+    },
+    "preferences": {
+      "title": "Налаштування сповіщень",
+      "inApp": "В додатку",
+      "email": "Email",
+      "saved": "Налаштування сповіщень збережено",
+      "save": "Зберегти налаштування",
+      "types": {
+        "task_assigned": "Задача призначена",
+        "task_completed": "Задача завершена",
+        "comment_added": "Додано коментар",
+        "process_started": "Процес запущено",
+        "process_completed": "Процес завершено",
+        "process_cancelled": "Процес скасовано",
+        "invitation_received": "Отримано запрошення"
+      }
+    },
+    "types": {
+      "task_assigned": "Задача призначена",
+      "task_completed": "Задача завершена",
+      "task_status_changed": "Статус задачі змінено",
+      "comment_added": "Додано коментар",
+      "process_started": "Процес запущено",
+      "process_completed": "Процес завершено",
+      "process_cancelled": "Процес скасовано",
+      "invitation_received": "Отримано запрошення"
+    }
   },
   "kanban": {
     "title": "Kanban дошка",
