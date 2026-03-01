@@ -98,10 +98,11 @@ Plans:
   1. TaskNodeConfig panel includes an assignment strategy dropdown (unassigned, specific_employee, by_role, by_department) with dynamic sub-fields (employee/role/department selector) that appear based on the selected strategy
   2. Transition property panel includes FormFieldsBuilder for configuring per-action form fields, and the configured fields are saved to the process definition
   3. A process designed entirely through the UI (with assignment rules and form fields configured in the designer) can be started, executed through task forms, and completed end-to-end without any JSON editing
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — Canvas validation warnings (missing action_key, duplicate action_keys) + config persistence fix (definition re-fetch after save)
+- [ ] 05-02-PLAN.md — Build verification, UI polish, and end-to-end human checkpoint for full designer-to-execution loop
 
 ## Progress
 
@@ -114,4 +115,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Form Schema and Assignment | 2/2 | Complete | 2026-02-28 |
 | 3. Completion and Claim APIs | 2/2 | Complete | 2026-02-28 |
 | 4. Frontend Task Integration | 5/5 | Complete | 2026-02-28 |
-| 5. Designer Configuration | 0/? | Not started | - |
+| 5. Designer Configuration | 0/2 | Not started | - |
