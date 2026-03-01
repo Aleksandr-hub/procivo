@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
+import { useConfirm } from 'primevue/useconfirm'
 import { useI18n } from 'vue-i18n'
 import { useProcessInstanceStore } from '@/modules/workflow/stores/process-instance.store'
 import ProcessMonitorGraph from '@/modules/workflow/components/ProcessMonitorGraph.vue'
@@ -11,6 +12,7 @@ import { getApiErrorMessage } from '@/shared/utils/api-error'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const confirm = useConfirm()
 const store = useProcessInstanceStore()
 const { t } = useI18n()
 
@@ -39,6 +41,17 @@ async function cancelInstance() {
   }
 }
 
+function confirmCancel() {
+  confirm.require({
+    message: t('workflow.confirmCancelInstance'),
+    header: t('common.confirm'),
+    acceptLabel: t('workflow.cancelProcess'),
+    rejectLabel: t('common.cancel'),
+    acceptClass: 'p-button-danger',
+    accept: () => cancelInstance(),
+  })
+}
+
 function formatEventType(type: string) {
   return type.replace('workflow.', '').replace(/\./g, ' ').replace(/_/g, ' ')
 }
@@ -52,7 +65,7 @@ function formatEventType(type: string) {
         <h3>{{ store.currentInstance?.definition_name || t('workflow.instanceDetail') }}</h3>
         <Tag v-if="store.currentInstance" :value="t('workflow.instanceStatus_' + store.currentInstance.status)" :severity="instanceStatusSeverity(store.currentInstance.status)" />
       </div>
-      <Button v-if="store.currentInstance?.status === 'running'" :label="t('workflow.cancel')" icon="pi pi-times" severity="danger" @click="cancelInstance" />
+      <Button v-if="store.currentInstance?.status === 'running'" :label="t('workflow.cancel')" icon="pi pi-times" severity="danger" @click="confirmCancel" />
     </div>
 
     <div v-if="store.currentInstance" class="detail-content">
