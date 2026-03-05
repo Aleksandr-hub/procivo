@@ -584,7 +584,8 @@
     "noTasks": "Задач немає",
     "taskMoved": "Задачу переміщено",
     "moveFailed": "Не вдалося перемістити задачу",
-    "transitionNotAllowed": "Цей перехід не дозволено"
+    "transitionNotAllowed": "Цей перехід не дозволено",
+    "commentCount": "{count} коментарів"
   },
   "workflow": {
     "processDefinitions": "Визначення процесів",

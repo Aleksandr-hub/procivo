@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/modules/tasks/stores/board.store'
 import { useTaskStore } from '@/modules/tasks/stores/task.store'
+import KanbanCard from '@/modules/tasks/components/KanbanCard.vue'
 import type { TaskDTO } from '@/modules/tasks/types/task.types'
 import type { BoardColumnDTO } from '@/modules/tasks/types/board.types'
 
@@ -51,9 +52,12 @@ function getColumnStyle(column: BoardColumnDTO) {
   return {}
 }
 
-function isWipExceeded(column: BoardColumnDTO): boolean {
-  if (!column.wipLimit) return false
-  return getTasksForColumn(column).length >= column.wipLimit
+function getColumnWipState(column: BoardColumnDTO): 'ok' | 'warning' | 'exceeded' {
+  if (!column.wipLimit) return 'ok'
+  const count = getTasksForColumn(column).length
+  if (count >= column.wipLimit) return 'exceeded'
+  if (count / column.wipLimit >= 0.8) return 'warning'
+  return 'ok'
 }
 
 // Drag and drop
@@ -127,16 +131,6 @@ function findTransition(task: TaskDTO, targetStatus: string): string | null {
   return task.availableTransitions.find((t) => possibleTransitions.includes(t)) ?? null
 }
 
-function getPrioritySeverity(priority: string) {
-  switch (priority) {
-    case 'low': return 'secondary'
-    case 'medium': return 'info'
-    case 'high': return 'warn'
-    case 'critical': return 'danger'
-    default: return undefined
-  }
-}
-
 // Mercure real-time
 function connectMercure() {
   const mercureUrl = import.meta.env.VITE_MERCURE_URL
@@ -185,7 +179,10 @@ function goBack() {
         v-for="column in sortedColumns"
         :key="column.id"
         class="kanban-column"
-        :class="{ 'wip-exceeded': isWipExceeded(column) }"
+        :class="{
+          'wip-warning': getColumnWipState(column) === 'warning',
+          'wip-exceeded': getColumnWipState(column) === 'exceeded',
+        }"
         :style="getColumnStyle(column)"
         @dragover="onDragOver"
         @drop="onDrop($event, column)"
@@ -199,22 +196,13 @@ function goBack() {
         </div>
 
         <div class="column-body">
-          <div
+          <KanbanCard
             v-for="task in getTasksForColumn(column)"
             :key="task.id"
-            class="kanban-card"
-            draggable="true"
+            :task="task"
+            @click="router.push({ name: 'task-detail', params: { orgId: orgId, taskId: task.id } })"
             @dragstart="onDragStart($event, task)"
-          >
-            <div class="card-title">{{ task.title }}</div>
-            <div class="card-meta">
-              <Tag :value="task.priority" :severity="getPrioritySeverity(task.priority)" rounded />
-              <span v-if="task.dueDate" class="due-date">
-                <i class="pi pi-calendar" />
-                {{ new Date(task.dueDate).toLocaleDateString() }}
-              </span>
-            </div>
-          </div>
+          />
 
           <div v-if="getTasksForColumn(column).length === 0" class="column-empty">
             {{ t('kanban.noTasks') }}
@@ -274,8 +262,20 @@ function goBack() {
   flex-shrink: 0;
 }
 
+.kanban-column.wip-warning {
+  border-top-color: var(--p-orange-500);
+}
+
 .kanban-column.wip-exceeded {
   border-top-color: var(--p-red-500);
+}
+
+.kanban-column.wip-warning .column-count {
+  color: var(--p-orange-600);
+}
+
+.kanban-column.wip-exceeded .column-count {
+  color: var(--p-red-600);
 }
 
 .column-header {
@@ -312,46 +312,5 @@ function goBack() {
   padding: 2rem 0.5rem;
   color: var(--p-text-muted-color);
   font-size: 0.8rem;
-}
-
-.kanban-card {
-  background: var(--p-surface-card);
-  border: 1px solid var(--p-content-border-color);
-  border-radius: 6px;
-  padding: 0.75rem;
-  cursor: grab;
-  transition: box-shadow 0.15s;
-}
-
-.kanban-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.kanban-card:active {
-  cursor: grabbing;
-}
-
-.card-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.card-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-}
-
-.due-date {
-  color: var(--p-text-muted-color);
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.due-date i {
-  font-size: 0.7rem;
 }
 </style>

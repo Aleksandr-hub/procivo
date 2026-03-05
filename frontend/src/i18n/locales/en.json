@@ -584,7 +584,8 @@
     "noTasks": "No tasks",
     "taskMoved": "Task moved",
     "moveFailed": "Failed to move task",
-    "transitionNotAllowed": "This transition is not allowed"
+    "transitionNotAllowed": "This transition is not allowed",
+    "commentCount": "{count} comments"
   },
   "workflow": {
     "processDefinitions": "Process Definitions",
