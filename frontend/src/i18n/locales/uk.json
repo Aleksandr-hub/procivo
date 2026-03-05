@@ -73,6 +73,7 @@
     }
   },
   "nav": {
+    "dashboard": "Панель",
     "organizations": "Організації",
     "departments": "Департаменти",
     "employees": "Працівники",
@@ -966,6 +967,35 @@
     "currentPassword": "Поточний пароль",
     "newPassword": "Новий пароль",
     "passwordChanged": "Пароль змінено"
+  },
+  "dashboard": {
+    "title": "Панель",
+    "myTasks": "Мої завдання",
+    "activeProcesses": "Активні процеси",
+    "charts": "Графіки",
+    "recentActivity": "Остання активність",
+    "overdue": "Прострочені",
+    "dueToday": "Сьогодні",
+    "upcoming": "Майбутні",
+    "noDueDate": "Без терміну",
+    "noTasks": "Немає призначених завдань",
+    "noProcesses": "Немає активних процесів",
+    "noData": "Дані ще відсутні",
+    "andMore": "та ще {count}...",
+    "completedTasks": "Виконані завдання",
+    "processes": "Процеси",
+    "tasksByStatus": "Завдання за статусом",
+    "completionTrend": "Тренд виконання (30 днів)",
+    "processCompletionRate": "Статус процесів"
+  },
+  "taskStatus": {
+    "draft": "Чернетка",
+    "open": "Відкрито",
+    "in_progress": "В роботі",
+    "review": "На перевірці",
+    "done": "Виконано",
+    "blocked": "Заблоковано",
+    "cancelled": "Скасовано"
   },
   "audit": {
     "activityTimeline": "Хронологія подій",

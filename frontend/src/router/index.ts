@@ -74,6 +74,12 @@ const router = createRouter({
           ],
         },
         {
+          path: 'organizations/:orgId/dashboard',
+          name: 'dashboard',
+          component: () => import('@/modules/dashboard/pages/DashboardPage.vue'),
+          props: true,
+        },
+        {
           path: 'organizations/:orgId/tasks',
           name: 'tasks',
           component: () => import('@/modules/tasks/pages/TasksPage.vue'),

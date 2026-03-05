@@ -31,6 +31,11 @@ const menuItems = computed(() => {
   if (orgId.value) {
     items.push(
       {
+        label: t('nav.dashboard'),
+        icon: 'pi pi-home',
+        to: `/organizations/${orgId.value}/dashboard`,
+      },
+      {
         label: t('nav.departments'),
         icon: 'pi pi-sitemap',
         to: `/organizations/${orgId.value}/departments`,

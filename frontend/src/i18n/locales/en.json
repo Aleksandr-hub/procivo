@@ -73,6 +73,7 @@
     }
   },
   "nav": {
+    "dashboard": "Dashboard",
     "organizations": "Organizations",
     "departments": "Departments",
     "employees": "Employees",
@@ -966,6 +967,35 @@
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "passwordChanged": "Password changed"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "myTasks": "My Tasks",
+    "activeProcesses": "Active Processes",
+    "charts": "Charts",
+    "recentActivity": "Recent Activity",
+    "overdue": "Overdue",
+    "dueToday": "Due Today",
+    "upcoming": "Upcoming",
+    "noDueDate": "No Due Date",
+    "noTasks": "No tasks assigned to you",
+    "noProcesses": "No active processes",
+    "noData": "No data yet",
+    "andMore": "and {count} more...",
+    "completedTasks": "Completed Tasks",
+    "processes": "Processes",
+    "tasksByStatus": "Tasks by Status",
+    "completionTrend": "Completion Trend (30 days)",
+    "processCompletionRate": "Process Status"
+  },
+  "taskStatus": {
+    "draft": "Draft",
+    "open": "Open",
+    "in_progress": "In Progress",
+    "review": "Review",
+    "done": "Done",
+    "blocked": "Blocked",
+    "cancelled": "Cancelled"
   },
   "audit": {
     "activityTimeline": "Activity Timeline",
