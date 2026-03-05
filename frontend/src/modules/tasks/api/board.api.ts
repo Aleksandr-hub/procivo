@@ -5,6 +5,8 @@ import type {
   UpdateBoardPayload,
   AddColumnPayload,
   UpdateColumnPayload,
+  CreateProcessBoardPayload,
+  ProcessBoardDataDTO,
 } from '@/modules/tasks/types/board.types'
 
 export const boardApi = {
@@ -38,5 +40,15 @@ export const boardApi = {
 
   deleteColumn(orgId: string, boardId: string, columnId: string) {
     return httpClient.delete(`/organizations/${orgId}/boards/${boardId}/columns/${columnId}`)
+  },
+
+  async createProcessBoard(orgId: string, payload: CreateProcessBoardPayload): Promise<{ id: string }> {
+    const { data } = await httpClient.post(`/organizations/${orgId}/boards/process`, payload)
+    return data
+  },
+
+  async getProcessBoardData(orgId: string, boardId: string): Promise<ProcessBoardDataDTO> {
+    const { data } = await httpClient.get(`/organizations/${orgId}/boards/${boardId}/process-data`)
+    return data
   },
 }

@@ -1010,6 +1010,17 @@
     "blocked": "Blocked",
     "cancelled": "Cancelled"
   },
+  "processBoard": {
+    "title": "Process Board",
+    "noInstances": "No instances in this stage",
+    "noActiveTask": "No active task to complete",
+    "dragRejected": "Cannot advance — the action was rejected",
+    "dragSuccess": "Instance advanced to next stage",
+    "multipleStages": "Multiple active stages",
+    "totalActive": "Active",
+    "throughput": "Completed / day (14d)",
+    "started": "Started"
+  },
   "audit": {
     "activityTimeline": "Activity Timeline",
     "noActivity": "No activity recorded",

@@ -104,6 +104,12 @@ const router = createRouter({
           props: true,
         },
         {
+          path: 'organizations/:orgId/boards/:boardId/process',
+          name: 'process-board',
+          component: () => import('@/modules/tasks/pages/ProcessBoardPage.vue'),
+          props: true,
+        },
+        {
           path: 'organizations/:orgId/labels',
           name: 'labels',
           component: () => import('@/modules/tasks/pages/LabelsPage.vue'),

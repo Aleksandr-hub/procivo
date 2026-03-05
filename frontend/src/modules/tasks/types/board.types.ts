@@ -6,6 +6,7 @@ export interface BoardColumnDTO {
   statusMapping: string | null
   wipLimit: number | null
   color: string | null
+  nodeId: string | null
   createdAt: string
 }
 
@@ -14,6 +15,8 @@ export interface BoardDTO {
   organizationId: string
   name: string
   description: string | null
+  boardType: string
+  processDefinitionId: string | null
   createdAt: string
   updatedAt: string | null
   columns: BoardColumnDTO[]
@@ -42,4 +45,30 @@ export interface UpdateColumnPayload {
   status_mapping?: string
   wip_limit?: number
   color?: string
+}
+
+export interface ProcessBoardInstanceDTO {
+  id: string
+  name: string
+  status: string
+  startedAt: string
+  activeNodeId: string | null
+  activeNodeName: string | null
+  activeTaskId: string | null
+  activeTaskAssigneeName: string | null
+}
+
+export interface ProcessBoardMetricsDTO {
+  totalActive: number
+  completedByDay: { date: string; count: number }[]
+}
+
+export interface ProcessBoardDataDTO {
+  instances: ProcessBoardInstanceDTO[]
+  metrics: ProcessBoardMetricsDTO
+}
+
+export interface CreateProcessBoardPayload {
+  name: string
+  process_definition_id: string
 }
