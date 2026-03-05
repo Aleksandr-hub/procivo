@@ -163,4 +163,13 @@ class User extends AggregateRoot
     {
         return UserStatus::Blocked->value === $this->status;
     }
+
+    public function addRole(string $role): void
+    {
+        if (!\in_array($role, $this->roles, true)) {
+            $this->roles[] = $role;
+            $this->roles = array_values(array_unique($this->roles));
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
 }
