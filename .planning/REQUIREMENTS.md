@@ -63,7 +63,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **BRD-04**: WIP limit visual states: amber at 80%, red at 100%+, count badge
 - [x] **BRD-05**: Process Board creation from published ProcessDefinition with topologically-ordered columns
 - [x] **BRD-06**: Process Board cards show instance name, current stage, started date, active task assignee
-- [ ] **BRD-07**: Drag-to-complete triggers ExecuteTaskAction with ActionFormDialog for required fields
+- [x] **BRD-07**: Drag-to-complete triggers ExecuteTaskAction with ActionFormDialog for required fields
 - [x] **BRD-08**: Process Board pipeline metrics: total active, throughput sparkline (14 days)
 
 ### Timer & Scheduler
@@ -161,7 +161,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRD-04 | Phase 10.1 | Complete |
 | BRD-05 | Phase 10.1 | Complete |
 | BRD-06 | Phase 10.1 | Complete |
-| BRD-07 | Phase 10.1 | Pending |
+| BRD-07 | Phase 10.1 | Complete |
 | BRD-08 | Phase 10.1 | Complete |
 | TIMR-01 | Phase 11 | Pending |
 | TIMR-02 | Phase 11 | Pending |
