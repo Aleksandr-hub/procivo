@@ -32,7 +32,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI (completed 2026-03-01)
 - [x] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center (completed 2026-03-01)
 - [x] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log (completed 2026-03-05)
-- [ ] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view)
+- [x] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view) (completed 2026-03-05)
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
@@ -159,7 +159,7 @@ Plans:
   7. Dragging a card from one stage column to the next triggers the active task's default action (complete with empty form data) — if the task has required form fields, a compact ActionFormDialog appears inline; if no valid transition exists, drag is rejected with a toast
   8. Process Board header shows pipeline metrics: total active instances, average time per stage (from audit log timestamps), and a mini throughput sparkline (instances completed per day over last 14 days)
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 - [ ] 10.1-01-PLAN.md — Backend DTO extensions (commentCount, assigneeAvatarUrl) + KanbanCard component + WIP warning/exceeded colors
 - [ ] 10.1-02-PLAN.md — QuickFilterBar with URL param persistence + swimlane grouping (assignee, priority, none)
@@ -240,7 +240,7 @@ Plans:
 | 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
 | 9. Notification System | 2/2 | Complete   | 2026-03-01 | - |
 | 10. Dashboard | 3/3 | Complete    | 2026-03-05 | - |
-| 10.1 Board Evolution | 3/4 | In Progress|  | - |
+| 10.1 Board Evolution | 4/4 | Complete   | 2026-03-05 | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |

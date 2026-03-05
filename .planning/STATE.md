@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T17:43:10.249Z"
+last_updated: "2026-03-05T17:49:13.954Z"
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 20
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 10.1 (Board Evolution) — In Progress
-Plan: 2 of 4 (completed, 10.1-02: QuickFilterBar + swimlane grouping + URL-persisted filters)
-Status: Phase 10.1 in progress — Filter bar with text/assignee/labels/date range + swimlane grouping (none/assignee/priority) added to KanbanBoardPage
-Last activity: 2026-03-05 — Completed 10.1-02: QuickFilterBar component, URL query param persistence, swimlane rows
+Phase: 10.1 (Board Evolution) — Complete
+Plan: 4 of 4 (completed, 10.1-04: ProcessBoardPage, ProcessBoardCard, ProcessBoardMetrics, drag-to-complete)
+Status: Phase 10.1 complete — Process Board with BPMN-stage columns, instance cards, drag-to-complete via workflow engine, and throughput sparkline
+Last activity: 2026-03-05 — Completed 10.1-04: ProcessBoardPage with ActionFormDialog integration and ProcessBoardMetrics sparkline
 
-Progress: [██░░░░░░░░] Phase 10.1 — 2/4 plans complete
+Progress: [████████████] Phase 10.1 — 4/4 plans complete
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [██░░░░░░░░] Phase 10.1 — 2/4 plans complete
 | Phase 10.1-board-evolution-task-board-polish-process-board P01 | 25 | 2 tasks | 9 files |
 | Phase 10.1 P03 | 35 | 2 tasks | 13 files |
 | Phase 10.1-board-evolution-task-board-polish-process-board P02 | 3 | 2 tasks | 4 files |
+| Phase 10.1-board-evolution-task-board-polish-process-board P04 | 3 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 10.1-03]: Assignee names via direct DBAL identity_users query — avoids OrganizationQueryPort coupling in Wave 1 parallel execution with Plan 01
 - [Phase 10.1-03]: completedByDay sparkline queries org-wide audit_log process.completed events — per-definition filtering deferred
 - [Phase 10.1-02]: QuickFilterBar defineModel pattern: uses defineModel for each filter value — clean 2-way binding; swimlanes computed returns Swimlane[] — getTasksForColumnInLane cross-joins lane.tasks with column.statusMapping; URL param sync uses undefined (not empty string) to remove params — clean shareable URLs
+- [Phase 10.1-board-evolution-task-board-polish-process-board]: executeAction uses POST /tasks/{taskId}/workflow-action (not /transition) — process board advances via workflow engine, preserves token semantics
+- [Phase 10.1-board-evolution-task-board-polish-process-board]: ActionFormDialog receives StatusAction prop — converted WorkflowActionDTO to StatusAction shape inline in onDrop handler
 
 ### Pending Todos
 
@@ -135,6 +138,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 10.1-02-PLAN.md — QuickFilterBar and swimlane grouping
+Stopped at: Completed 10.1-04-PLAN.md — Process Board frontend
 Resume file: None
-Next action: Continue Phase 10.1 with plan 03
+Next action: Phase 10.1 complete — start new milestone planning
