@@ -34,6 +34,9 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log (completed 2026-03-05)
 - [x] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view) (completed 2026-03-05)
 - [x] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators (completed 2026-03-05)
+- [ ] **Phase 11.1: Board Drag-to-Complete Fix** — Fix missing /workflow-action backend route breaking Process Board drag-to-complete (BRD-07 critical bug)
+- [ ] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input
+- [ ] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage)
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
 - [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
@@ -181,6 +184,40 @@ Plans:
 - [ ] 11-02-PLAN.md — Designer date mode (TimerNodeConfig.vue SelectButton toggle, DatePicker, i18n)
 - [ ] 11-03-PLAN.md — Overdue indicators (GetProcessInstanceHandler JOIN timers, ProcessInstanceDetailPage deadline badges)
 
+### Phase 11.1: Board Drag-to-Complete Fix (GAP CLOSURE)
+**Goal**: Process Board drag-to-complete works end-to-end — frontend executeAction() reaches a valid backend route and completes the task
+**Depends on**: Phase 10.1 (Board Evolution)
+**Requirements**: BRD-07
+**Gap Closure**: Closes BRD-07 (critical bug), integration gap (ProcessBoardPage → TaskController), flow gap (Process Board Drag-to-Complete)
+**Success Criteria** (what must be TRUE):
+  1. Dragging a Process Board card calls a backend endpoint that exists and returns 200 — no 404
+  2. Task is actually completed/transitioned after drag-to-complete (token advances in engine)
+  3. E2E flow works: drag card → ActionFormDialog if needed → task completed → card moves to next column
+**Plans**: TBD
+
+### Phase 11.2: Process Polish Gap Closure (GAP CLOSURE)
+**Goal**: Close remaining Phase 6 gaps — formSchema write path verified, FormSchemaBuilder dedup confirmed, from_variable Designer input added
+**Depends on**: Phase 6 (Process Polish)
+**Requirements**: PLSH-01, PLSH-02, PLSH-03
+**Gap Closure**: Closes PLSH-01 (partial), PLSH-02 (partial), PLSH-03 (unsatisfied)
+**Success Criteria** (what must be TRUE):
+  1. Task.formSchema is populated at creation time via OnTaskNodeActivated — verified by reading code path and/or test
+  2. FormSchemaBuilder dedup confirmed working (checkbox update)
+  3. Designer UI has a variable_name input field when from_variable assignment strategy is selected
+  4. Untracked files (UserQueryPort.php, DoctrineUserQueryAdapter.php) committed
+**Plans**: TBD
+
+### Phase 11.3: Avatar Display Extension (GAP CLOSURE)
+**Goal**: User avatars appear everywhere users are listed — employee lists, comments, and other user references across the platform
+**Depends on**: Phase 7 (User Profile)
+**Requirements**: PROF-03
+**Gap Closure**: Closes PROF-03 full coverage (avatar in employee lists, comments, other user contexts)
+**Success Criteria** (what must be TRUE):
+  1. Employee list items show avatar thumbnails (or initials fallback) instead of name-only rows
+  2. Comments display commenter avatar next to the comment body
+  3. Task assignment displays show avatar for any user (not just current user)
+**Plans**: TBD
+
 ### Phase 12: Super Admin Impersonation
 **Goal**: Super admins can impersonate any user for support purposes with a full audit trail and no JWT architecture violations
 **Depends on**: Phase 8 (audit log infrastructure required for impersonation events)
@@ -246,6 +283,9 @@ Plans:
 | 10. Dashboard | 3/3 | Complete    | 2026-03-05 | - |
 | 10.1 Board Evolution | 4/4 | Complete    | 2026-03-05 | - |
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
+| 11.1 Board Drag-to-Complete Fix | v2.0 | 0/TBD | Not started | - |
+| 11.2 Process Polish Gap Closure | v2.0 | 0/TBD | Not started | - |
+| 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |

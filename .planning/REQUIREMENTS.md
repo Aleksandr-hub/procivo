@@ -27,7 +27,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 - [x] **PROF-01**: User can view and edit profile (firstName, lastName, email) on a dedicated profile page
 - [x] **PROF-02**: User can upload avatar image to S3 with server-side validation (type, size)
-- [x] **PROF-03**: User avatar displayed in topbar, comments, employee lists, and task assignments
+- [ ] **PROF-03**: User avatar displayed in topbar, comments, employee lists, and task assignments
 - [x] **PROF-04**: GET /api/v1/auth/me returns full profile including avatar URL
 - [x] **PROF-05**: User can change password from profile page (current + new password form, uses existing PUT /api/v1/auth/password)
 
@@ -63,7 +63,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **BRD-04**: WIP limit visual states: amber at 80%, red at 100%+, count badge
 - [x] **BRD-05**: Process Board creation from published ProcessDefinition with topologically-ordered columns
 - [x] **BRD-06**: Process Board cards show instance name, current stage, started date, active task assignee
-- [x] **BRD-07**: Drag-to-complete triggers ExecuteTaskAction with ActionFormDialog for required fields
+- [ ] **BRD-07**: Drag-to-complete triggers ExecuteTaskAction with ActionFormDialog for required fields
 - [x] **BRD-08**: Process Board pipeline metrics: total active, throughput sparkline (14 days)
 
 ### Timer & Scheduler
@@ -125,9 +125,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLSH-01 | Phase 6 | Pending |
-| PLSH-02 | Phase 6 | Pending |
-| PLSH-03 | Phase 6 | Pending |
+| PLSH-01 | Phase 11.2 | Pending |
+| PLSH-02 | Phase 11.2 | Pending |
+| PLSH-03 | Phase 11.2 | Pending |
 | PLSH-04 | Phase 6 | Complete |
 | PLSH-05 | Phase 6 | Complete |
 | PLSH-06 | Phase 6 | Complete |
@@ -137,7 +137,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VER-03 | Phase 6.1 | Complete |
 | PROF-01 | Phase 7 | Complete |
 | PROF-02 | Phase 7 | Complete |
-| PROF-03 | Phase 7 | Complete |
+| PROF-03 | Phase 11.3 | Pending |
 | PROF-04 | Phase 7 | Complete |
 | PROF-05 | Phase 7 | Complete |
 | AUDT-01 | Phase 8 | Complete |
@@ -161,7 +161,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRD-04 | Phase 10.1 | Complete |
 | BRD-05 | Phase 10.1 | Complete |
 | BRD-06 | Phase 10.1 | Complete |
-| BRD-07 | Phase 10.1 | Complete |
+| BRD-07 | Phase 11.1 | Pending |
 | BRD-08 | Phase 10.1 | Complete |
 | TIMR-01 | Phase 11 | Complete |
 | TIMR-02 | Phase 11 | Complete |
@@ -174,8 +174,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADMN-05 | Phase 7 | Complete |
 
 **Coverage:**
-- v2.0 requirements: 44 total
-- Mapped to phases: 36
+- v2.0 requirements: 47 total
+- Satisfied: 40 (checkboxes [x])
+- Pending: 7 (PLSH-01, PLSH-02, PLSH-03, BRD-07, PROF-03, ADMN-01, ADMN-02)
 - Unmapped: 0
 
 ---
