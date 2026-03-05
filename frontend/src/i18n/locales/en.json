@@ -1050,5 +1050,9 @@
     "passwordChanged": "Password changed",
     "changesFrom": "from",
     "changesTo": "to"
+  },
+  "impersonation": {
+    "viewing": "Viewing as {name}",
+    "exit": "Exit Impersonation"
   }
 }

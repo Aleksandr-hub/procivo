@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import AppSidebar from '@/shared/components/AppSidebar.vue'
 import AppTopbar from '@/shared/components/AppTopbar.vue'
+import ImpersonationBanner from '@/shared/components/ImpersonationBanner.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
 
@@ -28,7 +29,8 @@ function toggleSidebar() {
 </script>
 
 <template>
-  <div class="layout-wrapper">
+  <ImpersonationBanner />
+  <div class="layout-wrapper" :class="{ 'has-impersonation-banner': authStore.isImpersonating }">
     <AppSidebar :visible="sidebarVisible" />
     <div class="layout-content" :class="{ 'sidebar-collapsed': !sidebarVisible }">
       <AppTopbar @toggle-sidebar="toggleSidebar" />
@@ -42,6 +44,10 @@ function toggleSidebar() {
 <style scoped>
 .layout-wrapper {
   min-height: 100vh;
+}
+
+.layout-wrapper.has-impersonation-banner {
+  margin-top: 40px;
 }
 
 .layout-content {

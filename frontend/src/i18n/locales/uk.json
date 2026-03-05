@@ -1050,5 +1050,9 @@
     "passwordChanged": "Пароль змінено",
     "changesFrom": "з",
     "changesTo": "на"
+  },
+  "impersonation": {
+    "viewing": "Перегляд від імені {name}",
+    "exit": "Вийти з імперсонації"
   }
 }
