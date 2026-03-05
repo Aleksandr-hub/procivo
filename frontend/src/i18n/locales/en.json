@@ -431,7 +431,11 @@
     "tasksCount": "tasks",
     "filters": "Filters",
     "deadlineIn": "Deadline: {date}",
-    "deadlineOverdue": "Overdue"
+    "deadlineOverdue": "Overdue",
+    "priority_critical": "Critical",
+    "priority_high": "High",
+    "priority_medium": "Medium",
+    "priority_low": "Low"
   },
   "boards": {
     "title": "Boards",

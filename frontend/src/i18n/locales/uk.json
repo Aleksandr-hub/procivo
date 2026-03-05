@@ -431,7 +431,11 @@
     "tasksCount": "задач",
     "filters": "Фільтри",
     "deadlineIn": "Дедлайн: {date}",
-    "deadlineOverdue": "Прострочено"
+    "deadlineOverdue": "Прострочено",
+    "priority_critical": "Критичний",
+    "priority_high": "Високий",
+    "priority_medium": "Середній",
+    "priority_low": "Низький"
   },
   "boards": {
     "title": "Дошки",

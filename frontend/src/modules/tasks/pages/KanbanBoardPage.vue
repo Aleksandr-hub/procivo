@@ -6,7 +6,8 @@ import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/modules/tasks/stores/board.store'
 import { useTaskStore } from '@/modules/tasks/stores/task.store'
 import KanbanCard from '@/modules/tasks/components/KanbanCard.vue'
-import type { TaskDTO } from '@/modules/tasks/types/task.types'
+import QuickFilterBar from '@/modules/tasks/components/QuickFilterBar.vue'
+import type { TaskDTO, TaskPriority } from '@/modules/tasks/types/task.types'
 import type { BoardColumnDTO } from '@/modules/tasks/types/board.types'
 
 const route = useRoute()
@@ -25,8 +26,85 @@ const sortedColumns = computed(() => {
   return [...board.value.columns].sort((a, b) => a.position - b.position)
 })
 
+// Filter state
+const filterText = ref('')
+const filterAssigneeId = ref('')
+const filterLabels = ref<string[]>([])
+const filterDateRange = ref<Date[] | null>(null)
+const swimlaneMode = ref<'none' | 'assignee' | 'priority'>('none')
+
 const draggedTaskId = ref<string | null>(null)
 const eventSource = ref<EventSource | null>(null)
+
+// Compute assignee and label options from loaded tasks
+const assigneeOptions = computed(() => {
+  const map = new Map<string, string>()
+  for (const task of taskStore.tasks) {
+    if (task.assigneeId && task.assigneeName) {
+      map.set(task.assigneeId, task.assigneeName)
+    }
+  }
+  return [...map.entries()].map(([value, label]) => ({ value, label }))
+})
+
+const labelOptions = computed(() => {
+  const set = new Set<string>()
+  for (const task of taskStore.tasks) {
+    for (const label of task.labels) set.add(label.name)
+  }
+  return [...set]
+})
+
+// Filtered tasks
+const filteredTasks = computed(() => {
+  return taskStore.tasks.filter((task) => {
+    if (filterText.value && !task.title.toLowerCase().includes(filterText.value.toLowerCase())) return false
+    if (filterAssigneeId.value && task.assigneeId !== filterAssigneeId.value) return false
+    if (filterLabels.value.length > 0) {
+      const taskLabelNames = task.labels.map((l) => l.name)
+      if (!filterLabels.value.some((fl) => taskLabelNames.includes(fl))) return false
+    }
+    if (filterDateRange.value && filterDateRange.value[0]) {
+      if (!task.dueDate) return false
+      const due = new Date(task.dueDate)
+      if (due < filterDateRange.value[0]) return false
+      if (filterDateRange.value[1] && due > filterDateRange.value[1]) return false
+    }
+    return true
+  })
+})
+
+// Swimlane interface and computation
+interface Swimlane {
+  key: string
+  label: string
+  tasks: TaskDTO[]
+}
+
+const swimlanes = computed((): Swimlane[] => {
+  if (swimlaneMode.value === 'none') {
+    return [{ key: 'all', label: '', tasks: filteredTasks.value }]
+  }
+  if (swimlaneMode.value === 'assignee') {
+    const groups = new Map<string, Swimlane>()
+    for (const task of filteredTasks.value) {
+      const key = task.assigneeId ?? 'unassigned'
+      const label = task.assigneeName ?? t('kanban.unassigned')
+      if (!groups.has(key)) groups.set(key, { key, label, tasks: [] })
+      groups.get(key)!.tasks.push(task)
+    }
+    return [...groups.entries()]
+      .sort(([a], [b]) => (a === 'unassigned' ? 1 : b === 'unassigned' ? -1 : 0))
+      .map(([, v]) => v)
+  }
+  // priority mode
+  const PRIORITY_ORDER: TaskPriority[] = ['critical', 'high', 'medium', 'low']
+  return PRIORITY_ORDER.map((p) => ({
+    key: p,
+    label: t(`tasks.priority_${p}`),
+    tasks: filteredTasks.value.filter((task) => task.priority === p),
+  }))
+})
 
 onMounted(async () => {
   await Promise.all([
@@ -40,9 +118,14 @@ onUnmounted(() => {
   disconnectMercure()
 })
 
+function getTasksForColumnInLane(column: BoardColumnDTO, lane: Swimlane): TaskDTO[] {
+  if (!column.statusMapping) return []
+  return lane.tasks.filter((task) => task.status === column.statusMapping)
+}
+
 function getTasksForColumn(column: BoardColumnDTO): TaskDTO[] {
   if (!column.statusMapping) return []
-  return taskStore.tasks.filter((task) => task.status === column.statusMapping)
+  return filteredTasks.value.filter((task) => task.status === column.statusMapping)
 }
 
 function getColumnStyle(column: BoardColumnDTO) {
@@ -174,42 +257,57 @@ function goBack() {
       {{ t('kanban.boardNotFound') }}
     </div>
 
-    <div v-if="board" class="kanban-board">
-      <div
-        v-for="column in sortedColumns"
-        :key="column.id"
-        class="kanban-column"
-        :class="{
-          'wip-warning': getColumnWipState(column) === 'warning',
-          'wip-exceeded': getColumnWipState(column) === 'exceeded',
-        }"
-        :style="getColumnStyle(column)"
-        @dragover="onDragOver"
-        @drop="onDrop($event, column)"
-      >
-        <div class="column-header">
-          <span class="column-name">{{ column.name }}</span>
-          <span class="column-count">
-            {{ getTasksForColumn(column).length }}
-            <span v-if="column.wipLimit" class="wip-limit">/ {{ column.wipLimit }}</span>
-          </span>
-        </div>
+    <template v-if="board">
+      <QuickFilterBar
+        v-model:filter-text="filterText"
+        v-model:filter-assignee-id="filterAssigneeId"
+        v-model:filter-labels="filterLabels"
+        v-model:filter-date-range="filterDateRange"
+        v-model:swimlane-mode="swimlaneMode"
+        :assignee-options="assigneeOptions"
+        :label-options="labelOptions"
+      />
 
-        <div class="column-body">
-          <KanbanCard
-            v-for="task in getTasksForColumn(column)"
-            :key="task.id"
-            :task="task"
-            @click="router.push({ name: 'task-detail', params: { orgId: orgId, taskId: task.id } })"
-            @dragstart="onDragStart($event, task)"
-          />
+      <div v-for="lane in swimlanes" :key="lane.key" class="swimlane-row">
+        <div v-if="swimlaneMode !== 'none'" class="swimlane-header">{{ lane.label }}</div>
+        <div class="kanban-board">
+          <div
+            v-for="column in sortedColumns"
+            :key="column.id"
+            class="kanban-column"
+            :class="{
+              'wip-warning': getColumnWipState(column) === 'warning',
+              'wip-exceeded': getColumnWipState(column) === 'exceeded',
+            }"
+            :style="getColumnStyle(column)"
+            @dragover="onDragOver"
+            @drop="onDrop($event, column)"
+          >
+            <div class="column-header">
+              <span class="column-name">{{ column.name }}</span>
+              <span class="column-count">
+                {{ getTasksForColumnInLane(column, lane).length }}
+                <span v-if="column.wipLimit" class="wip-limit">/ {{ column.wipLimit }}</span>
+              </span>
+            </div>
 
-          <div v-if="getTasksForColumn(column).length === 0" class="column-empty">
-            {{ t('kanban.noTasks') }}
+            <div class="column-body">
+              <KanbanCard
+                v-for="task in getTasksForColumnInLane(column, lane)"
+                :key="task.id"
+                :task="task"
+                @click="router.push({ name: 'task-detail', params: { orgId: orgId, taskId: task.id } })"
+                @dragstart="onDragStart($event, task)"
+              />
+
+              <div v-if="getTasksForColumnInLane(column, lane).length === 0" class="column-empty">
+                {{ t('kanban.noTasks') }}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -241,6 +339,18 @@ function goBack() {
   text-align: center;
   padding: 3rem;
   color: var(--p-text-muted-color);
+}
+
+.swimlane-row {
+  margin-bottom: 1.5rem;
+}
+
+.swimlane-header {
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--p-content-border-color);
+  margin-bottom: 0.75rem;
 }
 
 .kanban-board {
