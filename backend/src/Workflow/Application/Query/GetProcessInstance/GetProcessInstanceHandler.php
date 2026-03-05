@@ -29,6 +29,17 @@ final readonly class GetProcessInstanceHandler
             throw ProcessInstanceNotFoundException::withId($query->processInstanceId);
         }
 
-        return ProcessInstanceDTO::fromRow($row);
+        /** @var array<array{token_id: string, fire_at: string}> $timers */
+        $timers = $this->connection->fetchAllAssociative(
+            'SELECT token_id, fire_at FROM workflow_scheduled_timers WHERE process_instance_id = ? AND fired_at IS NULL',
+            [$query->processInstanceId],
+        );
+
+        $timerMap = [];
+        foreach ($timers as $timer) {
+            $timerMap[$timer['token_id']] = $timer['fire_at'];
+        }
+
+        return ProcessInstanceDTO::fromRow($row, $timerMap);
     }
 }

@@ -28,13 +28,19 @@ final readonly class ProcessInstanceDTO implements \JsonSerializable
 
     /**
      * @param array<string, mixed> $row
+     * @param array<string, string> $timerFireAtMap token_id => fire_at for pending timers
      */
-    public static function fromRow(array $row): self
+    public static function fromRow(array $row, array $timerFireAtMap = []): self
     {
         /** @var array<string, array<string, mixed>> $tokens */
         $tokens = \is_string($row['tokens']) ? json_decode($row['tokens'], true, 512, \JSON_THROW_ON_ERROR) : ($row['tokens'] ?? []);
         /** @var array<string, mixed> $variables */
         $variables = \is_string($row['variables']) ? json_decode($row['variables'], true, 512, \JSON_THROW_ON_ERROR) : ($row['variables'] ?? []);
+
+        foreach ($tokens as $tokenId => &$token) {
+            $token['fire_at'] = $timerFireAtMap[$tokenId] ?? null;
+        }
+        unset($token);
 
         return new self(
             id: (string) $row['id'],
