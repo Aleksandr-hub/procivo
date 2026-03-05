@@ -37,7 +37,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 11.1: Board Drag-to-Complete Fix** — Fix missing /workflow-action backend route breaking Process Board drag-to-complete (BRD-07 critical bug) (completed 2026-03-05)
 - [x] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input (completed 2026-03-05)
 - [x] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage) (completed 2026-03-05)
-- [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
+- [x] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions (completed 2026-03-05)
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
 - [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
 - [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
@@ -235,7 +235,7 @@ Plans:
   2. While impersonating, a persistent orange banner is visible on every page showing who is being impersonated; the exit button discards the impersonation JWT and restores the admin session
   3. audit_log contains an impersonation.started entry (with reason) and impersonation.ended entry, both with actor_id and impersonated_by fields
   4. Attempting to impersonate another super admin returns a 403 — privilege escalation is blocked
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 12-01-PLAN.md — Backend impersonation infrastructure (JWT extension, CQRS commands, audit handlers, AdminController, security config, promote-user CLI)
 - [ ] 12-02-PLAN.md — Frontend impersonation UX (auth store token swap, ImpersonationBanner, http-client refresh guard, i18n)
@@ -320,7 +320,7 @@ Plans:
 | 11.1 Board Drag-to-Complete Fix | 1/1 | Complete    | 2026-03-05 | - |
 | 11.2 Process Polish Gap Closure | 1/1 | Complete    | 2026-03-05 | - |
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
-| 12. Super Admin Impersonation | 1/2 | In Progress|  | - |
+| 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |

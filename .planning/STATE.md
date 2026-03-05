@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T21:21:04.257Z"
+last_updated: "2026-03-05T22:07:33.182Z"
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 27
-  completed_plans: 27
+  total_phases: 12
+  completed_phases: 12
+  total_plans: 29
+  completed_plans: 29
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 12 (Super Admin Impersonation)
-Plan: 1 of 2 (completed, 12-01: backend impersonation infrastructure)
-Status: In progress — Plan 01 done, Plan 02 (frontend) pending
-Last activity: 2026-03-05 — Completed 12-01: backend impersonation infrastructure
+Phase: 12 (Super Admin Impersonation) -- COMPLETE
+Plan: 2 of 2 (completed, 12-02: frontend impersonation UI)
+Status: Phase 12 complete -- all plans shipped
+Last activity: 2026-03-06 — Completed 12-02: frontend impersonation UI
 
-Progress: [██████░░░░░░] Phase 12 — 1/2 plans complete
+Progress: [████████████] Phase 12 — 2/2 plans complete
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░░░] Phase 12 — 1/2 plans complete
 | Phase 11.3-avatar-display-extension P01 | 4 | 2 tasks | 9 files |
 | Phase 11.3 P02 | 2 | 2 tasks | 7 files |
 | Phase 12-super-admin-impersonation P01 | 5 | 2 tasks | 18 files |
+| Phase 12-super-admin-impersonation P02 | 15 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -144,6 +145,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 12-01]: ImpersonateUser uses query.bus (not command.bus) because it returns ImpersonationDTO — command bus dispatch() returns void
 - [Phase 12-01]: JWT impersonation uses JWTEncoderInterface::encode() directly for custom 900s TTL — jwtManager->create() always uses configured 3600s TTL
 - [Phase 12-01]: Chained impersonation detection via base64 JWT payload parsing in controller — no SecurityUser extension needed
+- [Phase 12-02]: impersonationTrigger ref pattern for sessionStorage reactivity — Vue computed cannot track sessionStorage natively
+- [Phase 12-02]: No refresh token during impersonation — 401 triggers exit instead of refresh attempt
+- [Phase 12-02]: sessionStorage (not localStorage) for admin token backup — cleared on tab close for safety
 
 ### Pending Todos
 
@@ -159,7 +163,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05
-Stopped at: Completed 12-01-PLAN.md — backend impersonation infrastructure
+Last session: 2026-03-06
+Stopped at: Completed 12-02-PLAN.md — frontend impersonation UI (Phase 12 complete)
 Resume file: None
-Next action: Execute 12-02-PLAN.md (frontend impersonation UI)
+Next action: /gsd:new-milestone to plan next milestone

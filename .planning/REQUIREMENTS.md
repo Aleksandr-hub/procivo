@@ -76,7 +76,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 ### Admin & CI/CD
 
 - [x] **ADMN-01**: Super Admin impersonation via custom JWT endpoint with impersonated_by claim + short TTL
-- [ ] **ADMN-02**: Impersonation banner in frontend showing who is being impersonated + exit button
+- [x] **ADMN-02**: Impersonation banner in frontend showing who is being impersonated + exit button
 - [x] **ADMN-03**: GitHub Actions CI pipeline: CS Fixer + PHPStan + PHPUnit + frontend type-check + lint
 - [x] **ADMN-04**: Pre-commit hooks via lefthook (lint + type-check on staged files)
 - [x] **ADMN-05**: .env.example + README with setup instructions
@@ -168,7 +168,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TIMR-03 | Phase 11 | Complete |
 | TIMR-04 | Phase 11 | Complete |
 | ADMN-01 | Phase 12 | Complete |
-| ADMN-02 | Phase 12 | Pending |
+| ADMN-02 | Phase 12 | Complete |
 | ADMN-03 | Phase 7 | Complete |
 | ADMN-04 | Phase 7 | Complete |
 | ADMN-05 | Phase 7 | Complete |
