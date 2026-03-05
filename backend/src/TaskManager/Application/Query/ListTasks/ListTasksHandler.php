@@ -71,7 +71,7 @@ final readonly class ListTasksHandler
         $creatorIds = array_unique(array_map(static fn (Task $t) => $t->creatorId(), $tasks));
         $assigneeIds = array_unique(array_filter(array_map(static fn (Task $t) => $t->assigneeId(), $tasks)));
 
-        $creatorNameMap = $this->userQueryPort->resolveDisplayNames(array_values($creatorIds));
+        $creatorNameMap = $this->userQueryPort->resolveDisplayNamesWithAvatars(array_values($creatorIds));
         $assigneeNameMap = [] !== $assigneeIds
             ? $this->organizationQueryPort->resolveEmployeeDisplayNames(array_values($assigneeIds))
             : [];
@@ -96,7 +96,9 @@ final readonly class ListTasksHandler
                     }
                 }
 
-                $creatorName = $creatorNameMap[$task->creatorId()] ?? ('system' === $task->creatorId() ? 'System' : null);
+                $creatorData = $creatorNameMap[$task->creatorId()] ?? null;
+                $creatorName = $creatorData['name'] ?? ('system' === $task->creatorId() ? 'System' : null);
+                $creatorAvatarUrl = $creatorData['avatarUrl'] ?? null;
 
                 $assigneeName = null;
                 $assigneeAvatarUrl = null;
@@ -113,6 +115,7 @@ final readonly class ListTasksHandler
                     $this->getAvailableTransitions($task),
                     $taskLabels,
                     $creatorName,
+                    $creatorAvatarUrl,
                     $assigneeName,
                     $assigneeAvatarUrl,
                     $commentCount,

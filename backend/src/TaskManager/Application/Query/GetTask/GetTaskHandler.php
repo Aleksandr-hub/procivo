@@ -44,8 +44,10 @@ final readonly class GetTaskHandler
             ),
         ));
 
-        $creatorNames = $this->userQueryPort->resolveDisplayNames([$task->creatorId()]);
-        $creatorName = $creatorNames[$task->creatorId()] ?? ('system' === $task->creatorId() ? 'System' : null);
+        $creatorNames = $this->userQueryPort->resolveDisplayNamesWithAvatars([$task->creatorId()]);
+        $creatorData = $creatorNames[$task->creatorId()] ?? null;
+        $creatorName = $creatorData['name'] ?? ('system' === $task->creatorId() ? 'System' : null);
+        $creatorAvatarUrl = $creatorData['avatarUrl'] ?? null;
 
         $assigneeName = null;
         $assigneeAvatarUrl = null;
@@ -67,6 +69,7 @@ final readonly class GetTaskHandler
             $task,
             $transitions,
             creatorName: $creatorName,
+            creatorAvatarUrl: $creatorAvatarUrl,
             assigneeName: $assigneeName,
             assigneeAvatarUrl: $assigneeAvatarUrl,
             commentCount: $commentCount,
