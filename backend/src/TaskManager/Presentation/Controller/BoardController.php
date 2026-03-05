@@ -9,11 +9,13 @@ use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
 use App\TaskManager\Application\Command\AddColumn\AddColumnCommand;
 use App\TaskManager\Application\Command\CreateBoard\CreateBoardCommand;
+use App\TaskManager\Application\Command\CreateProcessBoard\CreateProcessBoardCommand;
 use App\TaskManager\Application\Command\DeleteBoard\DeleteBoardCommand;
 use App\TaskManager\Application\Command\DeleteColumn\DeleteColumnCommand;
 use App\TaskManager\Application\Command\UpdateBoard\UpdateBoardCommand;
 use App\TaskManager\Application\Command\UpdateColumn\UpdateColumnCommand;
 use App\TaskManager\Application\Query\GetBoard\GetBoardQuery;
+use App\TaskManager\Application\Query\GetProcessBoardData\GetProcessBoardDataQuery;
 use App\TaskManager\Application\Query\ListBoards\ListBoardsQuery;
 use App\TaskManager\Domain\ValueObject\BoardId;
 use App\TaskManager\Domain\ValueObject\ColumnId;
@@ -50,6 +52,26 @@ final readonly class BoardController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[Route('/process', name: 'create_process_board', methods: ['POST'])]
+    public function createProcessBoard(string $organizationId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_CREATE');
+        $data = $this->decodeJson($request);
+
+        $id = BoardId::generate()->value();
+
+        $this->commandBus->dispatch(new CreateProcessBoardCommand(
+            id: $id,
+            organizationId: $organizationId,
+            name: $data['name'] ?? '',
+            processDefinitionId: isset($data['process_definition_id']) && \is_string($data['process_definition_id'])
+                ? $data['process_definition_id']
+                : '',
+        ));
+
+        return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
+    }
+
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId): JsonResponse
     {
@@ -68,6 +90,16 @@ final readonly class BoardController
         $board = $this->queryBus->ask(new GetBoardQuery($boardId));
 
         return new JsonResponse($board);
+    }
+
+    #[Route('/{boardId}/process-data', name: 'process_data', methods: ['GET'])]
+    public function processData(string $organizationId, string $boardId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'TASK_VIEW');
+
+        $data = $this->queryBus->ask(new GetProcessBoardDataQuery($boardId, $organizationId));
+
+        return new JsonResponse($data);
     }
 
     #[Route('/{boardId}', name: 'update', methods: ['PUT'])]

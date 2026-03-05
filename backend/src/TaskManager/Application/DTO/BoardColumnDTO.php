@@ -16,6 +16,7 @@ final readonly class BoardColumnDTO
         public ?string $statusMapping,
         public ?int $wipLimit,
         public ?string $color,
+        public ?string $nodeId,
         public string $createdAt,
     ) {
     }
@@ -30,6 +31,7 @@ final readonly class BoardColumnDTO
             statusMapping: $column->statusMapping(),
             wipLimit: $column->wipLimit(),
             color: $column->color(),
+            nodeId: $column->nodeId(),
             createdAt: $column->createdAt()->format(\DateTimeInterface::ATOM),
         );
     }
