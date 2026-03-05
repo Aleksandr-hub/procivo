@@ -16,6 +16,7 @@ class BoardColumn
     private ?string $statusMapping;
     private ?int $wipLimit;
     private ?string $color;
+    private ?string $nodeId = null;
     private \DateTimeImmutable $createdAt;
 
     private function __construct()
@@ -30,6 +31,7 @@ class BoardColumn
         ?string $statusMapping = null,
         ?int $wipLimit = null,
         ?string $color = null,
+        ?string $nodeId = null,
     ): self {
         $col = new self();
         $col->id = $id->value();
@@ -39,6 +41,7 @@ class BoardColumn
         $col->statusMapping = $statusMapping;
         $col->wipLimit = $wipLimit;
         $col->color = $color;
+        $col->nodeId = $nodeId;
         $col->createdAt = new \DateTimeImmutable();
 
         return $col;
@@ -96,6 +99,11 @@ class BoardColumn
     public function color(): ?string
     {
         return $this->color;
+    }
+
+    public function nodeId(): ?string
+    {
+        return $this->nodeId;
     }
 
     public function createdAt(): \DateTimeImmutable

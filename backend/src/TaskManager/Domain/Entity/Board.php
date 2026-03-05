@@ -16,6 +16,8 @@ class Board extends AggregateRoot
     private string $organizationId;
     private string $name;
     private ?string $description;
+    private string $boardType = 'task_board';
+    private ?string $processDefinitionId = null;
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
 
@@ -34,6 +36,33 @@ class Board extends AggregateRoot
         $board->organizationId = $organizationId->value();
         $board->name = $name;
         $board->description = $description;
+        $board->boardType = 'task_board';
+        $board->processDefinitionId = null;
+        $board->createdAt = new \DateTimeImmutable();
+        $board->updatedAt = null;
+
+        $board->recordEvent(new BoardCreatedEvent(
+            $id->value(),
+            $organizationId->value(),
+            $name,
+        ));
+
+        return $board;
+    }
+
+    public static function createProcessBoard(
+        BoardId $id,
+        OrganizationId $organizationId,
+        string $name,
+        string $processDefinitionId,
+    ): self {
+        $board = new self();
+        $board->id = $id->value();
+        $board->organizationId = $organizationId->value();
+        $board->name = $name;
+        $board->description = null;
+        $board->boardType = 'process_board';
+        $board->processDefinitionId = $processDefinitionId;
         $board->createdAt = new \DateTimeImmutable();
         $board->updatedAt = null;
 
@@ -71,6 +100,16 @@ class Board extends AggregateRoot
     public function description(): ?string
     {
         return $this->description;
+    }
+
+    public function boardType(): string
+    {
+        return $this->boardType;
+    }
+
+    public function processDefinitionId(): ?string
+    {
+        return $this->processDefinitionId;
     }
 
     public function createdAt(): CreatedAt

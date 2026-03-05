@@ -14,11 +14,15 @@
         <field name="organizationId" column="organization_id" type="string" length="36"/>
         <field name="name" type="string" length="255"/>
         <field name="description" type="text" nullable="true"/>
+        <field name="boardType" column="board_type" type="string" length="20"/>
+        <field name="processDefinitionId" column="process_definition_id" type="string" length="36" nullable="true"/>
         <field name="createdAt" column="created_at" type="datetime_immutable"/>
         <field name="updatedAt" column="updated_at" type="datetime_immutable" nullable="true"/>
 
         <indexes>
             <index name="idx_board_organization" columns="organization_id"/>
+            <index name="idx_board_type" columns="board_type"/>
+            <index name="idx_board_process_def" columns="process_definition_id"/>
         </indexes>
 
     </entity>

@@ -17,6 +17,7 @@
         <field name="statusMapping" column="status_mapping" type="string" length="50" nullable="true"/>
         <field name="wipLimit" column="wip_limit" type="integer" nullable="true"/>
         <field name="color" type="string" length="7" nullable="true"/>
+        <field name="nodeId" column="node_id" type="string" length="36" nullable="true"/>
         <field name="createdAt" column="created_at" type="datetime_immutable"/>
 
         <indexes>
