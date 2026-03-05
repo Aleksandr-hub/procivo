@@ -1,0 +1,44 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\TaskManager\Infrastructure\Identity;
+
+use App\Identity\Domain\Repository\UserRepositoryInterface;
+use App\Identity\Domain\ValueObject\UserId;
+use App\TaskManager\Application\Port\UserQueryPort;
+use Symfony\Component\Uid\Uuid as SymfonyUuid;
+
+final readonly class DoctrineUserQueryAdapter implements UserQueryPort
+{
+    public function __construct(
+        private UserRepositoryInterface $userRepository,
+    ) {
+    }
+
+    /**
+     * @param list<string> $userIds
+     *
+     * @return array<string, string> Map of userId => displayName
+     */
+    public function resolveDisplayNames(array $userIds): array
+    {
+        $map = [];
+
+        foreach ($userIds as $userId) {
+            if ('system' === $userId || '' === $userId || !SymfonyUuid::isValid($userId)) {
+                continue;
+            }
+
+            $user = $this->userRepository->findById(UserId::fromString($userId));
+            if (null === $user) {
+                continue;
+            }
+
+            $fullName = trim($user->firstName() . ' ' . $user->lastName());
+            $map[$userId] = '' !== $fullName ? $fullName : $user->email()->value();
+        }
+
+        return $map;
+    }
+}
