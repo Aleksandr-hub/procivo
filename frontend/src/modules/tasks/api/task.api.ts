@@ -51,12 +51,6 @@ export const taskApi = {
       .then((r) => r.data)
   },
 
-  executeAction(orgId: string, taskId: string, data: ExecuteActionPayload): Promise<MessageResponse> {
-    return httpClient
-      .post(`/organizations/${orgId}/tasks/${taskId}/workflow-action`, data)
-      .then((r) => r.data)
-  },
-
   claim(orgId: string, taskId: string, employeeId: string): Promise<MessageResponse> {
     return httpClient
       .post(`/organizations/${orgId}/tasks/${taskId}/claim`, { employee_id: employeeId })

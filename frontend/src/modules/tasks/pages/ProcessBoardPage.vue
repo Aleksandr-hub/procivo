@@ -111,7 +111,7 @@ async function onDrop(event: DragEvent, targetColumn: BoardColumnDTO) {
       showActionDialog.value = true
     } else {
       // Execute immediately with empty form data
-      await taskApi.executeAction(orgId.value, instance.activeTaskId, {
+      await taskApi.completeTask(orgId.value, instance.activeTaskId, {
         action_key: defaultAction.key,
         form_data: {},
       })
@@ -127,7 +127,7 @@ async function onActionSubmit(payload: { actionKey: string; formData: Record<str
   if (!pendingActionTaskId.value) return
   try {
     const { taskApi } = await import('@/modules/tasks/api/task.api')
-    await taskApi.executeAction(orgId.value, pendingActionTaskId.value, {
+    await taskApi.completeTask(orgId.value, pendingActionTaskId.value, {
       action_key: payload.actionKey,
       form_data: payload.formData,
     })
