@@ -8,7 +8,15 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const initialized = ref(false)
 
+  // Impersonation state
+  const impersonationTrigger = ref(0)
+  const impersonatedUser = ref<{ id: string; firstName: string; lastName: string } | null>(null)
+
   const isAuthenticated = computed(() => !!accessToken.value)
+  const isImpersonating = computed(() => {
+    impersonationTrigger.value // dependency for reactivity
+    return !!sessionStorage.getItem('admin_token_backup')
+  })
 
   function setTokens(access: string, refresh: string) {
     accessToken.value = access
@@ -34,6 +42,13 @@ export const useAuthStore = defineStore('auth', () => {
       } catch {
         clearTokens()
       }
+    }
+
+    // Restore impersonation state on page refresh
+    if (sessionStorage.getItem('admin_token_backup')) {
+      const stored = sessionStorage.getItem('impersonated_user')
+      impersonatedUser.value = stored ? JSON.parse(stored) : null
+      impersonationTrigger.value++
     }
 
     initialized.value = true
@@ -73,6 +88,14 @@ export const useAuthStore = defineStore('auth', () => {
         await httpClient.post('/auth/logout', { refresh_token: refreshToken.value })
       }
     } finally {
+      // Clear impersonation state if active
+      if (sessionStorage.getItem('admin_token_backup')) {
+        sessionStorage.removeItem('admin_token_backup')
+        sessionStorage.removeItem('admin_refresh_token_backup')
+        sessionStorage.removeItem('impersonated_user')
+        impersonatedUser.value = null
+        impersonationTrigger.value++
+      }
       clearTokens()
     }
   }
@@ -81,6 +104,72 @@ export const useAuthStore = defineStore('auth', () => {
     const { default: httpClient } = await import('@/shared/api/http-client')
     const response = await httpClient.get('/auth/me')
     user.value = response.data
+  }
+
+  async function startImpersonation(userId: string, reason: string) {
+    const { startImpersonation: apiStartImpersonation } = await import(
+      '@/modules/auth/api/admin.api'
+    )
+
+    // Backup current admin tokens
+    sessionStorage.setItem('admin_token_backup', accessToken.value!)
+    sessionStorage.setItem('admin_refresh_token_backup', refreshToken.value!)
+
+    const response = await apiStartImpersonation(userId, reason)
+
+    // Set impersonation token (no refresh token for impersonation)
+    accessToken.value = response.access_token
+    localStorage.setItem('access_token', response.access_token)
+    refreshToken.value = null
+    localStorage.removeItem('refresh_token')
+
+    // Store impersonated user info
+    impersonatedUser.value = {
+      id: response.impersonated_user.id,
+      firstName: response.impersonated_user.firstName,
+      lastName: response.impersonated_user.lastName,
+    }
+    sessionStorage.setItem('impersonated_user', JSON.stringify(impersonatedUser.value))
+
+    impersonationTrigger.value++
+
+    // Load impersonated user's profile
+    await fetchUser()
+  }
+
+  async function exitImpersonation() {
+    // Restore admin tokens from backup
+    const adminAccessToken = sessionStorage.getItem('admin_token_backup')
+    const adminRefreshToken = sessionStorage.getItem('admin_refresh_token_backup')
+
+    if (adminAccessToken) {
+      accessToken.value = adminAccessToken
+      localStorage.setItem('access_token', adminAccessToken)
+    }
+    if (adminRefreshToken) {
+      refreshToken.value = adminRefreshToken
+      localStorage.setItem('refresh_token', adminRefreshToken)
+    }
+
+    // Clear impersonation state
+    sessionStorage.removeItem('admin_token_backup')
+    sessionStorage.removeItem('admin_refresh_token_backup')
+    sessionStorage.removeItem('impersonated_user')
+    impersonatedUser.value = null
+    impersonationTrigger.value++
+
+    // Notify backend (fire-and-forget, audit is best-effort)
+    try {
+      const { endImpersonation: apiEndImpersonation } = await import(
+        '@/modules/auth/api/admin.api'
+      )
+      await apiEndImpersonation()
+    } catch {
+      // Audit logging is best-effort
+    }
+
+    // Load admin's profile back
+    await fetchUser()
   }
 
   async function updateProfile(data: { firstName: string; lastName: string; email: string }) {
@@ -118,6 +207,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     initialized,
     isAuthenticated,
+    isImpersonating,
+    impersonatedUser,
     setTokens,
     clearTokens,
     initialize,
@@ -125,6 +216,8 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    startImpersonation,
+    exitImpersonation,
     updateProfile,
     uploadAvatar,
     changePassword,

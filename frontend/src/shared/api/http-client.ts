@@ -40,6 +40,26 @@ httpClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // During impersonation, do NOT attempt token refresh — exit impersonation instead
+      if (sessionStorage.getItem('admin_token_backup')) {
+        const adminAccessToken = sessionStorage.getItem('admin_token_backup')
+        const adminRefreshToken = sessionStorage.getItem('admin_refresh_token_backup')
+
+        if (adminAccessToken) {
+          localStorage.setItem('access_token', adminAccessToken)
+        }
+        if (adminRefreshToken) {
+          localStorage.setItem('refresh_token', adminRefreshToken)
+        }
+
+        sessionStorage.removeItem('admin_token_backup')
+        sessionStorage.removeItem('admin_refresh_token_backup')
+        sessionStorage.removeItem('impersonated_user')
+
+        window.location.reload()
+        return Promise.reject(error)
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({
