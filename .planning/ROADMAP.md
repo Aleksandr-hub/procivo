@@ -134,10 +134,11 @@ Plans:
   2. Active Processes widget lists processes where the user is a participant with current status badges
   3. Dashboard charts render: tasks by status (donut), tasks completed over time (line), and process completion rate (bar) — all scoped to the user's organization
   4. Recent activity feed shows the last 20 audit log entries for objects in the user's organization with clickable entity links
-**Plans:** 2/2 plans complete
+**Plans:** 3 plans (2 complete + 1 gap closure)
 Plans:
-- [ ] 10-01-PLAN.md — Backend dashboard stats endpoint + frontend data layer (types, API, store)
-- [ ] 10-02-PLAN.md — DashboardPage with 4 widgets (MyTasks, ActiveProcesses, Charts, RecentActivity) + route + sidebar + i18n
+- [x] 10-01-PLAN.md — Backend dashboard stats endpoint + frontend data layer (types, API, store)
+- [x] 10-02-PLAN.md — DashboardPage with 4 widgets (MyTasks, ActiveProcesses, Charts, RecentActivity) + route + sidebar + i18n
+- [ ] 10-03-PLAN.md — Gap closure: add clickable entity links to AuditLogTimeline
 
 ### Phase 10.1: Board Evolution — Task Board Polish + Process Board
 
