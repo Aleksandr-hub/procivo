@@ -39,6 +39,7 @@ framework:
             App\Workflow\Domain\Event\ProcessStartedEvent: async
             App\Workflow\Domain\Event\ProcessCancelledEvent: async
             # Workflow timer → async (RabbitMQ) with DelayStamp
+            App\Workflow\Domain\Event\TimerScheduledEvent: async
             App\Workflow\Infrastructure\Timer\FireTimerMessage: async
             # Workflow webhook → async (RabbitMQ) for HTTP calls
             App\Workflow\Infrastructure\Webhook\ExecuteWebhookMessage: async
