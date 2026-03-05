@@ -221,7 +221,10 @@ Plans:
   1. Employee list items show avatar thumbnails (or initials fallback) instead of name-only rows
   2. Comments display commenter avatar next to the comment body
   3. Task assignment displays show avatar for any user (not just current user)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 11.3-01-PLAN.md — Backend DTO enrichment (CommentDTO.authorAvatarUrl, EmployeeDTO.userAvatarUrl, TaskDTO.creatorAvatarUrl + handler wiring)
+- [ ] 11.3-02-PLAN.md — Frontend avatar rendering (TaskComments, EmployeesPage, TaskDetailSidebar, TaskCard)
 
 ### Phase 12: Super Admin Impersonation
 **Goal**: Super admins can impersonate any user for support purposes with a full audit trail and no JWT architecture violations
@@ -301,7 +304,7 @@ Plans:
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
 | 11.1 Board Drag-to-Complete Fix | 1/1 | Complete    | 2026-03-05 | - |
 | 11.2 Process Polish Gap Closure | 1/1 | Complete    | 2026-03-05 | - |
-| 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
+| 11.3 Avatar Display Extension | v2.0 | 0/2 | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
