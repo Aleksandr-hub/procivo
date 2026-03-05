@@ -34,7 +34,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log (completed 2026-03-05)
 - [x] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view) (completed 2026-03-05)
 - [x] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators (completed 2026-03-05)
-- [ ] **Phase 11.1: Board Drag-to-Complete Fix** — Fix missing /workflow-action backend route breaking Process Board drag-to-complete (BRD-07 critical bug)
+- [x] **Phase 11.1: Board Drag-to-Complete Fix** — Fix missing /workflow-action backend route breaking Process Board drag-to-complete (BRD-07 critical bug) (completed 2026-03-05)
 - [ ] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input
 - [ ] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage)
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
@@ -194,7 +194,7 @@ Plans:
   1. Dragging a Process Board card calls a backend endpoint that exists and returns 200 — no 404
   2. Task is actually completed/transitioned after drag-to-complete (token advances in engine)
   3. E2E flow works: drag card → ActionFormDialog if needed → task completed → card moves to next column
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 11.1-01-PLAN.md — Remove dead executeAction() API method, fix ProcessBoardPage to use completeTask()
 
@@ -297,7 +297,7 @@ Plans:
 | 10. Dashboard | 3/3 | Complete    | 2026-03-05 | - |
 | 10.1 Board Evolution | 4/4 | Complete    | 2026-03-05 | - |
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
-| 11.1 Board Drag-to-Complete Fix | v2.0 | 0/1 | Planning | - |
+| 11.1 Board Drag-to-Complete Fix | 1/1 | Complete   | 2026-03-05 | - |
 | 11.2 Process Polish Gap Closure | v2.0 | 0/TBD | Not started | - |
 | 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |

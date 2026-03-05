@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T18:39:49.373Z"
+last_updated: "2026-03-05T20:27:45.923Z"
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 23
-  completed_plans: 23
+  total_phases: 11
+  completed_phases: 9
+  total_plans: 24
+  completed_plans: 24
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 11 (Timer Execution) — Complete
-Plan: 3 of 3 (completed, 11-03: token fire_at enrichment + ProcessInstanceDetailPage overdue/deadline badges)
-Status: Phase 11 complete — all 3 plans done: DB-persistent timer scheduling, timer config UI, deadline visibility
-Last activity: 2026-03-05 — Completed 11-03: overdue indicators for process instances with active timer deadlines
+Phase: 11.1 (Board Drag-to-Complete Fix) — Complete
+Plan: 1 of 1 (completed, 11.1-01: replace dead executeAction() with completeTask())
+Status: Phase 11.1 complete — board drag-to-complete 404 bug fixed
+Last activity: 2026-03-05 — Completed 11.1-01: board drag-to-complete fix
 
-Progress: [████████████] Phase 11 — 3/3 plans complete
+Progress: [████████████] Phase 11.1 — 1/1 plans complete
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [████████████] Phase 11 — 3/3 plans complete
 | Phase 10.1-board-evolution-task-board-polish-process-board P04 | 3 | 2 tasks | 10 files |
 | Phase 11-timer-execution P01 | 3 | 2 tasks | 7 files |
 | Phase 11-timer-execution P03 | 12 | 2 tasks | 6 files |
+| Phase 11.1-board-drag-to-complete-fix P01 | 3 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,7 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 11-timer-execution]: TimerNodeConfig SelectButton mode toggle pattern: timerTypeOptions array + v-if blocks per mode — reusable for future node config panels
 - [Phase 11-03]: fromRow(row, timerFireAtMap=[]) enrichment pattern — optional secondary map keeps other callers (ListProcessInstancesHandler) unaffected without changes
 - [Phase 11-03]: Deadline badge shown only when status==='waiting' AND fire_at present — completed/cancelled tokens never show badge
+- [Phase 11.1-board-drag-to-complete-fix]: No new API method needed — existing completeTask() dispatches same ExecuteTaskActionCommand as the removed executeAction() intended to
 
 ### Pending Todos
 
@@ -148,6 +150,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 11-03-PLAN.md — overdue indicators for process instances with active timer deadlines
+Stopped at: Completed 11.1-01-PLAN.md — board drag-to-complete fix
 Resume file: None
-Next action: Phase 11 fully complete — run /gsd:new-milestone to plan next milestone or continue with Phase 12 (Impersonation)
+Next action: Phase 11.1 complete — continue with remaining gap closure phases (11.2, 11.3) or Phase 12 (Impersonation)
