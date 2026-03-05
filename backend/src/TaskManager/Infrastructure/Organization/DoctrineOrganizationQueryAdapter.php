@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\TaskManager\Infrastructure\Organization;
 
+use App\Identity\Application\Port\AvatarStorageInterface;
+use App\Identity\Domain\Repository\UserRepositoryInterface;
+use App\Identity\Domain\ValueObject\UserId;
 use App\Organization\Domain\Repository\EmployeeRepositoryInterface;
 use App\Organization\Domain\Repository\EmployeeRoleRepositoryInterface;
 use App\Organization\Domain\ValueObject\DepartmentId;
 use App\Organization\Domain\ValueObject\EmployeeId;
 use App\Organization\Domain\ValueObject\RoleId;
 use App\TaskManager\Application\Port\OrganizationQueryPort;
+use Symfony\Component\Uid\Uuid as SymfonyUuid;
 
 final readonly class DoctrineOrganizationQueryAdapter implements OrganizationQueryPort
 {
     public function __construct(
         private EmployeeRepositoryInterface $employeeRepository,
         private EmployeeRoleRepositoryInterface $employeeRoleRepository,
+        private UserRepositoryInterface $userRepository,
+        private AvatarStorageInterface $avatarStorage,
     ) {
     }
 
@@ -87,5 +93,46 @@ final readonly class DoctrineOrganizationQueryAdapter implements OrganizationQue
         $employee = $this->employeeRepository->findById(EmployeeId::fromString($employeeId));
 
         return $employee?->departmentId()->value();
+    }
+
+    /**
+     * @param list<string> $employeeIds
+     *
+     * @return array<string, array{name: string, avatarUrl: string|null}> Map of employeeId => {name, avatarUrl}
+     */
+    public function resolveEmployeeDisplayNames(array $employeeIds): array
+    {
+        $map = [];
+
+        foreach ($employeeIds as $employeeId) {
+            if (!SymfonyUuid::isValid($employeeId)) {
+                continue;
+            }
+
+            $employee = $this->employeeRepository->findById(EmployeeId::fromString($employeeId));
+            if (null === $employee) {
+                continue;
+            }
+
+            $user = $this->userRepository->findById(UserId::fromString($employee->userId()));
+            if (null === $user) {
+                continue;
+            }
+
+            $fullName = trim($user->firstName() . ' ' . $user->lastName());
+            $name = '' !== $fullName ? $fullName : $user->email()->value();
+
+            $avatarUrl = null;
+            if (null !== $user->avatarPath()) {
+                $avatarUrl = $this->avatarStorage->getUrl($user->avatarPath());
+            }
+
+            $map[$employeeId] = [
+                'name' => $name,
+                'avatarUrl' => $avatarUrl,
+            ];
+        }
+
+        return $map;
     }
 }

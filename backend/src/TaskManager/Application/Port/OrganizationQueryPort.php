@@ -26,4 +26,11 @@ interface OrganizationQueryPort
     public function getEmployeeRoleIds(string $employeeId): array;
 
     public function getEmployeeDepartmentId(string $employeeId): ?string;
+
+    /**
+     * @param list<string> $employeeIds
+     *
+     * @return array<string, array{name: string, avatarUrl: string|null}> Map of employeeId => {name, avatarUrl}
+     */
+    public function resolveEmployeeDisplayNames(array $employeeIds): array;
 }

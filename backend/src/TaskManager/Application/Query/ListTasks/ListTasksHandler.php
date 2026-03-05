@@ -6,10 +6,13 @@ namespace App\TaskManager\Application\Query\ListTasks;
 
 use App\TaskManager\Application\DTO\TaskDTO;
 use App\TaskManager\Application\Port\OrganizationQueryPort;
+use App\TaskManager\Application\Port\UserQueryPort;
 use App\TaskManager\Domain\Entity\Task;
 use App\TaskManager\Domain\Repository\LabelRepositoryInterface;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
 use App\TaskManager\Domain\ValueObject\TaskStatus;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Workflow\WorkflowInterface;
 
@@ -21,6 +24,8 @@ final readonly class ListTasksHandler
         private LabelRepositoryInterface $labelRepository,
         private WorkflowInterface $taskStateMachine,
         private OrganizationQueryPort $organizationQueryPort,
+        private UserQueryPort $userQueryPort,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -62,8 +67,28 @@ final readonly class ListTasksHandler
             }
         }
 
+        // Batch-resolve creator and assignee display names
+        $creatorIds = array_unique(array_map(static fn (Task $t) => $t->creatorId(), $tasks));
+        $assigneeIds = array_unique(array_filter(array_map(static fn (Task $t) => $t->assigneeId(), $tasks)));
+
+        $creatorNameMap = $this->userQueryPort->resolveDisplayNames(array_values($creatorIds));
+        $assigneeNameMap = [] !== $assigneeIds
+            ? $this->organizationQueryPort->resolveEmployeeDisplayNames(array_values($assigneeIds))
+            : [];
+
+        // Batch-load comment counts via DBAL (no N+1)
+        $commentCounts = [];
+        if ([] !== $taskIds) {
+            $conn = $this->entityManager->getConnection();
+            $commentCounts = $conn->fetchAllKeyValue(
+                'SELECT task_id, COUNT(*) FROM task_manager_comments WHERE task_id IN (?) GROUP BY task_id',
+                [$taskIds],
+                [ArrayParameterType::STRING],
+            );
+        }
+
         return array_map(
-            function (Task $task) use ($labelIdsByTask, $labelEntities) {
+            function (Task $task) use ($labelIdsByTask, $labelEntities, $creatorNameMap, $assigneeNameMap, $commentCounts) {
                 $taskLabels = [];
                 foreach ($labelIdsByTask[$task->id()->value()] ?? [] as $labelId) {
                     if (isset($labelEntities[$labelId])) {
@@ -71,10 +96,26 @@ final readonly class ListTasksHandler
                     }
                 }
 
+                $creatorName = $creatorNameMap[$task->creatorId()] ?? ('system' === $task->creatorId() ? 'System' : null);
+
+                $assigneeName = null;
+                $assigneeAvatarUrl = null;
+                if (null !== $task->assigneeId()) {
+                    $assigneeData = $assigneeNameMap[$task->assigneeId()] ?? null;
+                    $assigneeName = $assigneeData['name'] ?? null;
+                    $assigneeAvatarUrl = $assigneeData['avatarUrl'] ?? null;
+                }
+
+                $commentCount = (int) ($commentCounts[$task->id()->value()] ?? 0);
+
                 return TaskDTO::fromEntity(
                     $task,
                     $this->getAvailableTransitions($task),
                     $taskLabels,
+                    $creatorName,
+                    $assigneeName,
+                    $assigneeAvatarUrl,
+                    $commentCount,
                 );
             },
             $tasks,

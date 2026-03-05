@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\TaskManager\Application\Query\GetTask;
 
 use App\TaskManager\Application\DTO\TaskDTO;
+use App\TaskManager\Application\Port\OrganizationQueryPort;
+use App\TaskManager\Application\Port\UserQueryPort;
 use App\TaskManager\Domain\Exception\TaskNotFoundException;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
 use App\TaskManager\Domain\ValueObject\TaskId;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Workflow\WorkflowInterface;
 
@@ -17,6 +21,9 @@ final readonly class GetTaskHandler
     public function __construct(
         private TaskRepositoryInterface $taskRepository,
         private WorkflowInterface $taskStateMachine,
+        private UserQueryPort $userQueryPort,
+        private OrganizationQueryPort $organizationQueryPort,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -37,6 +44,32 @@ final readonly class GetTaskHandler
             ),
         ));
 
-        return TaskDTO::fromEntity($task, $transitions);
+        $creatorNames = $this->userQueryPort->resolveDisplayNames([$task->creatorId()]);
+        $creatorName = $creatorNames[$task->creatorId()] ?? ('system' === $task->creatorId() ? 'System' : null);
+
+        $assigneeName = null;
+        $assigneeAvatarUrl = null;
+        if (null !== $task->assigneeId()) {
+            $assigneeNames = $this->organizationQueryPort->resolveEmployeeDisplayNames([$task->assigneeId()]);
+            $assigneeData = $assigneeNames[$task->assigneeId()] ?? null;
+            $assigneeName = $assigneeData['name'] ?? null;
+            $assigneeAvatarUrl = $assigneeData['avatarUrl'] ?? null;
+        }
+
+        // Load comment count for this task via DBAL
+        $conn = $this->entityManager->getConnection();
+        $commentCount = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM task_manager_comments WHERE task_id = ?',
+            [$task->id()->value()],
+        );
+
+        return TaskDTO::fromEntity(
+            $task,
+            $transitions,
+            creatorName: $creatorName,
+            assigneeName: $assigneeName,
+            assigneeAvatarUrl: $assigneeAvatarUrl,
+            commentCount: $commentCount,
+        );
     }
 }

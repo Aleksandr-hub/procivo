@@ -31,9 +31,13 @@ final readonly class TaskDTO
         public string $creatorId,
         public string $createdAt,
         public ?string $updatedAt,
+        public ?string $creatorName = null,
+        public ?string $assigneeName = null,
+        public ?string $assigneeAvatarUrl = null,
         public ?array $formSchema = null,
         public array $availableTransitions = [],
         public array $labels = [],
+        public int $commentCount = 0,
     ) {
     }
 
@@ -41,8 +45,15 @@ final readonly class TaskDTO
      * @param list<string> $availableTransitions
      * @param list<array{name: string, color: string}> $labels
      */
-    public static function fromEntity(Task $task, array $availableTransitions = [], array $labels = []): self
-    {
+    public static function fromEntity(
+        Task $task,
+        array $availableTransitions = [],
+        array $labels = [],
+        ?string $creatorName = null,
+        ?string $assigneeName = null,
+        ?string $assigneeAvatarUrl = null,
+        int $commentCount = 0,
+    ): self {
         return new self(
             id: $task->id()->value(),
             sequenceNumber: $task->sequenceNumber(),
@@ -61,9 +72,13 @@ final readonly class TaskDTO
             creatorId: $task->creatorId(),
             createdAt: $task->createdAt()->format(\DateTimeInterface::ATOM),
             updatedAt: $task->updatedAt()?->format(\DateTimeInterface::ATOM),
+            creatorName: $creatorName,
+            assigneeName: $assigneeName,
+            assigneeAvatarUrl: $assigneeAvatarUrl,
             formSchema: $task->formSchema(),
             availableTransitions: $availableTransitions,
             labels: $labels,
+            commentCount: $commentCount,
         );
     }
 }

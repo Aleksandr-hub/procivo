@@ -50,10 +50,14 @@ export interface TaskDTO {
   candidateDepartmentId: string | null
   isPoolTask: boolean
   creatorId: string
+  creatorName: string | null
+  assigneeName: string | null
+  assigneeAvatarUrl: string | null
   createdAt: string
   updatedAt: string | null
   availableTransitions: string[]
   labels: TaskLabelSummary[]
+  commentCount: number
   workflow_summary: TaskWorkflowSummaryDTO | null
 }
 
