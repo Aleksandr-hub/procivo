@@ -81,6 +81,15 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **ADMN-04**: Pre-commit hooks via lefthook (lint + type-check on staged files)
 - [x] **ADMN-05**: .env.example + README with setup instructions
 
+
+### Granular Permissions (RBAC)
+
+- [ ] **PERM-01**: Permission model supports resource-type + action granularity with hierarchical inheritance: Organization -> Department -> Role -> User
+- [ ] **PERM-02**: Effective permissions computed by merging inherited permissions with user-level overrides taking highest priority
+- [ ] **PERM-03**: Per-definition access control — admin can restrict which departments/roles can start or view a specific process
+- [ ] **PERM-04**: Admin UI with permissions management page — permission matrices per role, per department, per user with immediate effect
+- [ ] **PERM-05**: All API endpoints enforce permissions via OrganizationAuthorizer — no endpoint relies solely on "user is in organization"
+- [ ] **PERM-06**: Permission changes logged in audit trail with before/after diff
 ## Future Requirements
 
 Deferred to v3.0+. Tracked but not in current roadmap.
@@ -172,6 +181,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ADMN-03 | Phase 7 | Complete |
 | ADMN-04 | Phase 7 | Complete |
 | ADMN-05 | Phase 7 | Complete |
+| PERM-01 | Phase 13 | Planned |
+| PERM-02 | Phase 13 | Planned |
+| PERM-03 | Phase 13 | Planned |
+| PERM-04 | Phase 13 | Planned |
+| PERM-05 | Phase 13 | Planned |
+| PERM-06 | Phase 13 | Planned |
 
 **Coverage:**
 - v2.0 requirements: 47 total
