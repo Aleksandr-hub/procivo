@@ -208,7 +208,9 @@ Plans:
   2. FormSchemaBuilder dedup confirmed working (checkbox update)
   3. Designer UI has a variable_name input field when from_variable assignment strategy is selected
   4. Untracked files (UserQueryPort.php, DoctrineUserQueryAdapter.php) committed
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 11.2-01-PLAN.md — Designer from_variable variable name display + verify formSchema write path/dedup + commit untracked files
 
 ### Phase 11.3: Avatar Display Extension (GAP CLOSURE)
 **Goal**: User avatars appear everywhere users are listed — employee lists, comments, and other user references across the platform
@@ -298,7 +300,7 @@ Plans:
 | 10.1 Board Evolution | 4/4 | Complete    | 2026-03-05 | - |
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
 | 11.1 Board Drag-to-Complete Fix | 1/1 | Complete    | 2026-03-05 | - |
-| 11.2 Process Polish Gap Closure | v2.0 | 0/TBD | Not started | - |
+| 11.2 Process Polish Gap Closure | v2.0 | 0/1 | In progress | - |
 | 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
