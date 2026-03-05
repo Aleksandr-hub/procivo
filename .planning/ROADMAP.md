@@ -3,7 +3,10 @@
 ## Milestones
 
 - ✅ **v1.0 Workflow + Tasks Integration** — Phases 1-5 (shipped 2026-03-01)
-- 🚧 **v2.0 Production-Ready BPM** — Phases 6-12 (in progress)
+- 🚧 **v2.0 Production-Ready BPM** — Phases 6-13 (in progress)
+- 📋 **v3.0 Configurable Platform + AI** — Module toggling, Directories, AI Assistant, Import/Export
+- 📋 **v4.0 Integrations + Growth** — Ukrainian integrations, Reports, Search, Chat, Calendar, PWA
+- 📋 **v5.0 Enterprise & Scale** — SSO, Self-hosted, Billing, Compliance, GraphQL, Microservices
 
 ## Phases
 
@@ -33,6 +36,8 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
+- [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
+- [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
 
 ## Phase Details
 
@@ -129,7 +134,10 @@ Plans:
   2. Active Processes widget lists processes where the user is a participant with current status badges
   3. Dashboard charts render: tasks by status (donut), tasks completed over time (line), and process completion rate (bar) — all scoped to the user's organization
   4. Recent activity feed shows the last 20 audit log entries for objects in the user's organization with clickable entity links
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 10-01-PLAN.md — Backend dashboard stats endpoint + frontend data layer (types, API, store)
+- [ ] 10-02-PLAN.md — DashboardPage with 4 widgets (MyTasks, ActiveProcesses, Charts, RecentActivity) + route + sidebar + i18n
 
 ### Phase 10.1: Board Evolution — Task Board Polish + Process Board
 
@@ -187,6 +195,30 @@ Plans:
   6. Permission changes are logged in the audit trail with before/after diff
 **Plans**: TBD
 
+### Phase 14: Infrastructure & Security
+**Goal**: Production-grade infrastructure — automated backups, monitoring, security hardening, environment pipeline, soft delete for critical entities
+**Depends on**: Phase 7 (CI/CD foundation), Phase 8 (audit logging for security events)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06
+**Success Criteria** (what must be TRUE):
+  1. PostgreSQL daily backups run automatically, compressed dumps stored in S3 with retention policy (30d daily, 3mo weekly, 1yr monthly), and a monthly automated restore test passes on staging
+  2. 2FA (TOTP) is available: user can enroll via QR code, login requires TOTP code, backup codes are generated, "remember device" skips 2FA for 30 days
+  3. Health check endpoints (/health, /health/db, /health/redis, /health/rabbitmq) return status and are used by load balancer
+  4. Prometheus metrics are exported (request duration, queue depth, error rates) and Grafana dashboards display system health and business metrics
+  5. Soft delete is implemented for Organization, User, ProcessDefinition, and Task — deleted entities are hidden by default via Doctrine filter, admin can restore within 30 days
+  6. Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) are set on all responses; CORS is configured per environment
+**Plans**: TBD
+
+### Phase 15: API Documentation
+**Goal**: All API endpoints are documented with OpenAPI 3.1 spec, browsable via Swagger UI, exportable as Postman collection
+**Depends on**: Phase 14 (stable API surface after security hardening)
+**Requirements**: DOCS-01, DOCS-02
+**Success Criteria** (what must be TRUE):
+  1. Every API endpoint has OpenAPI annotations — parameter types, response schemas, error codes, authentication requirements
+  2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
+  3. Postman collection is auto-generated and downloadable from /api/docs
+  4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -206,3 +238,50 @@ Plans:
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
+| 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
+| 15. API Documentation | v2.0 | 0/TBD | Not started | - |
+
+---
+
+## Future Milestones (high-level, detailed planning when we get there)
+
+### v3.0 Configurable Platform + AI
+
+**Milestone Goal:** Universal directory system (Custom Objects), AI Assistant as configuration tool, module toggling per-org, process templates, import/export with competitor migration.
+
+Phases:
+- **Phase 16: Module Toggling & Menu Customization** — Per-org module flags, sidebar config per role, feature flags, custom landing pages
+- **Phase 17: Directory System** — Dynamic catalogs with configurable fields (text, number, date, select, file, relation), hierarchical items, per-directory RBAC
+- **Phase 18: Entity Passport** — Dynamic detail pages (PassportTemplate config → universal renderer with tabs, sections, field groups)
+- **Phase 19: Directory-Workflow Integration** — Directory items as process context, task references, directory_item form field type
+- **Phase 20: Process Templates** — 10-15 pre-built process templates (HR, Finance, IT, General), template marketplace, AI-suggested templates
+- **Phase 21: AI Assistant — Read-Only** — Multi-provider (Claude/OpenAI/Gemini), org-scoped context isolation, RBAC-enforced tools, streaming via Mercure
+- **Phase 22: AI Assistant — Write Tools + Modes** — Quick Mode (execute immediately) vs Design Mode (iterative clarification like GSD), Preview+Confirm pattern, usage limits per org
+- **Phase 23: Import/Export + Migration** — CSV/Excel import with AI column mapping, competitor migration adapters (Creatio, 1C/BAS, Jira, Monday), MigrationWizard, rollback capability
+
+### v4.0 Integrations + Growth
+
+**Milestone Goal:** Integration framework with Ukrainian B2B connectors, reporting engine, full-text search, internal chat, calendar/SLA, mobile PWA.
+
+Phases:
+- **Phase 24: Integration Framework** — Webhook in/out, ConnectorInterface, API keys, OAuth2 client flow, delivery log
+- **Phase 25: Ukrainian Business Integrations** — Nova Poshta, PrivatBank, Monobank, Vchasno EDI, Diia.Sign (KEP), Checkbox PRRO, 1C/BAS sync, OpenDataBot, Telegram Bot, IP telephony (Binotel)
+- **Phase 26: Report Builder** — Configurable reports (chart, table, number card), ReportAccess sharing, AI report tools, PDF/Excel export
+- **Phase 27: Full-Text Search** — Elasticsearch indexing (tasks, employees, directories, processes), global search bar, faceted results, RBAC-scoped
+- **Phase 28: Chat & Discussions** — Task/process thread-based chat, direct messages, @mentions, file sharing, real-time via Mercure
+- **Phase 29: Calendar & Timeline** — Calendar view for deadlines, Gantt for processes, SLA management, escalation rules
+- **Phase 30: Mobile / PWA** — Service worker, responsive design, push notifications, camera integration, QR code scanning
+
+### v5.0 Enterprise & Scale
+
+**Milestone Goal:** Enterprise features for large organizations — SSO, self-hosted packaging, billing, compliance, microservices extraction.
+
+Phases:
+- **Phase 31: SSO & Advanced Auth** — SAML 2.0, OIDC, LDAP/AD sync, 2FA enforcement per org, session management, OAuth2 provider
+- **Phase 32: Self-Hosted Packaging** — Helm chart, Docker Compose prod template, install wizard, upgrade path, air-gapped support, license key validation
+- **Phase 33: Billing & Subscriptions** — Plan tiers (Free/Starter/Pro/Enterprise), per-module pricing, Stripe + LiqPay/Fondy, usage metering, trial period
+- **Phase 34: Compliance & Data Protection** — GDPR (consent, right to erasure, data export), data retention policies, DPA template, SAF-T compliance
+- **Phase 35: GraphQL API** — Schema for core entities, DataLoader, subscriptions, rate limiting
+- **Phase 36: gRPC Inter-service** — Proto definitions, server/client implementation, service mesh prep
+- **Phase 37: Microservices Extraction** — Notification + Search as separate services, Traefik gateway, distributed tracing
+- **Phase 38: Advanced Workflow** — SubProcess node, multi-instance tasks, process mining/analytics, DMN decision tables, simulation, plugin marketplace
