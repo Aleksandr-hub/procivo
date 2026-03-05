@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T17:26:31.143Z"
+last_updated: "2026-03-05T17:33:08.130Z"
 progress:
   total_phases: 7
   completed_phases: 6
@@ -63,6 +63,7 @@ Progress: [█░░░░░░░░░] Phase 10.1 — 1/4 plans complete
 | Phase 10-dashboard P02 | 3 | 2 tasks | 9 files |
 | Phase 10-dashboard P03 | 2 | 1 task | 1 file |
 | Phase 10.1-board-evolution-task-board-polish-process-board P01 | 25 | 2 tasks | 9 files |
+| Phase 10.1 P03 | 35 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,10 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 10.1-board-evolution-task-board-polish-process-board]: resolveEmployeeDisplayNames returns array{name,avatarUrl} — breaking change scoped to ListTasksHandler and GetTaskHandler only
 - [Phase 10.1-board-evolution-task-board-polish-process-board]: Batch DBAL fetchAllKeyValue for comment counts in ListTasksHandler, fetchOne in GetTaskHandler — no N+1
 - [Phase 10.1-board-evolution-task-board-polish-process-board]: WIP warning=80%, exceeded=100%; CSS uses --p-orange-500 for warning (amber does not exist in PrimeVue Aura)
+- [Phase 10.1-03]: Kahn BFS on raw nodesSnapshot arrays (not ProcessGraph) to avoid cross-module coupling in TaskManager
+- [Phase 10.1-03]: Active node identified by parsing tokens JSONB in PHP — tokens is object keyed by token ID, first waiting token is active node
+- [Phase 10.1-03]: Assignee names via direct DBAL identity_users query — avoids OrganizationQueryPort coupling in Wave 1 parallel execution with Plan 01
+- [Phase 10.1-03]: completedByDay sparkline queries org-wide audit_log process.completed events — per-definition filtering deferred
 
 ### Pending Todos
 
