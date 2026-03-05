@@ -35,7 +35,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view) (completed 2026-03-05)
 - [x] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators (completed 2026-03-05)
 - [x] **Phase 11.1: Board Drag-to-Complete Fix** — Fix missing /workflow-action backend route breaking Process Board drag-to-complete (BRD-07 critical bug) (completed 2026-03-05)
-- [ ] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input
+- [x] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input (completed 2026-03-05)
 - [ ] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage)
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
@@ -208,7 +208,7 @@ Plans:
   2. FormSchemaBuilder dedup confirmed working (checkbox update)
   3. Designer UI has a variable_name input field when from_variable assignment strategy is selected
   4. Untracked files (UserQueryPort.php, DoctrineUserQueryAdapter.php) committed
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 11.2-01-PLAN.md — Designer from_variable variable name display + verify formSchema write path/dedup + commit untracked files
 
@@ -300,7 +300,7 @@ Plans:
 | 10.1 Board Evolution | 4/4 | Complete    | 2026-03-05 | - |
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
 | 11.1 Board Drag-to-Complete Fix | 1/1 | Complete    | 2026-03-05 | - |
-| 11.2 Process Polish Gap Closure | v2.0 | 0/1 | In progress | - |
+| 11.2 Process Polish Gap Closure | 1/1 | Complete   | 2026-03-05 | - |
 | 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |

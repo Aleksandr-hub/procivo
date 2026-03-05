@@ -9,9 +9,9 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 ### Process Polish
 
-- [ ] **PLSH-01**: Frontend reads Task.formSchema snapshot instead of live schema from workflow context
-- [ ] **PLSH-02**: Single FormSchemaBuilder used by both task creation and task query (dedup)
-- [ ] **PLSH-03**: FromVariable case added to AssignmentStrategy backend enum + employee picker on start form
+- [x] **PLSH-01**: Frontend reads Task.formSchema snapshot instead of live schema from workflow context
+- [x] **PLSH-02**: Single FormSchemaBuilder used by both task creation and task query (dedup)
+- [x] **PLSH-03**: FromVariable case added to AssignmentStrategy backend enum + employee picker on start form
 - [x] **PLSH-04**: User can cancel a running process instance from ProcessInstanceDetailPage
 - [x] **PLSH-05**: User can filter process instance list by status, search by name, paginate results
 - [x] **PLSH-06**: Task detail page UI aligned with design intent (spacing, layout polish)
@@ -125,9 +125,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLSH-01 | Phase 11.2 | Pending |
-| PLSH-02 | Phase 11.2 | Pending |
-| PLSH-03 | Phase 11.2 | Pending |
+| PLSH-01 | Phase 11.2 | Complete |
+| PLSH-02 | Phase 11.2 | Complete |
+| PLSH-03 | Phase 11.2 | Complete |
 | PLSH-04 | Phase 6 | Complete |
 | PLSH-05 | Phase 6 | Complete |
 | PLSH-06 | Phase 6 | Complete |

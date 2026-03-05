@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T20:30:27.418Z"
+last_updated: "2026-03-05T20:43:26.158Z"
 progress:
   total_phases: 11
-  completed_phases: 9
-  total_plans: 24
-  completed_plans: 24
+  completed_phases: 10
+  total_plans: 25
+  completed_plans: 25
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 11.1 (Board Drag-to-Complete Fix) — Complete
-Plan: 1 of 1 (completed, 11.1-01: replace dead executeAction() with completeTask())
-Status: Phase 11.1 complete — board drag-to-complete 404 bug fixed
-Last activity: 2026-03-05 — Completed 11.1-01: board drag-to-complete fix
+Phase: 11.2 (Process Polish Gap Closure) — Complete
+Plan: 1 of 1 (completed, 11.2-01: from_variable display + PLSH verification + untracked files)
+Status: Phase 11.2 complete — PLSH-01/02/03 verified and closed
+Last activity: 2026-03-05 — Completed 11.2-01: process polish gap closure
 
-Progress: [████████████] Phase 11.1 — 1/1 plans complete
+Progress: [████████████] Phase 11.2 — 1/1 plans complete
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [████████████] Phase 11.1 — 1/1 plans comple
 | Phase 11-timer-execution P01 | 3 | 2 tasks | 7 files |
 | Phase 11-timer-execution P03 | 12 | 2 tasks | 6 files |
 | Phase 11.1-board-drag-to-complete-fix P01 | 3 | 1 tasks | 2 files |
+| Phase 11.2 P01 | 1 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -134,6 +135,7 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 11-03]: fromRow(row, timerFireAtMap=[]) enrichment pattern — optional secondary map keeps other callers (ListProcessInstancesHandler) unaffected without changes
 - [Phase 11-03]: Deadline badge shown only when status==='waiting' AND fire_at present — completed/cancelled tokens never show badge
 - [Phase 11.1-board-drag-to-complete-fix]: No new API method needed — existing completeTask() dispatches same ExecuteTaskActionCommand as the removed executeAction() intended to
+- [Phase 11.2]: from_variable variable name shown as disabled InputText — backend convention not user-configurable
 
 ### Pending Todos
 
@@ -150,6 +152,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 11.1-01-PLAN.md — board drag-to-complete fix
+Stopped at: Completed 11.2-01-PLAN.md — process polish gap closure
 Resume file: None
-Next action: Phase 11.1 complete — continue with remaining gap closure phases (11.2, 11.3) or Phase 12 (Impersonation)
+Next action: Phase 11.2 complete — continue with remaining gap closure phases (11.3+) or Phase 12 (Impersonation)
