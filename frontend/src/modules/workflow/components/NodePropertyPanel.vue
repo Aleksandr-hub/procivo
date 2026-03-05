@@ -133,6 +133,7 @@ function save() {
         :config="config"
         :org-id="orgId"
         :readonly="readonly"
+        :node-id="node.id"
         @update="onConfigUpdate"
       />
       <TimerNodeConfig

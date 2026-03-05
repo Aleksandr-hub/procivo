@@ -13,6 +13,7 @@ const props = defineProps<{
   config: Record<string, unknown>
   orgId: string
   readonly: boolean
+  nodeId: string
 }>()
 
 const emit = defineEmits<{
@@ -239,6 +240,15 @@ function onFieldsUpdate(fields: FormFieldDefinition[]) {
       />
     </div>
 
+    <div v-if="assignmentStrategy === 'from_variable'" class="config-field">
+      <label>{{ t('workflow.variableName') }}</label>
+      <InputText
+        :model-value="`_assignee_for_${nodeId}`"
+        disabled
+        class="w-full"
+      />
+      <small class="config-hint">{{ t('workflow.strategyFromVariableHint') }}</small>
+    </div>
 
     <Divider />
 

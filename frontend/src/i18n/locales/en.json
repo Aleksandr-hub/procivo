@@ -721,6 +721,7 @@
     "strategyByRoleHint": "Auto-assigns if one employee has this role, otherwise creates a pool task",
     "strategyFromVariable": "Selected at previous stage",
     "strategyFromVariableHint": "An Employee picker field will automatically appear on the previous stage's action form.",
+    "variableName": "Variable name",
     "strategyByDeptHint": "Auto-assigns if one employee in department, otherwise creates a pool task",
     "assigneeType": "Assignee Type",
     "assigneeTypeNone": "Unassigned",
