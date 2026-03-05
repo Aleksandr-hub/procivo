@@ -41,6 +41,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
 - [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
 - [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
+- [ ] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base
 
 ## Phase Details
 
@@ -193,7 +194,9 @@ Plans:
   1. Dragging a Process Board card calls a backend endpoint that exists and returns 200 — no 404
   2. Task is actually completed/transitioned after drag-to-complete (token advances in engine)
   3. E2E flow works: drag card → ActionFormDialog if needed → task completed → card moves to next column
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 11.1-01-PLAN.md — Remove dead executeAction() API method, fix ProcessBoardPage to use completeTask()
 
 ### Phase 11.2: Process Polish Gap Closure (GAP CLOSURE)
 **Goal**: Close remaining Phase 6 gaps — formSchema write path verified, FormSchemaBuilder dedup confirmed, from_variable Designer input added
@@ -266,6 +269,17 @@ Plans:
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
 **Plans**: TBD
 
+### Phase 16: Product Documentation
+**Goal**: Comprehensive product documentation accessible to all roles — users, admins, testers, support — with structured knowledge base that serves as foundation for future AI Assistant (v3.0)
+**Depends on**: Phase 15 (API docs complete, stable feature set)
+**Requirements**: PDOC-01, PDOC-02, PDOC-03, PDOC-04
+**Success Criteria** (what must be TRUE):
+  1. User Guide covers every feature with step-by-step instructions and screenshots: tasks, processes, boards, notifications, dashboard, timers, profile — organized by user role (employee, manager, admin)
+  2. Admin Guide documents system configuration: organization setup, employee management, process designer, permissions, impersonation, notification preferences
+  3. Searchable Help Center page in the app with quick navigation, category grouping, and full-text search across all documentation
+  4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -283,13 +297,14 @@ Plans:
 | 10. Dashboard | 3/3 | Complete    | 2026-03-05 | - |
 | 10.1 Board Evolution | 4/4 | Complete    | 2026-03-05 | - |
 | 11. Timer Execution | 3/3 | Complete    | 2026-03-05 | - |
-| 11.1 Board Drag-to-Complete Fix | v2.0 | 0/TBD | Not started | - |
+| 11.1 Board Drag-to-Complete Fix | v2.0 | 0/1 | Planning | - |
 | 11.2 Process Polish Gap Closure | v2.0 | 0/TBD | Not started | - |
 | 11.3 Avatar Display Extension | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
 | 13. Granular Permissions (RBAC) | v2.0 | 0/TBD | Not started | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
+| 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---
 
