@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { auditLogApi } from '@/modules/audit/api/audit-log.api'
 import { formatDateTime } from '@/shared/utils/date-format'
@@ -17,6 +18,7 @@ const props = withDefaults(
   },
 )
 
+const router = useRouter()
 const { t } = useI18n()
 
 const entries = ref<AuditLogDTO[]>([])
@@ -55,6 +57,21 @@ function getLabel(entry: AuditLogDTO): string {
     return t(config.labelKey)
   }
   return entry.event_type
+}
+
+function isNavigable(entry: AuditLogDTO): boolean {
+  return entry.entity_type === 'task' || entry.entity_type === 'process_instance'
+}
+
+function navigateToEntity(entry: AuditLogDTO): void {
+  switch (entry.entity_type) {
+    case 'task':
+      router.push(`/organizations/${props.orgId}/tasks/${entry.entity_id}`)
+      break
+    case 'process_instance':
+      router.push(`/organizations/${props.orgId}/process-instances/${entry.entity_id}`)
+      break
+  }
 }
 
 onMounted(async () => {
@@ -96,7 +113,14 @@ onMounted(async () => {
       </template>
       <template #content="{ item }">
         <div class="audit-event">
-          <div class="event-label">{{ getLabel(item) }}</div>
+          <a
+            v-if="isNavigable(item)"
+            href="#"
+            class="event-label event-label--link"
+            role="link"
+            @click.prevent="navigateToEntity(item)"
+          >{{ getLabel(item) }}</a>
+          <div v-else class="event-label">{{ getLabel(item) }}</div>
           <div v-if="item.changes && Object.keys(item.changes).length > 0" class="event-changes">
             <div
               v-for="(value, key) in item.changes"
@@ -158,6 +182,16 @@ onMounted(async () => {
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.4;
+}
+
+.event-label--link {
+  cursor: pointer;
+  color: var(--p-primary-color);
+  text-decoration: none;
+}
+
+.event-label--link:hover {
+  text-decoration: underline;
 }
 
 .event-changes {
