@@ -7,6 +7,7 @@ export interface CommentDTO {
   createdAt: string
   updatedAt: string | null
   authorName: string | null
+  authorAvatarUrl: string | null
 }
 
 export interface CreateCommentPayload {

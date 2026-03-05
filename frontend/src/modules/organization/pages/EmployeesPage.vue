@@ -181,9 +181,17 @@ const pendingCount = computed(
           <Column field="employeeNumber" :header="t('employees.employeeNumber')" sortable style="width: 130px" />
           <Column field="userFullName" :header="t('employees.fullName')" sortable style="min-width: 180px">
             <template #body="{ data }">
-              <div>
-                <div>{{ data.userFullName || data.userId }}</div>
-                <div v-if="data.userEmail" class="text-muted text-sm">{{ data.userEmail }}</div>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <Avatar
+                  :image="data.userAvatarUrl ?? undefined"
+                  :label="data.userAvatarUrl ? undefined : (data.userFullName || '?').charAt(0).toUpperCase()"
+                  shape="circle"
+                  size="small"
+                />
+                <div>
+                  <div>{{ data.userFullName || data.userId }}</div>
+                  <div v-if="data.userEmail" class="text-muted text-sm">{{ data.userEmail }}</div>
+                </div>
               </div>
             </template>
           </Column>

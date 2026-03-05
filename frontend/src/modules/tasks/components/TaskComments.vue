@@ -210,7 +210,13 @@ function formatDate(dateStr: string): string {
         <div class="comment-item">
           <div class="comment-header">
             <span class="comment-author">
-              <i class="pi pi-user" />
+              <Avatar
+                :image="comment.authorAvatarUrl ?? undefined"
+                :label="comment.authorAvatarUrl ? undefined : (comment.authorName || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)"
+                shape="circle"
+                size="small"
+                style="width: 1.5rem; height: 1.5rem; font-size: 0.6rem;"
+              />
               {{ comment.authorName || comment.authorId }}
             </span>
             <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
@@ -299,7 +305,13 @@ function formatDate(dateStr: string): string {
         >
           <div class="comment-header">
             <span class="comment-author">
-              <i class="pi pi-user" />
+              <Avatar
+                :image="reply.authorAvatarUrl ?? undefined"
+                :label="reply.authorAvatarUrl ? undefined : (reply.authorName || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)"
+                shape="circle"
+                size="small"
+                style="width: 1.5rem; height: 1.5rem; font-size: 0.6rem;"
+              />
               {{ reply.authorName || reply.authorId }}
             </span>
             <span class="comment-date">{{ formatDate(reply.createdAt) }}</span>

@@ -61,6 +61,7 @@ export interface EmployeeDTO {
   positionName: string | null
   userFullName: string | null
   userEmail: string | null
+  userAvatarUrl: string | null
 }
 
 export interface OrgChartNodeDTO {
