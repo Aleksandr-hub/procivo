@@ -50,10 +50,10 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 ### Dashboard
 
-- [ ] **DASH-01**: My Tasks widget showing overdue, due today, and upcoming tasks — clickable cards
-- [ ] **DASH-02**: Active Processes widget showing processes where user is participant with status badges
-- [ ] **DASH-03**: Charts: tasks by status (donut), completed over time (line), process completion rate (bar)
-- [ ] **DASH-04**: Recent activity feed from audit log with entity links
+- [x] **DASH-01**: My Tasks widget showing overdue, due today, and upcoming tasks — clickable cards
+- [x] **DASH-02**: Active Processes widget showing processes where user is participant with status badges
+- [x] **DASH-03**: Charts: tasks by status (donut), completed over time (line), process completion rate (bar)
+- [x] **DASH-04**: Recent activity feed from audit log with entity links
 
 ### Timer & Scheduler
 
@@ -140,10 +140,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NOTF-05 | Phase 9 | Complete |
 | NOTF-06 | Phase 9 | Complete |
 | NOTF-07 | Phase 9 | Complete |
-| DASH-01 | Phase 10 | Pending |
-| DASH-02 | Phase 10 | Pending |
-| DASH-03 | Phase 10 | Pending |
-| DASH-04 | Phase 10 | Pending |
+| DASH-01 | Phase 10 | Complete |
+| DASH-02 | Phase 10 | Complete |
+| DASH-03 | Phase 10 | Complete |
+| DASH-04 | Phase 10 | Complete |
 | TIMR-01 | Phase 11 | Pending |
 | TIMR-02 | Phase 11 | Pending |
 | TIMR-03 | Phase 11 | Pending |

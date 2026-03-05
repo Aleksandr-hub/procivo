@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 09 (Notification System) — Complete
-Plan: 2 of 2 (completed)
-Status: Phase 09 complete — full notification system delivered (backend + frontend)
-Last activity: 2026-03-01 — Completed 09-02: Notification frontend with Mercure SSE store, NotificationsPage, preferences toggle matrix in ProfilePage
+Phase: 10 (Dashboard) — In Progress
+Plan: 1 of 2 (completed)
+Status: Phase 10 plan 01 complete — backend stats endpoint + frontend data layer (types, API, Pinia store)
+Last activity: 2026-03-05 — Completed 10-01: DBAL aggregate dashboard stats, dashboardApi, useDashboardStore with Promise.all
 
-Progress: [██████████] Phase 09 complete (2/2 plans)
+Progress: [█████░░░░░] Phase 10 in progress (1/2 plans)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [██████████] Phase 09 complete (2/2 plans)
 | Phase 08-audit-logging P02 | 5 | 2 tasks | 8 files |
 | Phase 09-notification-system P01 | 8 | 3 tasks | 41 files |
 | Phase 09-notification-system P02 | 3 | 2 tasks | 10 files |
+| Phase 10-dashboard P01 | 12 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 09-02]: DashboardLayout watches authStore.user with immediate:true to manage Mercure SSE lifecycle — handles page refresh + login/logout in one place
 - [Phase 09-02]: NotificationsPage navigation uses currentOrgId from organization.store — notifications don't carry orgId, org context is required for task/process links
 - [Phase 09-02]: getPreference/setPreference helpers with JSON deep-clone on mount — avoids reactive aliasing with nested preferences object
+- [Phase 10-01]: TASK_VIEW permission reused for dashboard stats — no separate DASHBOARD_VIEW needed; dashboard shows task/process data already behind TASK_VIEW
+- [Phase 10-01]: fetchAllKeyValue() returns array<string, int> directly for status aggregates — COUNT results cast to (int) in completedByDay row mapping
+- [Phase 10-01]: Dashboard store fetchAll() uses Promise.all with per-fetch try/catch isolation — one widget data failure does not block other widgets
 
 ### Pending Todos
 
@@ -112,7 +116,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-01
-Stopped at: Completed 09-02-PLAN.md — Notification frontend with Mercure SSE store, NotificationsPage, preferences toggle matrix, i18n keys
+Last session: 2026-03-05
+Stopped at: Completed 10-01-PLAN.md — Backend dashboard stats endpoint + frontend types/API/Pinia store
 Resume file: None
-Next action: Phase 09 complete — proceed to Phase 10 or next milestone planning
+Next action: Execute Phase 10 Plan 02 — widget components and DashboardPage
