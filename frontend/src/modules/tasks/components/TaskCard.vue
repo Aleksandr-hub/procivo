@@ -87,7 +87,13 @@ const deadlineText = computed(() => {
       <div class="card-bottom-line">
         <div class="card-bottom-left">
           <span v-if="assigneeName" class="assignee-chip">
-            <i class="pi pi-user" />
+            <Avatar
+              :image="task.assigneeAvatarUrl ?? undefined"
+              :label="task.assigneeAvatarUrl ? undefined : (assigneeName || '?').charAt(0).toUpperCase()"
+              shape="circle"
+              size="small"
+              style="width: 1.25rem; height: 1.25rem; font-size: 0.55rem;"
+            />
             {{ assigneeName }}
           </span>
           <Tag
@@ -282,9 +288,6 @@ const deadlineText = computed(() => {
   background: var(--p-surface-700);
 }
 
-.assignee-chip i {
-  font-size: 0.7rem;
-}
 
 .label-chip {
   display: inline-flex;

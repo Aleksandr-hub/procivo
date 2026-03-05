@@ -51,6 +51,7 @@ export interface TaskDTO {
   isPoolTask: boolean
   creatorId: string
   creatorName: string | null
+  creatorAvatarUrl: string | null
   assigneeName: string | null
   assigneeAvatarUrl: string | null
   createdAt: string
