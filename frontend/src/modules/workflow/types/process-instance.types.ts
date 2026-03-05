@@ -4,6 +4,7 @@ export interface ProcessInstanceTokenDTO {
   id: string
   node_id: string
   status: string
+  fire_at?: string | null
 }
 
 export interface ProcessInstanceDTO {

@@ -56,6 +56,19 @@ function confirmCancel() {
 function formatEventType(type: string) {
   return type.replace('workflow.', '').replace(/\./g, ' ').replace(/_/g, ' ')
 }
+
+function isOverdue(fireAt: string): boolean {
+  return new Date(fireAt) < new Date()
+}
+
+function formatDeadline(fireAt: string): string {
+  const diff = new Date(fireAt).getTime() - Date.now()
+  const absDiff = Math.abs(diff)
+  if (absDiff < 60_000) return t('workflow.timerDeadlineSoon')
+  if (absDiff < 3_600_000) return `${Math.round(absDiff / 60_000)} ${t('workflow.timerMinutes')}`
+  if (absDiff < 86_400_000) return `${Math.round(absDiff / 3_600_000)} ${t('workflow.timerHours')}`
+  return `${Math.round(absDiff / 86_400_000)} ${t('workflow.timerDaysUnit')}`
+}
 </script>
 
 <template>
@@ -90,6 +103,23 @@ function formatEventType(type: string) {
           <Column field="status" :header="t('workflow.status')">
             <template #body="{ data }">
               <Tag :value="t('workflow.tokenStatus_' + data.status)" :severity="tokenStatusSeverity(data.status)" />
+            </template>
+          </Column>
+          <Column :header="t('workflow.tokenDeadline')">
+            <template #body="{ data }">
+              <template v-if="data.fire_at && data.status === 'waiting'">
+                <Tag
+                  v-if="isOverdue(data.fire_at)"
+                  severity="danger"
+                  :value="t('workflow.timerOverdue')"
+                />
+                <Tag
+                  v-else
+                  severity="info"
+                  icon="pi pi-clock"
+                  :value="formatDeadline(data.fire_at)"
+                />
+              </template>
             </template>
           </Column>
         </DataTable>
