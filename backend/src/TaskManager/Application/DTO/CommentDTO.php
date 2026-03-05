@@ -17,10 +17,11 @@ final readonly class CommentDTO
         public string $createdAt,
         public ?string $updatedAt,
         public ?string $authorName = null,
+        public ?string $authorAvatarUrl = null,
     ) {
     }
 
-    public static function fromEntity(Comment $comment, ?string $authorName = null): self
+    public static function fromEntity(Comment $comment, ?string $authorName = null, ?string $authorAvatarUrl = null): self
     {
         return new self(
             id: $comment->id()->value(),
@@ -31,6 +32,7 @@ final readonly class CommentDTO
             createdAt: $comment->createdAt()->value()->format(\DateTimeInterface::ATOM),
             updatedAt: $comment->updatedAt()?->format(\DateTimeInterface::ATOM),
             authorName: $authorName,
+            authorAvatarUrl: $authorAvatarUrl,
         );
     }
 }

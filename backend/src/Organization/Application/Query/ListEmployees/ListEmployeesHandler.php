@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Organization\Application\Query\ListEmployees;
 
+use App\Identity\Application\Port\AvatarStorageInterface;
 use App\Identity\Domain\Repository\UserRepositoryInterface;
 use App\Identity\Domain\ValueObject\UserId;
 use App\Organization\Application\DTO\EmployeeDTO;
@@ -22,6 +23,7 @@ final readonly class ListEmployeesHandler
         private DepartmentRepositoryInterface $departmentRepository,
         private PositionRepositoryInterface $positionRepository,
         private UserRepositoryInterface $userRepository,
+        private AvatarStorageInterface $avatarStorage,
     ) {
     }
 
@@ -51,9 +53,14 @@ final readonly class ListEmployeesHandler
         foreach ($userIds as $userId) {
             $user = $this->userRepository->findById(UserId::fromString($userId));
             if (null !== $user) {
+                $avatarUrl = null;
+                if (null !== $user->avatarPath()) {
+                    $avatarUrl = $this->avatarStorage->getUrl($user->avatarPath());
+                }
                 $userMap[$userId] = [
                     'fullName' => $user->firstName() . ' ' . $user->lastName(),
                     'email' => $user->email()->value(),
+                    'avatarUrl' => $avatarUrl,
                 ];
             }
         }
@@ -65,6 +72,7 @@ final readonly class ListEmployeesHandler
                 positionName: $posMap[$emp->positionId()->value()] ?? null,
                 userFullName: $userMap[$emp->userId()]['fullName'] ?? null,
                 userEmail: $userMap[$emp->userId()]['email'] ?? null,
+                userAvatarUrl: $userMap[$emp->userId()]['avatarUrl'] ?? null,
             ),
             $employees,
         );

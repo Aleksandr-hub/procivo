@@ -23,6 +23,7 @@ final readonly class EmployeeDTO
         public ?string $positionName = null,
         public ?string $userFullName = null,
         public ?string $userEmail = null,
+        public ?string $userAvatarUrl = null,
     ) {
     }
 
@@ -32,6 +33,7 @@ final readonly class EmployeeDTO
         ?string $positionName = null,
         ?string $userFullName = null,
         ?string $userEmail = null,
+        ?string $userAvatarUrl = null,
     ): self {
         return new self(
             id: $employee->id()->value(),
@@ -48,6 +50,7 @@ final readonly class EmployeeDTO
             positionName: $positionName,
             userFullName: $userFullName,
             userEmail: $userEmail,
+            userAvatarUrl: $userAvatarUrl,
         );
     }
 }
