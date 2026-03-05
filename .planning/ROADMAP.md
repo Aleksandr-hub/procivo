@@ -31,7 +31,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 7: User Profile + CI/CD** — Avatar upload to S3, profile editing, password change, CI pipeline, pre-commit hooks, developer setup docs (completed 2026-03-01)
 - [x] **Phase 8: Audit Logging** — AuditLog module with actorId propagation, async event consumers, REST API, activity timeline UI (completed 2026-03-01)
 - [x] **Phase 9: Notification System** — Mercure per-user SSE, async email, notification preferences, bell icon, notification center (completed 2026-03-01)
-- [ ] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log
+- [x] **Phase 10: Dashboard** — My Tasks widget, Active Processes widget, charts, activity feed from audit log (completed 2026-03-05)
 - [ ] **Phase 10.1: Board Evolution** — Task Board polish (swimlanes, filters, rich cards) + Process Board (BPMN stage columns, drag-to-complete, pipeline view)
 - [ ] **Phase 11: Timer Execution** — Duration + date timer node execution with persistent fallback table, Designer config, overdue indicators
 - [ ] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions
@@ -134,7 +134,7 @@ Plans:
   2. Active Processes widget lists processes where the user is a participant with current status badges
   3. Dashboard charts render: tasks by status (donut), tasks completed over time (line), and process completion rate (bar) — all scoped to the user's organization
   4. Recent activity feed shows the last 20 audit log entries for objects in the user's organization with clickable entity links
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 10-01-PLAN.md — Backend dashboard stats endpoint + frontend data layer (types, API, store)
 - [ ] 10-02-PLAN.md — DashboardPage with 4 widgets (MyTasks, ActiveProcesses, Charts, RecentActivity) + route + sidebar + i18n
@@ -233,7 +233,7 @@ Plans:
 | 7. User Profile + CI/CD | 3/3 | Complete   | 2026-03-01 | - |
 | 8. Audit Logging | 2/2 | Complete   | 2026-03-01 | - |
 | 9. Notification System | 2/2 | Complete   | 2026-03-01 | - |
-| 10. Dashboard | 1/2 | In Progress|  | - |
+| 10. Dashboard | 2/2 | Complete   | 2026-03-05 | - |
 | 10.1 Board Evolution | v2.0 | 0/TBD | Not started | - |
 | 11. Timer Execution | v2.0 | 0/TBD | Not started | - |
 | 12. Super Admin Impersonation | v2.0 | 0/TBD | Not started | - |
