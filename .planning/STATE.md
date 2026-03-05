@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 11.3 (Avatar Display Extension) — Complete
-Plan: 2 of 2 (completed, 11.3-02: frontend avatar rendering)
-Status: Phase 11.3 complete — all avatar display components updated
-Last activity: 2026-03-05 — Completed 11.3-02: frontend avatar rendering
+Phase: 12 (Super Admin Impersonation)
+Plan: 1 of 2 (completed, 12-01: backend impersonation infrastructure)
+Status: In progress — Plan 01 done, Plan 02 (frontend) pending
+Last activity: 2026-03-05 — Completed 12-01: backend impersonation infrastructure
 
-Progress: [████████████] Phase 11.3 — 2/2 plans complete
+Progress: [██████░░░░░░] Phase 12 — 1/2 plans complete
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [████████████] Phase 11.3 — 2/2 plans comple
 | Phase 11.2 P01 | 1 | 2 tasks | 6 files |
 | Phase 11.3-avatar-display-extension P01 | 4 | 2 tasks | 9 files |
 | Phase 11.3 P02 | 2 | 2 tasks | 7 files |
+| Phase 12-super-admin-impersonation P01 | 5 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -140,6 +141,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 11.2]: from_variable variable name shown as disabled InputText — backend convention not user-configurable
 - [Phase 11.3-01]: resolveDisplayNamesWithAvatars added as separate method on UserQueryPort — preserves backward compatibility with existing resolveDisplayNames callers
 - [Phase 11.3-02]: Removed useAuthStore and isCurrentUserAssignee/isCurrentUserCreator from TaskDetailSidebar — DTO fields provide avatar for any user
+- [Phase 12-01]: ImpersonateUser uses query.bus (not command.bus) because it returns ImpersonationDTO — command bus dispatch() returns void
+- [Phase 12-01]: JWT impersonation uses JWTEncoderInterface::encode() directly for custom 900s TTL — jwtManager->create() always uses configured 3600s TTL
+- [Phase 12-01]: Chained impersonation detection via base64 JWT payload parsing in controller — no SecurityUser extension needed
 
 ### Pending Todos
 
@@ -156,6 +160,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 11.3-02-PLAN.md — frontend avatar rendering (Phase 11.3 complete)
+Stopped at: Completed 12-01-PLAN.md — backend impersonation infrastructure
 Resume file: None
-Next action: Next milestone planning
+Next action: Execute 12-02-PLAN.md (frontend impersonation UI)
