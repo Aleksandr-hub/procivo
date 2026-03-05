@@ -735,6 +735,10 @@
     "timerUnitMinutes": "Minutes",
     "timerUnitHours": "Hours",
     "timerUnitDays": "Days",
+    "timerMode": "Timer Mode",
+    "timerModeDuration": "Duration",
+    "timerModeDate": "Fixed Date",
+    "timerDate": "Fire at Date/Time",
 
     "notificationConfig": "Notification Configuration",
     "notificationRecipientType": "Recipient",

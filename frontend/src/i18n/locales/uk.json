@@ -735,6 +735,10 @@
     "timerUnitMinutes": "Хвилини",
     "timerUnitHours": "Години",
     "timerUnitDays": "Дні",
+    "timerMode": "Режим таймера",
+    "timerModeDuration": "Тривалість",
+    "timerModeDate": "Фіксована дата",
+    "timerDate": "Дата/час спрацювання",
 
     "notificationConfig": "Налаштування сповіщення",
     "notificationRecipientType": "Отримувач",

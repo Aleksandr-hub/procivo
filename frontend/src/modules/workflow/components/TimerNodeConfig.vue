@@ -13,8 +13,15 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const timerType = ref<string>((props.config.timer_type as string) ?? 'duration')
 const duration = ref<number | null>(null)
 const unit = ref('hours')
+const dateValue = ref<Date | null>(null)
+
+const timerTypeOptions = [
+  { label: t('workflow.timerModeDuration'), value: 'duration' },
+  { label: t('workflow.timerModeDate'), value: 'date' },
+]
 
 const unitOptions = [
   { label: t('workflow.timerUnitMinutes'), value: 'minutes' },
@@ -23,18 +30,30 @@ const unitOptions = [
 ]
 
 watch(() => props.config, (cfg) => {
+  timerType.value = (cfg.timer_type as string) || 'duration'
   duration.value = (cfg.timer_duration as number) ?? null
   unit.value = (cfg.timer_unit as string) || 'hours'
+  const dateExpr = cfg.date_expression as string | undefined
+  dateValue.value = dateExpr ? new Date(dateExpr) : null
 }, { immediate: true })
 
 function emitConfig() {
-  emit('update', {
-    ...props.config,
-    timer_type: 'duration',
-    timer_duration: duration.value,
-    timer_unit: unit.value,
-    duration: buildDurationString(),
-  })
+  if (timerType.value === 'date') {
+    emit('update', {
+      ...props.config,
+      timer_type: 'date',
+      date_expression: dateValue.value?.toISOString() ?? '',
+    })
+  }
+  else {
+    emit('update', {
+      ...props.config,
+      timer_type: 'duration',
+      timer_duration: duration.value,
+      timer_unit: unit.value,
+      duration: buildDurationString(),
+    })
+  }
 }
 
 function buildDurationString(): string | undefined {
@@ -53,24 +72,51 @@ function buildDurationString(): string | undefined {
     <h5>{{ t('workflow.timerConfig') }}</h5>
 
     <div class="config-field">
-      <label>{{ t('workflow.timerDuration') }}</label>
-      <InputNumber
-        v-model="duration"
+      <label>{{ t('workflow.timerMode') }}</label>
+      <SelectButton
+        v-model="timerType"
+        :options="timerTypeOptions"
+        option-label="label"
+        option-value="value"
         :disabled="readonly"
-        :min="1"
         class="w-full"
         @update:model-value="emitConfig"
       />
     </div>
 
-    <div class="config-field">
-      <label>{{ t('workflow.timerUnit') }}</label>
-      <Select
-        v-model="unit"
-        :options="unitOptions"
-        option-label="label"
-        option-value="value"
+    <template v-if="timerType === 'duration'">
+      <div class="config-field">
+        <label>{{ t('workflow.timerDuration') }}</label>
+        <InputNumber
+          v-model="duration"
+          :disabled="readonly"
+          :min="1"
+          class="w-full"
+          @update:model-value="emitConfig"
+        />
+      </div>
+
+      <div class="config-field">
+        <label>{{ t('workflow.timerUnit') }}</label>
+        <Select
+          v-model="unit"
+          :options="unitOptions"
+          option-label="label"
+          option-value="value"
+          :disabled="readonly"
+          class="w-full"
+          @update:model-value="emitConfig"
+        />
+      </div>
+    </template>
+
+    <div v-if="timerType === 'date'" class="config-field">
+      <label>{{ t('workflow.timerDate') }}</label>
+      <DatePicker
+        v-model="dateValue"
         :disabled="readonly"
+        showTime
+        hourFormat="24"
         class="w-full"
         @update:model-value="emitConfig"
       />
