@@ -57,10 +57,10 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 ### Board Evolution (Phase 10.1)
 
-- [ ] **BRD-01**: Task cards display avatar badge, priority chip, label dots, due date (red overdue), comment count
+- [x] **BRD-01**: Task cards display avatar badge, priority chip, label dots, due date (red overdue), comment count
 - [ ] **BRD-02**: User can toggle swimlanes: by Assignee, by Priority, or None
 - [ ] **BRD-03**: Quick Filter bar with text, assignee, labels, due date — filters persist in URL query params
-- [ ] **BRD-04**: WIP limit visual states: amber at 80%, red at 100%+, count badge
+- [x] **BRD-04**: WIP limit visual states: amber at 80%, red at 100%+, count badge
 - [ ] **BRD-05**: Process Board creation from published ProcessDefinition with topologically-ordered columns
 - [ ] **BRD-06**: Process Board cards show instance name, current stage, started date, active task assignee
 - [ ] **BRD-07**: Drag-to-complete triggers ExecuteTaskAction with ActionFormDialog for required fields
@@ -155,10 +155,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-02 | Phase 10 | Complete |
 | DASH-03 | Phase 10 | Complete |
 | DASH-04 | Phase 10 | Complete |
-| BRD-01 | Phase 10.1 | Pending |
+| BRD-01 | Phase 10.1 | Complete |
 | BRD-02 | Phase 10.1 | Pending |
 | BRD-03 | Phase 10.1 | Pending |
-| BRD-04 | Phase 10.1 | Pending |
+| BRD-04 | Phase 10.1 | Complete |
 | BRD-05 | Phase 10.1 | Pending |
 | BRD-06 | Phase 10.1 | Pending |
 | BRD-07 | Phase 10.1 | Pending |

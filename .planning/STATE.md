@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T16:48:58.982Z"
+last_updated: "2026-03-05T17:26:31.143Z"
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 6
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 20
+  completed_plans: 17
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 10 (Dashboard) — Complete
-Plan: 3 of 3 (completed, 10-03 was gap-closure)
-Status: Phase 10 fully complete — DashboardPage with 4 widgets, route, sidebar nav, i18n keys, clickable entity links in AuditLogTimeline
-Last activity: 2026-03-05 — Completed 10-03: clickable entity links in AuditLogTimeline (gap closure for verification criterion 4)
+Phase: 10.1 (Board Evolution) — In Progress
+Plan: 1 of 4 (completed, 10.1-01: rich kanban cards + WIP limit colors)
+Status: Phase 10.1 in progress — TaskDTO extended with commentCount+assigneeAvatarUrl, KanbanCard component created, WIP states added
+Last activity: 2026-03-05 — Completed 10.1-01: rich kanban cards (avatar, priority, labels, due date, comments) and WIP warning/exceeded column colors
 
-Progress: [██████████] Phase 10 complete (3/3 plans)
+Progress: [█░░░░░░░░░] Phase 10.1 — 1/4 plans complete
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [██████████] Phase 10 complete (3/3 plans)
 | Phase 10-dashboard P01 | 12 | 2 tasks | 8 files |
 | Phase 10-dashboard P02 | 3 | 2 tasks | 9 files |
 | Phase 10-dashboard P03 | 2 | 1 task | 1 file |
+| Phase 10.1-board-evolution-task-board-polish-process-board P01 | 25 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 10-02]: RecentActivityWidget delegates to AuditLogTimeline which handles its own data fetch — unlike other widgets that receive props from DashboardPage
 - [Phase 10-03]: AuditLogTimeline uses props.orgId instead of orgStore.currentOrgId — component already has orgId prop, avoids extra store dependency for navigation
 - [Phase 10-03]: Use <a href="#" @click.prevent> instead of <router-link> in AuditLogTimeline — programmatic navigation in script setup, consistent with NotificationsPage.vue pattern
+- [Phase 10.1-board-evolution-task-board-polish-process-board]: resolveEmployeeDisplayNames returns array{name,avatarUrl} — breaking change scoped to ListTasksHandler and GetTaskHandler only
+- [Phase 10.1-board-evolution-task-board-polish-process-board]: Batch DBAL fetchAllKeyValue for comment counts in ListTasksHandler, fetchOne in GetTaskHandler — no N+1
+- [Phase 10.1-board-evolution-task-board-polish-process-board]: WIP warning=80%, exceeded=100%; CSS uses --p-orange-500 for warning (amber does not exist in PrimeVue Aura)
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 10-03-PLAN.md — clickable entity links in AuditLogTimeline (gap closure)
+Stopped at: Completed 10.1-01-PLAN.md — rich kanban cards and WIP limit colors
 Resume file: None
-Next action: Phase 10 fully complete — proceed to next phase
+Next action: Continue Phase 10.1 with plan 02
