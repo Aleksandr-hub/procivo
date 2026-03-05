@@ -10,7 +10,6 @@ use App\TaskManager\Application\Port\UserQueryPort;
 use App\TaskManager\Domain\Exception\TaskNotFoundException;
 use App\TaskManager\Domain\Repository\TaskRepositoryInterface;
 use App\TaskManager\Domain\ValueObject\TaskId;
-use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Workflow\WorkflowInterface;

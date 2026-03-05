@@ -36,7 +36,7 @@ final readonly class ListCommentsHandler
         foreach ($authorIds as $authorId) {
             $user = $this->userRepository->findById(UserId::fromString($authorId));
             if (null !== $user) {
-                $fullName = trim($user->firstName() . ' ' . $user->lastName());
+                $fullName = trim($user->firstName().' '.$user->lastName());
                 $avatarUrl = null;
                 if (null !== $user->avatarPath()) {
                     $avatarUrl = $this->avatarStorage->getUrl($user->avatarPath());

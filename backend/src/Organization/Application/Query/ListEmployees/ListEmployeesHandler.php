@@ -58,7 +58,7 @@ final readonly class ListEmployeesHandler
                     $avatarUrl = $this->avatarStorage->getUrl($user->avatarPath());
                 }
                 $userMap[$userId] = [
-                    'fullName' => $user->firstName() . ' ' . $user->lastName(),
+                    'fullName' => $user->firstName().' '.$user->lastName(),
                     'email' => $user->email()->value(),
                     'avatarUrl' => $avatarUrl,
                 ];

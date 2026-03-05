@@ -9,8 +9,8 @@ use App\TaskManager\Domain\Entity\Task;
 final readonly class TaskDTO
 {
     /**
-     * @param array<string, mixed>|null $formSchema
-     * @param list<string> $availableTransitions
+     * @param array<string, mixed>|null                $formSchema
+     * @param list<string>                             $availableTransitions
      * @param list<array{name: string, color: string}> $labels
      */
     public function __construct(
@@ -43,7 +43,7 @@ final readonly class TaskDTO
     }
 
     /**
-     * @param list<string> $availableTransitions
+     * @param list<string>                             $availableTransitions
      * @param list<array{name: string, color: string}> $labels
      */
     public static function fromEntity(

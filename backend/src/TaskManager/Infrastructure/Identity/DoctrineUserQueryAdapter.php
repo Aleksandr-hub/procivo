@@ -37,7 +37,7 @@ final readonly class DoctrineUserQueryAdapter implements UserQueryPort
                 continue;
             }
 
-            $fullName = trim($user->firstName() . ' ' . $user->lastName());
+            $fullName = trim($user->firstName().' '.$user->lastName());
             $map[$userId] = '' !== $fullName ? $fullName : $user->email()->value();
         }
 
@@ -63,7 +63,7 @@ final readonly class DoctrineUserQueryAdapter implements UserQueryPort
                 continue;
             }
 
-            $fullName = trim($user->firstName() . ' ' . $user->lastName());
+            $fullName = trim($user->firstName().' '.$user->lastName());
             $avatarUrl = null;
             if (null !== $user->avatarPath()) {
                 $avatarUrl = $this->avatarStorage->getUrl($user->avatarPath());
