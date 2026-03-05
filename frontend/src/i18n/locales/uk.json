@@ -585,7 +585,15 @@
     "taskMoved": "Задачу переміщено",
     "moveFailed": "Не вдалося перемістити задачу",
     "transitionNotAllowed": "Цей перехід не дозволено",
-    "commentCount": "{count} коментарів"
+    "commentCount": "{count} коментарів",
+    "filterSearch": "Пошук задач...",
+    "filterAssignee": "Виконавець",
+    "filterLabels": "Мітки",
+    "filterDueDate": "Термін",
+    "swimlaneNone": "Без доріжок",
+    "swimlaneAssignee": "За виконавцем",
+    "swimlanePriority": "За пріоритетом",
+    "unassigned": "Не призначено"
   },
   "workflow": {
     "processDefinitions": "Визначення процесів",

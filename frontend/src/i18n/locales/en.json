@@ -585,7 +585,15 @@
     "taskMoved": "Task moved",
     "moveFailed": "Failed to move task",
     "transitionNotAllowed": "This transition is not allowed",
-    "commentCount": "{count} comments"
+    "commentCount": "{count} comments",
+    "filterSearch": "Search tasks...",
+    "filterAssignee": "Assignee",
+    "filterLabels": "Labels",
+    "filterDueDate": "Due date",
+    "swimlaneNone": "No swimlanes",
+    "swimlaneAssignee": "By assignee",
+    "swimlanePriority": "By priority",
+    "unassigned": "Unassigned"
   },
   "workflow": {
     "processDefinitions": "Process Definitions",
