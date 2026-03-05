@@ -27,7 +27,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 - [x] **PROF-01**: User can view and edit profile (firstName, lastName, email) on a dedicated profile page
 - [x] **PROF-02**: User can upload avatar image to S3 with server-side validation (type, size)
-- [ ] **PROF-03**: User avatar displayed in topbar, comments, employee lists, and task assignments
+- [x] **PROF-03**: User avatar displayed in topbar, comments, employee lists, and task assignments
 - [x] **PROF-04**: GET /api/v1/auth/me returns full profile including avatar URL
 - [x] **PROF-05**: User can change password from profile page (current + new password form, uses existing PUT /api/v1/auth/password)
 
@@ -137,7 +137,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VER-03 | Phase 6.1 | Complete |
 | PROF-01 | Phase 7 | Complete |
 | PROF-02 | Phase 7 | Complete |
-| PROF-03 | Phase 11.3 | Pending |
+| PROF-03 | Phase 11.3 | Complete |
 | PROF-04 | Phase 7 | Complete |
 | PROF-05 | Phase 7 | Complete |
 | AUDT-01 | Phase 8 | Complete |

@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 11.2 (Process Polish Gap Closure) — Complete
-Plan: 1 of 1 (completed, 11.2-01: from_variable display + PLSH verification + untracked files)
-Status: Phase 11.2 complete — PLSH-01/02/03 verified and closed
-Last activity: 2026-03-05 — Completed 11.2-01: process polish gap closure
+Phase: 11.3 (Avatar Display Extension) — In Progress
+Plan: 1 of 2 (completed, 11.3-01: backend avatar URL enrichment)
+Status: Plan 01 complete — DTOs enriched with avatar URLs, proceeding to Plan 02 (frontend)
+Last activity: 2026-03-05 — Completed 11.3-01: backend avatar URL enrichment
 
-Progress: [████████████] Phase 11.2 — 1/1 plans complete
+Progress: [██████░░░░░░] Phase 11.3 — 1/2 plans complete
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: [████████████] Phase 11.2 — 1/1 plans comple
 | Phase 11-timer-execution P03 | 12 | 2 tasks | 6 files |
 | Phase 11.1-board-drag-to-complete-fix P01 | 3 | 1 tasks | 2 files |
 | Phase 11.2 P01 | 1 | 2 tasks | 6 files |
+| Phase 11.3-avatar-display-extension P01 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,7 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 11-03]: Deadline badge shown only when status==='waiting' AND fire_at present — completed/cancelled tokens never show badge
 - [Phase 11.1-board-drag-to-complete-fix]: No new API method needed — existing completeTask() dispatches same ExecuteTaskActionCommand as the removed executeAction() intended to
 - [Phase 11.2]: from_variable variable name shown as disabled InputText — backend convention not user-configurable
+- [Phase 11.3-01]: resolveDisplayNamesWithAvatars added as separate method on UserQueryPort — preserves backward compatibility with existing resolveDisplayNames callers
 
 ### Pending Todos
 
@@ -152,6 +154,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-05
-Stopped at: Completed 11.2-01-PLAN.md — process polish gap closure
+Stopped at: Completed 11.3-01-PLAN.md — backend avatar URL enrichment
 Resume file: None
-Next action: Phase 11.2 complete — continue with remaining gap closure phases (11.3+) or Phase 12 (Impersonation)
+Next action: Execute 11.3-02-PLAN.md (frontend avatar rendering)
