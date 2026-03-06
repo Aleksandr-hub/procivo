@@ -131,5 +131,11 @@ const sparklineOptions = {
 .kpi-sparkline {
   height: 40px;
   margin-top: 0.75rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.kpi-sparkline :deep(canvas) {
+  max-height: 40px !important;
 }
 </style>

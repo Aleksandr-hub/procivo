@@ -109,15 +109,24 @@ function isActive(to: string): boolean {
 <template>
   <aside class="sidebar" :class="{ collapsed: !expanded }">
     <div class="sidebar-logo">
-      <span v-if="expanded" class="logo-text">Procivo</span>
-      <span v-else class="logo-compact">P</span>
+      <template v-if="expanded">
+        <span class="logo-text">Procivo</span>
+        <button
+          class="collapse-toggle"
+          :aria-label="toggleTooltip"
+          @click="toggle"
+        >
+          <i class="pi pi-chevron-left" />
+        </button>
+      </template>
       <button
-        class="collapse-toggle"
+        v-else
+        class="logo-compact"
         :aria-label="toggleTooltip"
-        v-tooltip.right="!expanded ? toggleTooltip : undefined"
+        v-tooltip.right="toggleTooltip"
         @click="toggle"
       >
-        <i :class="expanded ? 'pi pi-chevron-left' : 'pi pi-chevron-right'" />
+        P
       </button>
     </div>
 
@@ -192,12 +201,19 @@ function isActive(to: string): boolean {
   color: white;
   width: 32px;
   height: 32px;
+  border: none;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.logo-compact:hover {
+  background: #3b82f6;
 }
 
 .collapse-toggle {
@@ -220,10 +236,6 @@ function isActive(to: string): boolean {
   color: var(--sidebar-text-active);
   background: var(--sidebar-hover-bg);
   border-color: var(--sidebar-text);
-}
-
-.sidebar.collapsed .collapse-toggle {
-  display: none;
 }
 
 .sidebar-nav {
