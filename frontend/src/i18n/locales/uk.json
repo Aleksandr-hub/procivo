@@ -362,7 +362,7 @@
       "task": "Задачі",
       "taskDesc": "Задачі та управління задачами",
       "workflow": "Процеси",
-      "workflowDesc": "Бізнес-процеси та визначення",
+      "workflowDesc": "Бізнес-процеси",
       "audit": "Аудит",
       "auditDesc": "Журнали аудиту та відстеження активності"
     },
@@ -693,17 +693,17 @@
     "addTask": "Додати завдання"
   },
   "workflow": {
-    "processDefinitions": "Визначення процесів",
-    "createDefinition": "Створити визначення",
-    "editDefinition": "Редагувати визначення",
-    "noDefinitionsFound": "Визначень процесів не знайдено",
-    "definitionCreated": "Визначення створено",
-    "definitionUpdated": "Визначення оновлено",
-    "definitionDeleted": "Визначення видалено",
-    "definitionPublished": "Визначення опубліковано",
-    "definitionRevertedToDraft": "Визначення повернуто в чернетку — тепер можна редагувати",
+    "processDefinitions": "Процеси",
+    "createDefinition": "Створити процес",
+    "editDefinition": "Редагувати процес",
+    "noDefinitionsFound": "Процесів не знайдено",
+    "definitionCreated": "Процес створено",
+    "definitionUpdated": "Процес оновлено",
+    "definitionDeleted": "Процес видалено",
+    "definitionPublished": "Процес опубліковано",
+    "definitionRevertedToDraft": "Процес повернуто в чернетку — тепер можна редагувати",
     "revertToDraft": "Редагувати (Повернути в чернетку)",
-    "confirmDelete": "Видалити визначення \"{name}\"? Цю дію не можна скасувати.",
+    "confirmDelete": "Видалити процес \"{name}\"? Цю дію не можна скасувати.",
     "failedToDelete": "Не вдалося видалити",
     "operationFailed": "Операція не вдалася",
     "publishFailed": "Не вдалося опублікувати",
@@ -723,10 +723,10 @@
     "searchInstances": "Пошук за назвою процесу",
     "instanceStarted": "Процес запущено",
     "instanceCancelled": "Процес скасовано",
-    "selectDefinition": "Оберіть визначення",
+    "selectDefinition": "Оберіть процес",
     "start": "Запустити",
     "cancel": "Скасувати",
-    "definitionName": "Визначення",
+    "definitionName": "Процес",
     "startedAt": "Розпочато",
     "instanceDetail": "Деталі екземпляра",
     "instanceStatus_running": "Виконується",
@@ -861,7 +861,7 @@
     "webhookBodyHint": "Залиште порожнім щоб надіслати всі змінні процесу як JSON.",
 
     "subProcessConfig": "Налаштування підпроцесу",
-    "subProcessDefinition": "Визначення процесу",
+    "subProcessDefinition": "Процес",
     "subProcessSelectDefinition": "Оберіть опублікований процес…",
     "subProcessVariableMappings": "Маппінг змінних",
     "subProcessParentVar": "Змінна батьківського процесу",
@@ -1157,5 +1157,36 @@
   "impersonation": {
     "viewing": "Перегляд від імені {name}",
     "exit": "Вийти з імперсонації"
+  },
+  "help": {
+    "title": "Довідковий центр",
+    "sidebar": "Довідка",
+    "article": "стаття",
+    "articles": "статей",
+    "search": {
+      "placeholder": "Пошук у довідці...",
+      "noResults": "Нічого не знайдено"
+    },
+    "categories": {
+      "userGuide": "Посібник користувача",
+      "adminGuide": "Посібник адміністратора"
+    },
+    "subcategories": {
+      "getting-started": "Початок роботи",
+      "tasks": "Завдання",
+      "processes": "Процеси",
+      "boards": "Дошки",
+      "notifications": "Сповіщення",
+      "dashboard": "Дашборд",
+      "profile": "Профіль",
+      "organization": "Організація",
+      "roles-and-permissions": "Ролі та дозволи",
+      "process-designer": "Конструктор процесів",
+      "impersonation": "Імперсонація",
+      "monitoring": "Моніторинг"
+    },
+    "articleNotFound": "Стаття не знайдена",
+    "relatedArticles": "Пов'язані статті",
+    "backToCenter": "Повернутися до довідки"
   }
 }

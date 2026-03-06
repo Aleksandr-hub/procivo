@@ -362,7 +362,7 @@
       "task": "Task",
       "taskDesc": "Tasks and task management",
       "workflow": "Workflow",
-      "workflowDesc": "Workflow processes and definitions",
+      "workflowDesc": "Business processes",
       "audit": "Audit",
       "auditDesc": "Audit logs and activity tracking"
     },
@@ -693,17 +693,17 @@
     "addTask": "Add task"
   },
   "workflow": {
-    "processDefinitions": "Process Definitions",
-    "createDefinition": "Create Definition",
-    "editDefinition": "Edit Definition",
-    "noDefinitionsFound": "No process definitions found",
-    "definitionCreated": "Definition created",
-    "definitionUpdated": "Definition updated",
-    "definitionDeleted": "Definition deleted",
-    "definitionPublished": "Definition published",
-    "definitionRevertedToDraft": "Definition reverted to draft — you can now edit it",
+    "processDefinitions": "Processes",
+    "createDefinition": "Create Process",
+    "editDefinition": "Edit Process",
+    "noDefinitionsFound": "No processes found",
+    "definitionCreated": "Process created",
+    "definitionUpdated": "Process updated",
+    "definitionDeleted": "Process deleted",
+    "definitionPublished": "Process published",
+    "definitionRevertedToDraft": "Process reverted to draft — you can now edit it",
     "revertToDraft": "Edit (Revert to Draft)",
-    "confirmDelete": "Delete definition \"{name}\"? This cannot be undone.",
+    "confirmDelete": "Delete process \"{name}\"? This cannot be undone.",
     "failedToDelete": "Failed to delete",
     "operationFailed": "Operation failed",
     "publishFailed": "Failed to publish",
@@ -723,10 +723,10 @@
     "searchInstances": "Search by process name",
     "instanceStarted": "Process started",
     "instanceCancelled": "Process cancelled",
-    "selectDefinition": "Select definition",
+    "selectDefinition": "Select process",
     "start": "Start",
     "cancel": "Cancel",
-    "definitionName": "Definition",
+    "definitionName": "Process",
     "startedAt": "Started At",
     "instanceDetail": "Instance Detail",
     "instanceStatus_running": "Running",
@@ -861,7 +861,7 @@
     "webhookBodyHint": "Leave empty to send all process variables as JSON.",
 
     "subProcessConfig": "Sub-Process Configuration",
-    "subProcessDefinition": "Process definition",
+    "subProcessDefinition": "Process",
     "subProcessSelectDefinition": "Select a published process…",
     "subProcessVariableMappings": "Variable mappings",
     "subProcessParentVar": "Parent variable",
@@ -1157,5 +1157,36 @@
   "impersonation": {
     "viewing": "Viewing as {name}",
     "exit": "Exit Impersonation"
+  },
+  "help": {
+    "title": "Help Center",
+    "sidebar": "Help",
+    "article": "article",
+    "articles": "articles",
+    "search": {
+      "placeholder": "Search help...",
+      "noResults": "No results found"
+    },
+    "categories": {
+      "userGuide": "User Guide",
+      "adminGuide": "Admin Guide"
+    },
+    "subcategories": {
+      "getting-started": "Getting Started",
+      "tasks": "Tasks",
+      "processes": "Processes",
+      "boards": "Boards",
+      "notifications": "Notifications",
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "organization": "Organization",
+      "roles-and-permissions": "Roles & Permissions",
+      "process-designer": "Process Designer",
+      "impersonation": "Impersonation",
+      "monitoring": "Monitoring"
+    },
+    "articleNotFound": "Article not found",
+    "relatedArticles": "Related Articles",
+    "backToCenter": "Back to Help Center"
   }
 }

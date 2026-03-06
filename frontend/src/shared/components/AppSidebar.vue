@@ -95,6 +95,13 @@ const menuItems = computed(() => {
     }
   }
 
+  // Help link always at the bottom
+  items.push({
+    label: t('help.sidebar'),
+    icon: 'pi pi-question-circle',
+    to: '/help',
+  })
+
   return items
 })
 

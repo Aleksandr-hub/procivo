@@ -29,6 +29,8 @@ const routeToI18nKey: Record<string, string> = {
   permissions: 'nav.permissions',
   notifications: 'notifications.sidebar',
   profile: 'auth.profile.title',
+  'help-center': 'help.title',
+  'help-article': 'help.title',
 }
 
 const pageTitle = computed(() => {

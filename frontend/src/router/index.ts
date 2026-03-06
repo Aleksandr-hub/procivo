@@ -44,6 +44,17 @@ const router = createRouter({
           component: () => import('@/modules/notifications/pages/NotificationsPage.vue'),
         },
         {
+          path: 'help',
+          name: 'help-center',
+          component: () => import('@/modules/help/pages/HelpCenterPage.vue'),
+        },
+        {
+          path: 'help/:slug+',
+          name: 'help-article',
+          component: () => import('@/modules/help/pages/HelpArticlePage.vue'),
+          props: true,
+        },
+        {
           path: '',
           name: 'organizations',
           component: () => import('@/modules/organization/pages/OrganizationsPage.vue'),
