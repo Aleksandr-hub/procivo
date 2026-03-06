@@ -8,7 +8,7 @@ progress:
   total_phases: 14
   completed_phases: 13
   total_plans: 38
-  completed_plans: 35
+  completed_plans: 36
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 14 (Infrastructure & Security)
-Plan: 3 of 5 (completed, 14-03: PostgreSQL backup infrastructure)
+Plan: 4 of 5 (completed, 14-04: TOTP Two-Factor Authentication)
 Status: Phase 14 In Progress
-Last activity: 2026-03-06 — Completed 14-03: PostgreSQL backup infrastructure
+Last activity: 2026-03-06 — Completed 14-04: TOTP Two-Factor Authentication
 
-Progress: [██████------] Phase 14 — 3/5 plans complete
+Progress: [████████----] Phase 14 — 4/5 plans complete
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [██████------] Phase 14 — 3/5 plans complete
 | Phase 13 P04 | 8 | 2 tasks | 18 files |
 | Phase 14-infrastructure-security P03 | 3 | 2 tasks | 5 files |
 | Phase 14 P01 | 4 | 2 tasks | 17 files |
+| Phase 14 P04 | 6 | 2 tasks | 26 files |
 
 ## Accumulated Context
 
@@ -169,6 +170,12 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14-01]: Health endpoints at /health (not /api/health) to bypass JWT firewall for load balancer probes
 - [Phase 14-01]: Prometheus CollectorRegistry uses Redis adapter for metric persistence across PHP requests
 - [Phase 14-01]: Grafana on port 3001 (3000 occupied by Mercure)
+- [Phase 14-04]: Partial JWT uses empty roles[] and 2fa_required claim — cannot access any ROLE_USER endpoint
+- [Phase 14-04]: Two-step enrollment: setup saves secret (totpEnabled=false) -> confirm verifies code then enables
+- [Phase 14-04]: AES-256-CBC encryption for TOTP secret storage using APP_SECRET-derived key
+- [Phase 14-04]: Remember device: HMAC-signed token (userId + UA hash + expiry), 30-day httpOnly cookie
+- [Phase 14-04]: Rate limiting via CacheInterface (Redis) keyed by token hash, 5 attempts max
+- [Phase 14-04]: /2fa/verify is PUBLIC_ACCESS — partial JWT validated manually in controller
 
 ### Pending Todos
 
@@ -185,6 +192,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 14-03-PLAN.md — PostgreSQL backup infrastructure
+Stopped at: Completed 14-04-PLAN.md — TOTP Two-Factor Authentication
 Resume file: None
-Next action: Continue Phase 14 execution (plans 04-05 remaining)
+Next action: Continue Phase 14 execution (plan 05 remaining)

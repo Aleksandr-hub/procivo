@@ -269,7 +269,7 @@ Plans:
   4. Prometheus metrics are exported (request duration, queue depth, error rates) and Grafana dashboards display system health and business metrics
   5. Soft delete is implemented for Organization, User, ProcessDefinition, and Task — deleted entities are hidden by default via Doctrine filter, admin can restore within 30 days
   6. Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) are set on all responses; CORS is configured per environment
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 Plans:
 - [x] 14-01-PLAN.md — Health check endpoints + Prometheus metrics + Grafana dashboards
 - [x] 14-02-PLAN.md — Soft delete infrastructure + security headers + NelmioCorsBundle
@@ -321,7 +321,7 @@ Plans:
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
-| 14. Infrastructure & Security | 3/5 | In Progress|  | - |
+| 14. Infrastructure & Security | 4/5 | In Progress|  | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
