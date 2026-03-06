@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-06T12:31:49.216Z"
+last_updated: "2026-03-06T13:24:20.377Z"
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 14
-  total_plans: 38
-  completed_plans: 38
+  total_plans: 41
+  completed_plans: 40
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 14.1 (UI Refresh — Figma Design System Adaptation)
-Plan: 1 of 3 (completed, 14.1-01: Design Tokens, Collapsible Sidebar, Topbar Refresh)
+Plan: 2 of 3 (completed, 14.1-02: Bento Grid Dashboard with KPI Counters)
 Status: In Progress
-Last activity: 2026-03-06 — Completed 14.1-01: Design Tokens + Collapsible Sidebar
+Last activity: 2026-03-06 — Completed 14.1-02: Bento Grid Dashboard
 
-Progress: [████░░░░░░░░] Phase 14.1 — 1/3 plans complete
+Progress: [████████░░░░] Phase 14.1 — 2/3 plans complete
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Progress: [████░░░░░░░░] Phase 14.1 — 1/3 plans comple
 | Phase 14 P04 | 6 | 2 tasks | 26 files |
 | Phase 14 P05 | 5 | 2 tasks | 12 files |
 | Phase 14.1 P01 | 3 | 2 tasks | 7 files |
+| Phase 14.1 P02 | 6 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -184,6 +185,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14.1-01]: Module-level ref in useCollapsibleSidebar follows useTheme pattern — localStorage read at module load avoids flash of wrong state
 - [Phase 14.1-01]: Route-to-i18n mapping as static Record in AppTopbar — simple lookup, no dynamic resolution needed
 - [Phase 14.1-01]: Sidebar collapse/expand i18n keys added to existing top-level "sidebar" object alongside task sidebar keys
+- [Phase 14.1]: KPI card sparkline uses PrimeVue Chart (Chart.js) with hidden axes/legend/tooltip — filled area line at 40px height
+- [Phase 14.1]: ActiveProcessesWidget replaced by KPI counter card in bento layout — full list widget no longer imported
+- [Phase 14.1]: Completion rate computed client-side from tasks_by_status (done / total * 100) — no new API endpoint
 
 ### Pending Todos
 
@@ -201,6 +205,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 14.1-01-PLAN.md — Design Tokens, Collapsible Sidebar, Topbar Refresh
+Stopped at: Completed 14.1-02-PLAN.md — Bento Grid Dashboard with KPI Counters
 Resume file: None
-Next action: Execute 14.1-02-PLAN.md (Dashboard Widgets Refresh)
+Next action: Execute 14.1-03-PLAN.md (Task Board Polish)
