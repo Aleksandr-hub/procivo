@@ -55,8 +55,8 @@ final readonly class AuditLogController
         $actorId = $request->query->get('actor_id');
         $dateFromStr = $request->query->get('date_from');
         $dateToStr = $request->query->get('date_to');
-        $page = max(1, (int) ($request->query->get('page', '1')));
-        $limit = min(100, max(1, (int) ($request->query->get('limit', '50'))));
+        $page = max(1, (int) $request->query->get('page', '1'));
+        $limit = min(100, max(1, (int) $request->query->get('limit', '50')));
 
         $dateFrom = null;
         if (\is_string($dateFromStr) && '' !== $dateFromStr) {

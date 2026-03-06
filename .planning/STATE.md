@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-06T16:14:04.000Z"
+last_updated: "2026-03-06T16:29:17.000Z"
 progress:
   total_phases: 15
   completed_phases: 14
   total_plans: 43
-  completed_plans: 41
+  completed_plans: 42
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 15 (API Documentation)
-Plan: 1 of 3 (completed, 15-01: NelmioApiDocBundle Setup and DTO Schemas)
+Plan: 2 of 3 (completed, 15-02: Controller Endpoint Annotations — Identity, Organization, Shared)
 Status: In Progress
-Last activity: 2026-03-06 — Completed 15-01: NelmioApiDocBundle Setup and DTO Schemas
+Last activity: 2026-03-06 — Completed 15-02: Controller Endpoint Annotations
 
-Progress: [████░░░░░░░░] Phase 15 — 1/3 plans complete
+Progress: [████████░░░░] Phase 15 — 2/3 plans complete
 
 ## Performance Metrics
 
@@ -86,6 +86,7 @@ Progress: [████░░░░░░░░] Phase 15 — 1/3 plans complete
 | Phase 14.1 P02 | 6 | 2 tasks | 6 files |
 | Phase 14.1 P03 | 7 | 2 tasks | 4 files |
 | Phase 15-api-documentation P01 | 9 | 2 tasks | 43 files |
+| Phase 15-api-documentation P02 | 12 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14.1-03]: Label chips limited to 3 with +N overflow for card space conservation
 - [Phase 15-01]: symfony/asset required for Swagger UI controller — NelmioApiDocBundle removes swagger_ui service when Asset component missing
 - [Phase 15-01]: DTO schemas not visible in spec until controllers reference them — standard NelmioApiDocBundle behavior
+- [Phase 15-02]: Public endpoints (register, login, refresh, 2fa/verify, health/*, metrics, public invitations) use Security(name: null) to override default JWT Bearer scheme
+- [Phase 15-02]: UserController only has search endpoint — profile/avatar are in AuthController under /auth/me route prefix
 
 ### Pending Todos
 
@@ -211,6 +214,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 15-01-PLAN.md — NelmioApiDocBundle Setup and DTO Schemas
+Stopped at: Completed 15-02-PLAN.md — Controller Endpoint Annotations (Identity, Organization, Shared)
 Resume file: None
-Next action: Execute 15-02-PLAN.md (Controller endpoint annotations)
+Next action: Execute 15-03-PLAN.md (Remaining module controller annotations)

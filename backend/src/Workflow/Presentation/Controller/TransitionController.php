@@ -10,11 +10,13 @@ use App\Workflow\Application\Command\AddTransition\AddTransitionCommand;
 use App\Workflow\Application\Command\RemoveTransition\RemoveTransitionCommand;
 use App\Workflow\Application\Command\UpdateTransition\UpdateTransitionCommand;
 use App\Workflow\Domain\ValueObject\TransitionId;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Designer')]
 #[Route('/api/v1/organizations/{organizationId}/process-definitions/{definitionId}/transitions', name: 'api_v1_wf_transitions_')]
 final readonly class TransitionController
 {
@@ -24,6 +26,27 @@ final readonly class TransitionController
     ) {
     }
 
+    #[OA\Post(
+        summary: 'Add a transition to a process definition',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['source_node_id', 'target_node_id'],
+                properties: [
+                    new OA\Property(property: 'source_node_id', type: 'string', format: 'uuid'),
+                    new OA\Property(property: 'target_node_id', type: 'string', format: 'uuid'),
+                    new OA\Property(property: 'name', type: 'string', nullable: true),
+                    new OA\Property(property: 'action_key', type: 'string', nullable: true),
+                    new OA\Property(property: 'condition_expression', type: 'string', nullable: true),
+                    new OA\Property(property: 'form_fields', type: 'array', items: new OA\Items(type: 'object'), nullable: true),
+                    new OA\Property(property: 'sort_order', type: 'integer'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Transition added', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'add', methods: ['POST'])]
     public function add(string $organizationId, string $definitionId, Request $request): JsonResponse
     {
@@ -47,6 +70,23 @@ final readonly class TransitionController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Put(
+        summary: 'Update a workflow transition',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'name', type: 'string', nullable: true),
+                new OA\Property(property: 'action_key', type: 'string', nullable: true),
+                new OA\Property(property: 'condition_expression', type: 'string', nullable: true),
+                new OA\Property(property: 'form_fields', type: 'array', items: new OA\Items(type: 'object'), nullable: true),
+                new OA\Property(property: 'sort_order', type: 'integer'),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'transitionId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Transition updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{transitionId}', name: 'update', methods: ['PUT'])]
     public function update(string $organizationId, string $definitionId, string $transitionId, Request $request): JsonResponse
     {
@@ -65,6 +105,11 @@ final readonly class TransitionController
         return new JsonResponse(['message' => 'Transition updated.']);
     }
 
+    #[OA\Delete(summary: 'Remove a transition from a process definition')]
+    #[OA\Parameter(name: 'transitionId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Transition removed', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{transitionId}', name: 'remove', methods: ['DELETE'])]
     public function remove(string $organizationId, string $definitionId, string $transitionId): JsonResponse
     {

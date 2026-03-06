@@ -297,7 +297,7 @@ Plans:
   2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
   3. Postman collection is auto-generated and downloadable from /api/docs
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
 - [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
@@ -342,7 +342,7 @@ Plans:
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
-| 15. API Documentation | 1/3 | In Progress|  | - |
+| 15. API Documentation | 2/3 | In Progress|  | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---

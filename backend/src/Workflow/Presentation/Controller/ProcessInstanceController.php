@@ -16,12 +16,15 @@ use App\Workflow\Application\Query\GetProcessInstanceHistory\GetProcessInstanceH
 use App\Workflow\Application\Query\ListProcessInstances\ListProcessInstancesQuery;
 use App\Workflow\Domain\ValueObject\ProcessInstanceId;
 use App\Workflow\Presentation\Security\ProcessDefinitionAccessChecker;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Workflow')]
 #[Route('/api/v1/organizations/{organizationId}/process-instances', name: 'api_v1_process_instances_')]
 final readonly class ProcessInstanceController
 {
@@ -34,6 +37,22 @@ final readonly class ProcessInstanceController
     ) {
     }
 
+    #[OA\Post(
+        summary: 'Start a new process instance',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['process_definition_id'],
+                properties: [
+                    new OA\Property(property: 'process_definition_id', type: 'string', format: 'uuid'),
+                    new OA\Property(property: 'variables', type: 'object', description: 'Initial process variables'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Process started', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'start', methods: ['POST'])]
     public function start(string $organizationId, Request $request): JsonResponse
     {
@@ -62,6 +81,25 @@ final readonly class ProcessInstanceController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Get(
+        summary: 'List process instances',
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['running', 'completed', 'cancelled'])),
+            new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 20, maximum: 100)),
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Paginated instance list',
+        content: new OA\JsonContent(properties: [
+            new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: new Model(type: \App\Workflow\Application\DTO\ProcessInstanceDTO::class))),
+            new OA\Property(property: 'total', type: 'integer'),
+        ]),
+    )]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId, Request $request): JsonResponse
     {
@@ -83,6 +121,12 @@ final readonly class ProcessInstanceController
         return new JsonResponse($instances);
     }
 
+    #[OA\Get(summary: 'Get process instance details')]
+    #[OA\Parameter(name: 'instanceId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Instance details', content: new OA\JsonContent(ref: new Model(type: \App\Workflow\Application\DTO\ProcessInstanceDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
+    #[OA\Response(response: 404, description: 'Instance not found')]
     #[Route('/{instanceId}', name: 'show', methods: ['GET'])]
     public function show(string $organizationId, string $instanceId): JsonResponse
     {
@@ -93,6 +137,11 @@ final readonly class ProcessInstanceController
         return new JsonResponse($instance);
     }
 
+    #[OA\Get(summary: 'Get process instance event history')]
+    #[OA\Parameter(name: 'instanceId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Event history', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: \App\Workflow\Application\DTO\ProcessEventDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{instanceId}/history', name: 'history', methods: ['GET'])]
     public function history(string $organizationId, string $instanceId): JsonResponse
     {
@@ -103,6 +152,12 @@ final readonly class ProcessInstanceController
         return new JsonResponse($events);
     }
 
+    #[OA\Get(summary: 'Get process instance execution graph')]
+    #[OA\Parameter(name: 'instanceId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Execution graph', content: new OA\JsonContent(type: 'object'))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
+    #[OA\Response(response: 404, description: 'Graph not found')]
     #[Route('/{instanceId}/graph', name: 'graph', methods: ['GET'])]
     public function graph(string $organizationId, string $instanceId): JsonResponse
     {
@@ -117,6 +172,19 @@ final readonly class ProcessInstanceController
         return new JsonResponse($graph);
     }
 
+    #[OA\Post(
+        summary: 'Cancel a running process instance',
+        requestBody: new OA\RequestBody(
+            required: false,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'reason', type: 'string', nullable: true),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'instanceId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Instance cancelled', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{instanceId}/cancel', name: 'cancel', methods: ['POST'])]
     public function cancel(string $organizationId, string $instanceId, Request $request): JsonResponse
     {

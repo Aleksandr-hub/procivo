@@ -30,7 +30,7 @@ final readonly class BoardDTO
         public string $createdAt,
         #[OA\Property(description: 'Last update timestamp', format: 'date-time', nullable: true)]
         public ?string $updatedAt,
-        #[OA\Property(description: 'Board columns', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: \App\TaskManager\Application\DTO\BoardColumnDTO::class)))]
+        #[OA\Property(description: 'Board columns', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: BoardColumnDTO::class)))]
         public array $columns = [],
     ) {
     }
