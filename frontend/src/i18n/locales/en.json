@@ -83,7 +83,8 @@
     "orgChart": "Org Chart",
     "roles": "Roles",
     "processes": "Processes",
-    "instances": "Instances"
+    "instances": "Instances",
+    "permissions": "Permissions"
   },
   "topbar": {
     "lightMode": "Light mode",
@@ -240,7 +241,11 @@
     "invitationCancelled": "Invitation cancelled",
     "failedToCancelInvitation": "Failed to cancel invitation",
     "dismiss": "Dismiss",
-    "cancelInvitation": "Cancel invitation"
+    "cancelInvitation": "Cancel invitation",
+    "impersonate": "Log in as this user",
+    "impersonation": "Impersonation",
+    "impersonationStarted": "You are now viewing as {name}",
+    "impersonationFailed": "Failed to impersonate user"
   },
   "orgChart": {
     "title": "Organization Chart",
@@ -315,7 +320,11 @@
       "organization": "Organization",
       "organizationDesc": "Organization settings",
       "task": "Task",
-      "taskDesc": "Tasks and task management"
+      "taskDesc": "Tasks and task management",
+      "workflow": "Workflow",
+      "workflowDesc": "Workflow processes and definitions",
+      "audit": "Audit",
+      "auditDesc": "Audit logs and activity tracking"
     },
     "actions": {
       "view": "View",
@@ -342,6 +351,49 @@
       "department_treeDesc": "All employees in the department and its sub-departments",
       "organization": "Entire organization",
       "organizationDesc": "All employees across the whole organization"
+    },
+    "title": "Permissions",
+    "rolesTab": "Roles",
+    "departmentsTab": "Departments",
+    "usersTab": "Users",
+    "selectRole": "Select a role...",
+    "selectRoleHint": "Select a role to view and edit its permissions",
+    "selectDepartment": "Select a department...",
+    "selectDepartmentHint": "Select a department to set default permissions",
+    "selectUser": "Select an employee...",
+    "selectUserHint": "Select an employee to manage overrides and view effective permissions",
+    "departmentDefaultsInfo": "These permissions apply to all employees in this department as defaults",
+    "saved": "Permissions saved",
+    "failedToSave": "Failed to save permissions",
+    "failedToLoad": "Failed to load permissions",
+    "effect": "Effect",
+    "effects": {
+      "allow": "Allow",
+      "deny": "Deny"
+    },
+    "source": "Source",
+    "sources": {
+      "role": "Role",
+      "department": "Department",
+      "user_override": "User Override"
+    },
+    "effectiveTitle": "Effective Permissions",
+    "noEffectivePermissions": "No effective permissions",
+    "userOverrides": "User Overrides",
+    "addOverride": "Add Override",
+    "overrideAdded": "Override added",
+    "overrideRemoved": "Override removed",
+    "noOverrides": "No user overrides",
+    "confirmRemoveOverride": "Remove {resource}/{action} override?",
+    "confirmRemoveTitle": "Confirm Remove",
+    "failedToRemove": "Failed to remove override",
+    "processAccess": {
+      "title": "Process Access Control",
+      "viewAccess": "View Access",
+      "startAccess": "Start Access",
+      "openToAll": "Open to all",
+      "anyDepartment": "Any department",
+      "anyRole": "Any role"
     }
   },
   "tasks": {

@@ -71,6 +71,12 @@ const router = createRouter({
               name: 'role-detail',
               component: () => import('@/modules/organization/pages/RoleDetailPage.vue'),
             },
+            {
+              path: 'permissions',
+              name: 'permissions',
+              component: () => import('@/modules/organization/pages/PermissionsPage.vue'),
+              meta: { permission: { resource: 'role', action: 'view' } },
+            },
           ],
         },
         {

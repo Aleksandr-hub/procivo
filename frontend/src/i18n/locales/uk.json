@@ -83,7 +83,8 @@
     "orgChart": "Оргструктура",
     "roles": "Ролі",
     "processes": "Процеси",
-    "instances": "Екземпляри"
+    "instances": "Екземпляри",
+    "permissions": "Дозволи"
   },
   "topbar": {
     "lightMode": "Світла тема",
@@ -240,7 +241,11 @@
     "invitationCancelled": "Запрошення скасовано",
     "failedToCancelInvitation": "Не вдалося скасувати запрошення",
     "dismiss": "Звільнити",
-    "cancelInvitation": "Скасувати запрошення"
+    "cancelInvitation": "Скасувати запрошення",
+    "impersonate": "Увійти як цей користувач",
+    "impersonation": "Імперсонація",
+    "impersonationStarted": "Ви увійшли як {name}",
+    "impersonationFailed": "Не вдалося виконати імперсонацію"
   },
   "orgChart": {
     "title": "Організаційна структура",
@@ -315,7 +320,11 @@
       "organization": "Організація",
       "organizationDesc": "Налаштування організації",
       "task": "Задачі",
-      "taskDesc": "Задачі та управління задачами"
+      "taskDesc": "Задачі та управління задачами",
+      "workflow": "Процеси",
+      "workflowDesc": "Бізнес-процеси та визначення",
+      "audit": "Аудит",
+      "auditDesc": "Журнали аудиту та відстеження активності"
     },
     "actions": {
       "view": "Перегляд",
@@ -342,6 +351,49 @@
       "department_treeDesc": "Всі працівники департаменту та його піддепартаментів",
       "organization": "Вся організація",
       "organizationDesc": "Всі працівники організації"
+    },
+    "title": "Дозволи",
+    "rolesTab": "Ролі",
+    "departmentsTab": "Департаменти",
+    "usersTab": "Користувачі",
+    "selectRole": "Оберіть роль...",
+    "selectRoleHint": "Оберіть роль для перегляду та редагування дозволів",
+    "selectDepartment": "Оберіть департамент...",
+    "selectDepartmentHint": "Оберіть департамент для налаштування дозволів за замовчуванням",
+    "selectUser": "Оберіть працівника...",
+    "selectUserHint": "Оберіть працівника для управління перевизначеннями та перегляду ефективних дозволів",
+    "departmentDefaultsInfo": "Ці дозволи застосовуються до всіх працівників цього департаменту як значення за замовчуванням",
+    "saved": "Дозволи збережено",
+    "failedToSave": "Не вдалося зберегти дозволи",
+    "failedToLoad": "Не вдалося завантажити дозволи",
+    "effect": "Ефект",
+    "effects": {
+      "allow": "Дозволити",
+      "deny": "Заборонити"
+    },
+    "source": "Джерело",
+    "sources": {
+      "role": "Роль",
+      "department": "Департамент",
+      "user_override": "Перевизначення"
+    },
+    "effectiveTitle": "Ефективні дозволи",
+    "noEffectivePermissions": "Ефективних дозволів немає",
+    "userOverrides": "Перевизначення користувача",
+    "addOverride": "Додати перевизначення",
+    "overrideAdded": "Перевизначення додано",
+    "overrideRemoved": "Перевизначення видалено",
+    "noOverrides": "Перевизначень немає",
+    "confirmRemoveOverride": "Видалити перевизначення {resource}/{action}?",
+    "confirmRemoveTitle": "Підтвердити видалення",
+    "failedToRemove": "Не вдалося видалити перевизначення",
+    "processAccess": {
+      "title": "Контроль доступу до процесу",
+      "viewAccess": "Доступ на перегляд",
+      "startAccess": "Доступ на запуск",
+      "openToAll": "Відкрито для всіх",
+      "anyDepartment": "Будь-який департамент",
+      "anyRole": "Будь-яка роль"
     }
   },
   "tasks": {

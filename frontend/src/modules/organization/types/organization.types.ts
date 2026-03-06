@@ -107,6 +107,8 @@ export type PermissionResource =
   | 'invitation'
   | 'organization'
   | 'task'
+  | 'workflow'
+  | 'audit'
 
 export type PermissionAction = 'view' | 'create' | 'update' | 'delete' | 'manage'
 
@@ -122,6 +124,44 @@ export interface MyPermissionsResponse {
   isOwner: boolean
   roles: RoleDTO[]
   permissions: PermissionDTO[]
+}
+
+export interface DepartmentPermissionDTO {
+  id: string
+  departmentId: string
+  departmentName: string
+  resource: string
+  action: string
+  scope: string
+  createdAt: string
+}
+
+export interface UserPermissionOverrideDTO {
+  id: string
+  employeeId: string
+  employeeName: string
+  resource: string
+  action: string
+  effect: 'allow' | 'deny'
+  scope: string
+  createdAt: string
+}
+
+export interface EffectivePermissionDTO {
+  resource: string
+  action: string
+  scope: string
+  source: 'role' | 'department' | 'user_override'
+}
+
+export interface ProcessDefinitionAccessDTO {
+  id: string
+  processDefinitionId: string
+  departmentId: string | null
+  departmentName: string | null
+  roleId: string | null
+  roleName: string | null
+  accessType: 'view' | 'start'
 }
 
 export interface InvitationDTO {

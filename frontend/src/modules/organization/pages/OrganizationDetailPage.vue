@@ -31,7 +31,7 @@ onMounted(async () => {
   if (orgStore.organizations.length === 0) {
     await orgStore.fetchOrganizations()
   }
-  if (!route.matched.some((r) => r.name === 'departments' || r.name === 'employees' || r.name === 'org-chart' || r.name === 'roles' || r.name === 'role-detail')) {
+  if (!route.matched.some((r) => r.name === 'departments' || r.name === 'employees' || r.name === 'org-chart' || r.name === 'roles' || r.name === 'role-detail' || r.name === 'permissions')) {
     router.replace(`/organizations/${props.orgId}/departments`)
   }
 })

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useOrganizationStore } from '@/modules/organization/stores/organization.store'
+import { usePermissionStore } from '@/modules/organization/stores/permission.store'
 
 defineProps<{
   visible: boolean
@@ -11,6 +12,7 @@ defineProps<{
 const route = useRoute()
 const { t } = useI18n()
 const orgStore = useOrganizationStore()
+const permissionStore = usePermissionStore()
 
 const orgId = computed(() => (route.params.orgId as string | undefined) ?? orgStore.currentOrgId ?? undefined)
 
@@ -81,6 +83,14 @@ const menuItems = computed(() => {
         to: `/organizations/${orgId.value}/process-instances`,
       },
     )
+
+    if (permissionStore.can('role', 'view') || permissionStore.isOwner) {
+      items.push({
+        label: t('nav.permissions'),
+        icon: 'pi pi-lock',
+        to: `/organizations/${orgId.value}/permissions`,
+      })
+    }
   }
 
   return items
