@@ -269,11 +269,11 @@ Plans:
   4. Prometheus metrics are exported (request duration, queue depth, error rates) and Grafana dashboards display system health and business metrics
   5. Soft delete is implemented for Organization, User, ProcessDefinition, and Task — deleted entities are hidden by default via Doctrine filter, admin can restore within 30 days
   6. Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) are set on all responses; CORS is configured per environment
-**Plans:** 1/5 plans executed
+**Plans:** 3/5 plans executed
 Plans:
-- [ ] 14-01-PLAN.md — Health check endpoints + Prometheus metrics + Grafana dashboards
-- [ ] 14-02-PLAN.md — Soft delete infrastructure + security headers + NelmioCorsBundle
-- [ ] 14-03-PLAN.md — PostgreSQL backup Docker service + S3 retention + restore test
+- [x] 14-01-PLAN.md — Health check endpoints + Prometheus metrics + Grafana dashboards
+- [x] 14-02-PLAN.md — Soft delete infrastructure + security headers + NelmioCorsBundle
+- [x] 14-03-PLAN.md — PostgreSQL backup Docker service + S3 retention + restore test
 - [ ] 14-04-PLAN.md — 2FA TOTP backend (User entity, TotpService, two-step JWT login, rate limiting)
 - [ ] 14-05-PLAN.md — 2FA frontend (TwoFactorVerifyPage, profile setup dialog, backup codes)
 
