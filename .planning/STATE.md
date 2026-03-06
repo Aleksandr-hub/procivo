@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-06T07:08:13.121Z"
+last_updated: "2026-03-06T12:02:32.307Z"
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 13
-  total_plans: 33
-  completed_plans: 33
+  total_plans: 38
+  completed_plans: 35
 ---
 
 # Project State
@@ -79,6 +79,7 @@ Progress: [██████------] Phase 14 — 3/5 plans complete
 | Phase 13 P03 | 8 | 2 tasks | 25 files |
 | Phase 13 P04 | 8 | 2 tasks | 18 files |
 | Phase 14-infrastructure-security P03 | 3 | 2 tasks | 5 files |
+| Phase 14 P01 | 4 | 2 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -165,6 +166,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14-03]: postgres:18-alpine as base image for backup container — includes pg_dump natively, no version mismatch
 - [Phase 14-03]: Daily/weekly/monthly prefix rotation based on day-of-month and day-of-week for S3 lifecycle retention
 - [Phase 14-03]: Initial backup on container startup for dev/testing verification
+- [Phase 14-01]: Health endpoints at /health (not /api/health) to bypass JWT firewall for load balancer probes
+- [Phase 14-01]: Prometheus CollectorRegistry uses Redis adapter for metric persistence across PHP requests
+- [Phase 14-01]: Grafana on port 3001 (3000 occupied by Mercure)
 
 ### Pending Todos
 
