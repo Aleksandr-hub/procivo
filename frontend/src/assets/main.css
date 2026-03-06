@@ -71,3 +71,24 @@ a:hover {
 .app-dark ::-webkit-scrollbar-thumb:hover {
   background: var(--p-surface-500);
 }
+
+/* Design tokens */
+:root {
+  --color-primary: #3B82F6;
+  --color-accent: #8B5CF6;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --card-radius: 0.75rem;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --sidebar-width-expanded: 250px;
+  --sidebar-width-collapsed: 64px;
+  --topbar-height: 56px;
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-dark {
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
