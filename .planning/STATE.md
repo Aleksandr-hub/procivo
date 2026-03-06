@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 14 (Infrastructure & Security)
-Plan: 5 of 5 (completed, 14-05: Frontend 2FA Experience)
-Status: Phase 14 Complete
-Last activity: 2026-03-06 — Completed 14-05: Frontend 2FA Experience
+Phase: 14.1 (UI Refresh — Figma Design System Adaptation)
+Plan: 1 of 3 (completed, 14.1-01: Design Tokens, Collapsible Sidebar, Topbar Refresh)
+Status: In Progress
+Last activity: 2026-03-06 — Completed 14.1-01: Design Tokens + Collapsible Sidebar
 
-Progress: [████████████] Phase 14 — 5/5 plans complete
+Progress: [████░░░░░░░░] Phase 14.1 — 1/3 plans complete
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ Progress: [████████████] Phase 14 — 5/5 plans complete
 | Phase 14 P01 | 4 | 2 tasks | 17 files |
 | Phase 14 P04 | 6 | 2 tasks | 26 files |
 | Phase 14 P05 | 5 | 2 tasks | 12 files |
+| Phase 14.1 P01 | 3 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -180,6 +181,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14-05]: Partial token stored in Vue ref (in-memory only) — page refresh forces re-login for security
 - [Phase 14-05]: Separate axios instance for /2fa/verify — partial JWT requires manual Authorization header, bypasses httpClient interceptors
 - [Phase 14-05]: InputOtp @complete auto-submits on 6th digit for seamless TOTP verification
+- [Phase 14.1-01]: Module-level ref in useCollapsibleSidebar follows useTheme pattern — localStorage read at module load avoids flash of wrong state
+- [Phase 14.1-01]: Route-to-i18n mapping as static Record in AppTopbar — simple lookup, no dynamic resolution needed
+- [Phase 14.1-01]: Sidebar collapse/expand i18n keys added to existing top-level "sidebar" object alongside task sidebar keys
 
 ### Pending Todos
 
@@ -188,6 +192,7 @@ None.
 ### Roadmap Evolution
 
 - Phase 06.1 inserted after Phase 6: Process Definition Versioning — version definitions on deploy, bind instances to versions, admin migration with compatibility validation (URGENT)
+- Phase 14.1 inserted after Phase 14: UI Refresh — Figma Design System Adaptation (URGENT)
 
 ### Blockers/Concerns
 
@@ -196,6 +201,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 14-05-PLAN.md — Frontend 2FA Experience
+Stopped at: Completed 14.1-01-PLAN.md — Design Tokens, Collapsible Sidebar, Topbar Refresh
 Resume file: None
-Next action: Phase 14 complete. Next milestone planning needed.
+Next action: Execute 14.1-02-PLAN.md (Dashboard Widgets Refresh)
