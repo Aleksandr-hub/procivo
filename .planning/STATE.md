@@ -8,7 +8,7 @@ progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 33
-  completed_plans: 31
+  completed_plans: 33
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 13 (Granular Permissions RBAC)
-Plan: 2 of 4 (completed, 13-02: per-definition access control)
-Status: Executing Phase 13
-Last activity: 2026-03-06 — Completed 13-02: per-definition access control
+Plan: 4 of 4 (completed, 13-04: frontend permissions UI)
+Status: Phase 13 Complete
+Last activity: 2026-03-06 — Completed 13-04: frontend permissions UI
 
-Progress: [██████░░░░░░] Phase 13 — 2/4 plans complete
+Progress: [████████████] Phase 13 — 4/4 plans complete
 
 ## Performance Metrics
 
@@ -76,6 +76,8 @@ Progress: [██████░░░░░░] Phase 13 — 2/4 plans complete
 | Phase 12-super-admin-impersonation P02 | 15 | 3 tasks | 7 files |
 | Phase 13-granular-permissions-rbac P02 | 5 | 2 tasks | 15 files |
 | Phase 13 P01 | 6 | 2 tasks | 19 files |
+| Phase 13 P03 | 8 | 2 tasks | 25 files |
+| Phase 13 P04 | 8 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -153,6 +155,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 13-02]: ProcessDefinitionAccessChecker as dedicated Presentation service — avoids cross-module repository injection in controllers
 - [Phase 13-02]: Whitelist ACL model: no rows = open to all, rows = restricted; owner bypass returns null for "show all" semantics
 - [Phase 13-02]: ArrayParameterType::STRING replaces deprecated Connection::PARAM_STR_ARRAY in DBAL
+- [Phase 13-04]: Permission matrix uses resource rows x action columns with scope Select dropdown per cell — diff-based save via grant/revoke API
+- [Phase 13-04]: Router navigation guard allows navigation when permissions not yet loaded (loaded=false) — avoids blocking first render
+- [Phase 13-04]: Permission store fetch triggered by route.params.orgId watcher in DashboardLayout with immediate:true
 - [Phase 13]: Migration uses VARCHAR(36) not UUID type for consistency with existing Doctrine mappings
 - [Phase 13]: Hierarchical permission merge: UserOverride deny blocks immediately; allow overrides scope; Role and Department scopes use wider-wins
 - [Phase 13]: Department permission tree inheritance walks parentId chain; child department explicit permission overrides parent
@@ -172,6 +177,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 13-02-PLAN.md — per-definition access control
+Stopped at: Completed 13-04-PLAN.md — frontend permissions UI (Phase 13 complete)
 Resume file: None
-Next action: Execute 13-03-PLAN.md
+Next action: /gsd:new-milestone to plan next milestone

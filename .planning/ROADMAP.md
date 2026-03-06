@@ -38,7 +38,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 11.2: Process Polish Gap Closure** — Close PLSH-01/02/03 gaps: formSchema write path verification, checkbox updates, from_variable Designer input (completed 2026-03-05)
 - [x] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage) (completed 2026-03-05)
 - [x] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions (completed 2026-03-05)
-- [ ] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance
+- [x] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance (completed 2026-03-06)
 - [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
 - [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
 - [ ] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base
@@ -251,7 +251,7 @@ Plans:
   4. Admin UI provides a permissions management page where org admins can view and edit permission matrices per role, per department, and per user with immediate effect
   5. All API endpoints enforce permissions via the existing OrganizationAuthorizer — no endpoint relies solely on "user is in organization" for access
   6. Permission changes are logged in the audit trail with before/after diff
-**Plans:** 2/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 - [ ] 13-01-PLAN.md — Backend permission hierarchy (DepartmentPermission, UserPermissionOverride entities, PermissionResolver hierarchical merge, OrganizationVoter fix, enum fixes)
 - [ ] 13-02-PLAN.md — Per-definition access control (ProcessDefinitionAccess entity, whitelist ACL, controller enforcement)
@@ -323,7 +323,7 @@ Plans:
 | 11.2 Process Polish Gap Closure | 1/1 | Complete    | 2026-03-05 | - |
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
-| 13. Granular Permissions (RBAC) | 2/4 | In Progress|  | - |
+| 13. Granular Permissions (RBAC) | 4/4 | Complete   | 2026-03-06 | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
