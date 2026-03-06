@@ -65,21 +65,24 @@ const assigneeInitial = computed(() => {
         :severity="getPrioritySeverity(task.priority)"
         rounded
         class="priority-tag"
+        style="font-size: 0.7rem"
       />
     </div>
 
     <!-- Title -->
     <div class="card-title">{{ task.title }}</div>
 
-    <!-- Label dots row -->
+    <!-- Label chips row -->
     <div v-if="task.labels.length > 0" class="card-labels">
-      <span
-        v-for="label in task.labels"
+      <Tag
+        v-for="label in task.labels.slice(0, 3)"
         :key="label.name"
-        class="label-dot"
-        :style="{ background: label.color }"
-        :title="label.name"
+        :value="label.name"
+        :style="{ backgroundColor: label.color + '22', color: label.color, border: '1px solid ' + label.color + '44' }"
+        rounded
+        class="label-chip"
       />
+      <span v-if="task.labels.length > 3" class="label-more">+{{ task.labels.length - 3 }}</span>
     </div>
 
     <!-- Footer row: due date + comment count -->
@@ -100,14 +103,16 @@ const assigneeInitial = computed(() => {
 .kanban-card {
   background: var(--p-surface-card);
   border: 1px solid var(--p-content-border-color);
-  border-radius: 6px;
+  border-radius: var(--card-radius);
   padding: 0.75rem;
   cursor: grab;
-  transition: box-shadow 0.15s;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
 }
 
 .kanban-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-1px);
 }
 
 .kanban-card:active {
@@ -149,12 +154,16 @@ const assigneeInitial = computed(() => {
   margin-bottom: 0.5rem;
 }
 
-.label-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
+.label-chip {
+  font-size: 0.7rem;
+  padding: 0.125rem 0.375rem;
+}
+
+.label-more {
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+  display: flex;
+  align-items: center;
 }
 
 .card-footer {
