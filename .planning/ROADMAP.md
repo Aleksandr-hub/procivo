@@ -315,10 +315,9 @@ Plans:
   4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
 **Plans:** 3 plans
 Plans:
-- [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
-- [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
-- [ ] 15-03-PLAN.md — TaskManager, Workflow, Notification, Audit controller OA annotations + final validation
-- [ ] 15-04-PLAN.md — Gap closure: API versioning strategy document + migration guide
+- [ ] 16-01-PLAN.md — Help Center infrastructure (Vite markdown plugin, MiniSearch, pages, router, i18n)
+- [ ] 16-02-PLAN.md — User Guide content (~18 articles: tasks, processes, boards, notifications, dashboard, profile)
+- [ ] 16-03-PLAN.md — Admin Guide content (~15 articles: org setup, permissions, designer, impersonation, monitoring)
 
 ## Progress
 
@@ -345,7 +344,7 @@ Plans:
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
 | 15. API Documentation | 4/4 | Complete    | 2026-03-06 | - |
-| 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
+| 16. Product Documentation | v2.0 | 0/3 | Not started | - |
 
 ---
 
