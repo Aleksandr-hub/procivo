@@ -110,18 +110,18 @@ onMounted(() => {
       </div>
 
       <!-- Row 2: Charts (span-8) + Team Activity (span-4) -->
-      <Card class="span-8 row-span-2 bento-card">
+      <Card class="span-8 bento-card">
         <template #title>{{ t('dashboard.charts') }}</template>
         <template #content>
-          <Skeleton v-if="dashboardStore.loading" height="400px" />
+          <Skeleton v-if="dashboardStore.loading" height="300px" />
           <ChartsWidget v-else :stats="dashboardStore.stats" />
         </template>
       </Card>
 
-      <Card class="span-4 row-span-2 bento-card">
+      <Card class="span-4 bento-card">
         <template #title>{{ t('dashboard.teamActivity') }}</template>
         <template #content>
-          <Skeleton v-if="dashboardStore.loading" height="400px" />
+          <Skeleton v-if="dashboardStore.loading" height="300px" />
           <RecentActivityWidget v-else :org-id="orgId" />
         </template>
       </Card>
@@ -173,10 +173,6 @@ onMounted(() => {
   grid-column: span 8;
 }
 
-.row-span-2 {
-  grid-row: span 2;
-}
-
 .bento-card {
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
@@ -205,10 +201,6 @@ onMounted(() => {
   .span-4 {
     grid-column: span 12;
   }
-
-  .row-span-2 {
-    grid-row: span 1;
-  }
 }
 
 @media (max-width: 768px) {
@@ -221,10 +213,6 @@ onMounted(() => {
   .span-6,
   .span-8 {
     grid-column: span 1;
-  }
-
-  .row-span-2 {
-    grid-row: span 1;
   }
 }
 </style>

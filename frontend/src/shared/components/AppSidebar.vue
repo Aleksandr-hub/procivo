@@ -111,16 +111,15 @@ function isActive(to: string): boolean {
     <div class="sidebar-logo">
       <span v-if="expanded" class="logo-text">Procivo</span>
       <span v-else class="logo-compact">P</span>
+      <button
+        class="collapse-toggle"
+        :aria-label="toggleTooltip"
+        v-tooltip.right="!expanded ? toggleTooltip : undefined"
+        @click="toggle"
+      >
+        <i :class="expanded ? 'pi pi-chevron-left' : 'pi pi-chevron-right'" />
+      </button>
     </div>
-
-    <button
-      class="collapse-toggle"
-      :aria-label="toggleTooltip"
-      v-tooltip.right="toggleTooltip"
-      @click="toggle"
-    >
-      <i :class="expanded ? 'pi pi-chevron-left' : 'pi pi-chevron-right'" />
-    </button>
 
     <nav class="sidebar-nav">
       <router-link
@@ -168,16 +167,17 @@ function isActive(to: string): boolean {
 }
 
 .sidebar-logo {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--sidebar-border);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  min-height: 56px;
 }
 
 .sidebar.collapsed .sidebar-logo {
   justify-content: center;
-  padding: 1.25rem 0.5rem;
+  padding: 1rem 0.5rem;
 }
 
 .logo-text {
@@ -204,19 +204,26 @@ function isActive(to: string): boolean {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 0.5rem;
-  border: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 6px;
   background: transparent;
   color: var(--sidebar-text);
   cursor: pointer;
-  transition: color 0.15s, background-color 0.15s;
-  border-bottom: 1px solid var(--sidebar-border);
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+  font-size: 0.75rem;
 }
 
 .collapse-toggle:hover {
   color: var(--sidebar-text-active);
   background: var(--sidebar-hover-bg);
+  border-color: var(--sidebar-text);
+}
+
+.sidebar.collapsed .collapse-toggle {
+  display: none;
 }
 
 .sidebar-nav {

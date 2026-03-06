@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import Chart from 'primevue/chart'
 
 const props = defineProps<{
@@ -11,18 +11,28 @@ const props = defineProps<{
   color?: string
 }>()
 
-const iconColor = computed(() => props.color ?? 'var(--color-primary)')
+const resolvedColor = ref('#3B82F6')
+
+onMounted(() => {
+  const c = props.color ?? 'var(--color-primary)'
+  if (c.startsWith('var(--')) {
+    const varName = c.slice(4, -1)
+    resolvedColor.value =
+      getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#3B82F6'
+  } else {
+    resolvedColor.value = c
+  }
+})
 
 const sparklineData = computed(() => {
   if (!props.trend || props.trend.length === 0) return null
-  const borderColor = props.color ?? 'var(--color-primary)'
   return {
     labels: props.trend.map((_, i) => String(i)),
     datasets: [
       {
         data: props.trend,
-        borderColor,
-        backgroundColor: borderColor + '1a',
+        borderColor: resolvedColor.value,
+        backgroundColor: resolvedColor.value + '1a',
         borderWidth: 2,
         fill: true,
         tension: 0.4,
@@ -50,8 +60,8 @@ const sparklineOptions = {
 <template>
   <div class="kpi-card">
     <div class="kpi-header">
-      <div class="kpi-icon-wrap" :style="{ backgroundColor: iconColor + '1a' }">
-        <i :class="icon" :style="{ color: iconColor }" />
+      <div class="kpi-icon-wrap" :style="{ backgroundColor: resolvedColor + '1a' }">
+        <i :class="icon" :style="{ color: resolvedColor }" />
       </div>
       <span class="kpi-label">{{ label }}</span>
     </div>
