@@ -297,7 +297,11 @@ Plans:
   2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
   3. Postman collection is auto-generated and downloadable from /api/docs
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
+- [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
+- [ ] 15-03-PLAN.md — TaskManager, Workflow, Notification, Audit controller OA annotations + final validation
 
 ### Phase 16: Product Documentation
 **Goal**: Comprehensive product documentation accessible to all roles — users, admins, testers, support — with structured knowledge base that serves as foundation for future AI Assistant (v3.0)
@@ -308,7 +312,11 @@ Plans:
   2. Admin Guide documents system configuration: organization setup, employee management, process designer, permissions, impersonation, notification preferences
   3. Searchable Help Center page in the app with quick navigation, category grouping, and full-text search across all documentation
   4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
+- [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
+- [ ] 15-03-PLAN.md — TaskManager, Workflow, Notification, Audit controller OA annotations + final validation
 
 ## Progress
 
@@ -334,7 +342,7 @@ Plans:
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
-| 15. API Documentation | v2.0 | 0/TBD | Not started | - |
+| 15. API Documentation | v2.0 | 0/3 | Planning | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---
