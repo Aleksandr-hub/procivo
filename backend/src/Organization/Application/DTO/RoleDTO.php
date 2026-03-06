@@ -28,7 +28,7 @@ final readonly class RoleDTO
         public int $hierarchy,
         #[OA\Property(description: 'Creation timestamp', format: 'date-time')]
         public string $createdAt,
-        #[OA\Property(description: 'Associated permissions', type: 'array', items: new OA\Items(ref: '#/components/schemas/PermissionDTO'))]
+        #[OA\Property(description: 'Associated permissions', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: PermissionDTO::class)))]
         public array $permissions = [],
     ) {
     }

@@ -13,11 +13,14 @@ use App\TaskManager\Application\Command\DeleteComment\DeleteCommentCommand;
 use App\TaskManager\Application\Command\UpdateComment\UpdateCommentCommand;
 use App\TaskManager\Application\Query\ListComments\ListCommentsQuery;
 use App\TaskManager\Domain\ValueObject\CommentId;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Comments')]
 #[Route('/api/v1/organizations/{organizationId}/tasks/{taskId}/comments', name: 'api_v1_comments_')]
 final readonly class CommentController
 {
@@ -29,6 +32,10 @@ final readonly class CommentController
     ) {
     }
 
+    #[OA\Get(summary: 'List comments on a task')]
+    #[OA\Response(response: 200, description: 'Comment list', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: \App\TaskManager\Application\DTO\CommentDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId, string $taskId): JsonResponse
     {
@@ -39,6 +46,22 @@ final readonly class CommentController
         return new JsonResponse($comments);
     }
 
+    #[OA\Post(
+        summary: 'Add comment to task',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['body'],
+                properties: [
+                    new OA\Property(property: 'body', type: 'string'),
+                    new OA\Property(property: 'parent_id', type: 'string', format: 'uuid', nullable: true, description: 'Parent comment ID for threading'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Comment created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -59,6 +82,20 @@ final readonly class CommentController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Put(
+        summary: 'Update a comment',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['body'],
+                properties: [new OA\Property(property: 'body', type: 'string')],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'commentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Comment updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{commentId}', name: 'update', methods: ['PUT'])]
     public function update(string $organizationId, string $taskId, string $commentId, Request $request): JsonResponse
     {
@@ -73,6 +110,11 @@ final readonly class CommentController
         return new JsonResponse(['message' => 'Comment updated.']);
     }
 
+    #[OA\Delete(summary: 'Delete a comment')]
+    #[OA\Parameter(name: 'commentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Comment deleted', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{commentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $organizationId, string $taskId, string $commentId): JsonResponse
     {

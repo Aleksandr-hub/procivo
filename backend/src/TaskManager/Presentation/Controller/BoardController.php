@@ -19,11 +19,14 @@ use App\TaskManager\Application\Query\GetProcessBoardData\GetProcessBoardDataQue
 use App\TaskManager\Application\Query\ListBoards\ListBoardsQuery;
 use App\TaskManager\Domain\ValueObject\BoardId;
 use App\TaskManager\Domain\ValueObject\ColumnId;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Boards')]
 #[Route('/api/v1/organizations/{organizationId}/boards', name: 'api_v1_boards_')]
 final readonly class BoardController
 {
@@ -34,6 +37,22 @@ final readonly class BoardController
     ) {
     }
 
+    #[OA\Post(
+        summary: 'Create a kanban board',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Board created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(string $organizationId, Request $request): JsonResponse
     {
@@ -52,6 +71,22 @@ final readonly class BoardController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Post(
+        summary: 'Create a process board linked to a workflow definition',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'process_definition_id'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'process_definition_id', type: 'string', format: 'uuid'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Process board created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/process', name: 'create_process_board', methods: ['POST'])]
     public function createProcessBoard(string $organizationId, Request $request): JsonResponse
     {
@@ -72,6 +107,10 @@ final readonly class BoardController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Get(summary: 'List boards in organization')]
+    #[OA\Response(response: 200, description: 'Board list', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: \App\TaskManager\Application\DTO\BoardDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId): JsonResponse
     {
@@ -82,6 +121,12 @@ final readonly class BoardController
         return new JsonResponse($boards);
     }
 
+    #[OA\Get(summary: 'Get board with columns')]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Board details', content: new OA\JsonContent(ref: new Model(type: \App\TaskManager\Application\DTO\BoardDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
+    #[OA\Response(response: 404, description: 'Board not found')]
     #[Route('/{boardId}', name: 'show', methods: ['GET'])]
     public function show(string $organizationId, string $boardId): JsonResponse
     {
@@ -92,6 +137,11 @@ final readonly class BoardController
         return new JsonResponse($board);
     }
 
+    #[OA\Get(summary: 'Get process board data with instances and metrics')]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Process board data', content: new OA\JsonContent(ref: new Model(type: \App\TaskManager\Application\DTO\ProcessBoardDataDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}/process-data', name: 'process_data', methods: ['GET'])]
     public function processData(string $organizationId, string $boardId): JsonResponse
     {
@@ -102,6 +152,23 @@ final readonly class BoardController
         return new JsonResponse($data);
     }
 
+    #[OA\Put(
+        summary: 'Update board',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Board updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}', name: 'update', methods: ['PUT'])]
     public function update(string $organizationId, string $boardId, Request $request): JsonResponse
     {
@@ -117,6 +184,11 @@ final readonly class BoardController
         return new JsonResponse(['message' => 'Board updated.']);
     }
 
+    #[OA\Delete(summary: 'Delete board')]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Board deleted', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $organizationId, string $boardId): JsonResponse
     {
@@ -127,6 +199,25 @@ final readonly class BoardController
         return new JsonResponse(['message' => 'Board deleted.']);
     }
 
+    #[OA\Post(
+        summary: 'Add column to board',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'status_mapping', type: 'string', nullable: true),
+                    new OA\Property(property: 'wip_limit', type: 'integer', nullable: true),
+                    new OA\Property(property: 'color', type: 'string', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 201, description: 'Column added', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}/columns', name: 'add_column', methods: ['POST'])]
     public function addColumn(string $organizationId, string $boardId, Request $request): JsonResponse
     {
@@ -147,6 +238,24 @@ final readonly class BoardController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Put(
+        summary: 'Update board column',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'name', type: 'string'),
+                new OA\Property(property: 'position', type: 'integer'),
+                new OA\Property(property: 'status_mapping', type: 'string', nullable: true),
+                new OA\Property(property: 'wip_limit', type: 'integer', nullable: true),
+                new OA\Property(property: 'color', type: 'string', nullable: true),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'columnId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Column updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}/columns/{columnId}', name: 'update_column', methods: ['PUT'])]
     public function updateColumn(string $organizationId, string $boardId, string $columnId, Request $request): JsonResponse
     {
@@ -165,6 +274,12 @@ final readonly class BoardController
         return new JsonResponse(['message' => 'Column updated.']);
     }
 
+    #[OA\Delete(summary: 'Delete board column')]
+    #[OA\Parameter(name: 'boardId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'columnId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Column deleted', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{boardId}/columns/{columnId}', name: 'delete_column', methods: ['DELETE'])]
     public function deleteColumn(string $organizationId, string $boardId, string $columnId): JsonResponse
     {

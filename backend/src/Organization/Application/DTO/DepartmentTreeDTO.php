@@ -30,7 +30,7 @@ final readonly class DepartmentTreeDTO implements \JsonSerializable
         public int $level,
         #[OA\Property(description: 'Department status', enum: ['active', 'archived'])]
         public string $status,
-        #[OA\Property(description: 'Child departments', type: 'array', items: new OA\Items(ref: '#/components/schemas/DepartmentTreeDTO'))]
+        #[OA\Property(description: 'Child departments', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: DepartmentTreeDTO::class)))]
         public array $children,
     ) {
     }

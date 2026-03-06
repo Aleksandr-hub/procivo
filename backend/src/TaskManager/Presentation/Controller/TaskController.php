@@ -23,11 +23,14 @@ use App\Workflow\Application\Command\ExecuteTaskAction\ExecuteTaskActionCommand;
 use App\Workflow\Application\DTO\TaskWorkflowSummaryDTO;
 use App\Workflow\Application\Query\BatchTaskWorkflowSummary\BatchTaskWorkflowSummaryQuery;
 use App\Workflow\Application\Query\GetTaskWorkflowContext\GetTaskWorkflowContextQuery;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Tasks')]
 #[Route('/api/v1/organizations/{organizationId}/tasks', name: 'api_v1_tasks_')]
 final readonly class TaskController
 {
@@ -39,6 +42,31 @@ final readonly class TaskController
     ) {
     }
 
+    #[OA\Post(
+        summary: 'Create a new task',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['title', 'creator_id'],
+                properties: [
+                    new OA\Property(property: 'title', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'priority', type: 'string', enum: ['low', 'medium', 'high', 'urgent']),
+                    new OA\Property(property: 'due_date', type: 'string', format: 'date-time', nullable: true),
+                    new OA\Property(property: 'estimated_hours', type: 'number', format: 'float', nullable: true),
+                    new OA\Property(property: 'creator_id', type: 'string', format: 'uuid'),
+                    new OA\Property(property: 'assignee_id', type: 'string', format: 'uuid', nullable: true),
+                    new OA\Property(property: 'assignment_strategy', type: 'string', enum: ['unassigned', 'direct', 'role_based', 'department_based', 'pool']),
+                    new OA\Property(property: 'assignee_employee_id', type: 'string', format: 'uuid', nullable: true),
+                    new OA\Property(property: 'assignee_role_id', type: 'string', format: 'uuid', nullable: true),
+                    new OA\Property(property: 'assignee_department_id', type: 'string', format: 'uuid', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'Task created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(string $organizationId, Request $request): JsonResponse
     {
@@ -66,6 +94,17 @@ final readonly class TaskController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Get(
+        summary: 'List tasks in organization',
+        parameters: [
+            new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['open', 'in_progress', 'done', 'cancelled'])),
+            new OA\Parameter(name: 'assignee_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'candidate_employee_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
+        ],
+    )]
+    #[OA\Response(response: 200, description: 'Task list', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: TaskDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId, Request $request): JsonResponse
     {
@@ -99,6 +138,12 @@ final readonly class TaskController
         return new JsonResponse($result);
     }
 
+    #[OA\Get(summary: 'Get task details with workflow context')]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Task details', content: new OA\JsonContent(ref: new Model(type: TaskDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
+    #[OA\Response(response: 404, description: 'Task not found')]
     #[Route('/{taskId}', name: 'show', methods: ['GET'])]
     public function show(string $organizationId, string $taskId): JsonResponse
     {
@@ -124,6 +169,23 @@ final readonly class TaskController
         return new JsonResponse($taskData);
     }
 
+    #[OA\Post(
+        summary: 'Execute a workflow action on a task',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['action_key'],
+                properties: [
+                    new OA\Property(property: 'action_key', type: 'string', description: 'Transition action key'),
+                    new OA\Property(property: 'form_data', type: 'object', description: 'Form data for the action', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Action executed', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}/complete', name: 'complete', methods: ['POST'])]
     public function complete(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -144,6 +206,26 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task completed.']);
     }
 
+    #[OA\Put(
+        summary: 'Update task details',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['title'],
+                properties: [
+                    new OA\Property(property: 'title', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'priority', type: 'string', enum: ['low', 'medium', 'high', 'urgent']),
+                    new OA\Property(property: 'due_date', type: 'string', format: 'date-time', nullable: true),
+                    new OA\Property(property: 'estimated_hours', type: 'number', format: 'float', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Task updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}', name: 'update', methods: ['PUT'])]
     public function update(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -162,6 +244,22 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task updated.']);
     }
 
+    #[OA\Post(
+        summary: 'Transition task status (Symfony Workflow)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['transition'],
+                properties: [
+                    new OA\Property(property: 'transition', type: 'string', description: 'Workflow transition name'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Status updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}/transition', name: 'transition', methods: ['POST'])]
     public function transition(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -177,6 +275,19 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task status updated.']);
     }
 
+    #[OA\Put(
+        summary: 'Assign task to a user',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'assignee_id', type: 'string', format: 'uuid', nullable: true),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Assignee updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}/assign', name: 'assign', methods: ['PUT'])]
     public function assign(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -192,6 +303,19 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task assignee updated.']);
     }
 
+    #[OA\Post(
+        summary: 'Claim a pool task',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'employee_id', type: 'string', format: 'uuid'),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Task claimed', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}/claim', name: 'claim', methods: ['POST'])]
     public function claim(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -207,6 +331,19 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task claimed.']);
     }
 
+    #[OA\Post(
+        summary: 'Return a claimed task to the pool',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'employee_id', type: 'string', format: 'uuid'),
+            ]),
+        ),
+    )]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Task returned to queue', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}/unclaim', name: 'unclaim', methods: ['POST'])]
     public function unclaim(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -222,6 +359,11 @@ final readonly class TaskController
         return new JsonResponse(['message' => 'Task returned to queue.']);
     }
 
+    #[OA\Delete(summary: 'Delete a task')]
+    #[OA\Parameter(name: 'taskId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 204, description: 'Task deleted')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{taskId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $organizationId, string $taskId): JsonResponse
     {

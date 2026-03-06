@@ -12,11 +12,14 @@ use App\TaskManager\Application\Command\DeleteAttachment\DeleteAttachmentCommand
 use App\TaskManager\Application\Command\UploadAttachment\UploadAttachmentCommand;
 use App\TaskManager\Application\Query\ListAttachments\ListAttachmentsQuery;
 use App\TaskManager\Domain\ValueObject\AttachmentId;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Attachments')]
 #[Route('/api/v1/organizations/{organizationId}/tasks/{taskId}/attachments', name: 'api_v1_attachments_')]
 final readonly class AttachmentController
 {
@@ -30,6 +33,10 @@ final readonly class AttachmentController
     ) {
     }
 
+    #[OA\Get(summary: 'List attachments on a task')]
+    #[OA\Response(response: 200, description: 'Attachment list', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: \App\TaskManager\Application\DTO\TaskAttachmentDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId, string $taskId): JsonResponse
     {
@@ -40,6 +47,25 @@ final readonly class AttachmentController
         return new JsonResponse($attachments);
     }
 
+    #[OA\Post(
+        summary: 'Upload file attachment',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'multipart/form-data',
+                schema: new OA\Schema(
+                    required: ['file'],
+                    properties: [
+                        new OA\Property(property: 'file', type: 'string', format: 'binary', description: 'File to upload (max 20MB)'),
+                    ],
+                ),
+            ),
+        ),
+    )]
+    #[OA\Response(response: 201, description: 'File uploaded', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 400, description: 'No file or file too large')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'upload', methods: ['POST'])]
     public function upload(string $organizationId, string $taskId, Request $request): JsonResponse
     {
@@ -76,6 +102,11 @@ final readonly class AttachmentController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Delete(summary: 'Delete an attachment')]
+    #[OA\Parameter(name: 'attachmentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Attachment deleted', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{attachmentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $organizationId, string $taskId, string $attachmentId): JsonResponse
     {

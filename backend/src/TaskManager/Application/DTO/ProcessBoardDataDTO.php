@@ -74,7 +74,7 @@ final readonly class ProcessBoardDataDTO implements \JsonSerializable
      * @param list<ProcessBoardInstanceDTO> $instances
      */
     public function __construct(
-        #[OA\Property(description: 'Process instances', type: 'array', items: new OA\Items(ref: '#/components/schemas/ProcessBoardInstanceDTO'))]
+        #[OA\Property(description: 'Process instances', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: ProcessBoardInstanceDTO::class)))]
         public array $instances,
         #[OA\Property(description: 'Aggregate metrics')]
         public ProcessBoardMetricsDTO $metrics,

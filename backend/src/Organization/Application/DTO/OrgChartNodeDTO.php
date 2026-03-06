@@ -34,7 +34,7 @@ final readonly class OrgChartNodeDTO implements \JsonSerializable
         public ?bool $isHead = null,
         #[OA\Property(description: 'Manager employee UUID (for person nodes)', format: 'uuid', nullable: true)]
         public ?string $managerId = null,
-        #[OA\Property(description: 'Child nodes', type: 'array', items: new OA\Items(ref: '#/components/schemas/OrgChartNodeDTO'))]
+        #[OA\Property(description: 'Child nodes', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: OrgChartNodeDTO::class)))]
         public array $children = [],
     ) {
     }

@@ -16,9 +16,9 @@ final readonly class ProcessDefinitionDetailDTO implements \JsonSerializable
     public function __construct(
         #[OA\Property(description: 'Process definition')]
         public ProcessDefinitionDTO $definition,
-        #[OA\Property(description: 'Workflow nodes', type: 'array', items: new OA\Items(ref: '#/components/schemas/NodeDTO'))]
+        #[OA\Property(description: 'Workflow nodes', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: NodeDTO::class)))]
         public array $nodes,
-        #[OA\Property(description: 'Workflow transitions', type: 'array', items: new OA\Items(ref: '#/components/schemas/TransitionDTO'))]
+        #[OA\Property(description: 'Workflow transitions', type: 'array', items: new OA\Items(ref: new \Nelmio\ApiDocBundle\Attribute\Model(type: TransitionDTO::class)))]
         public array $transitions,
     ) {
     }

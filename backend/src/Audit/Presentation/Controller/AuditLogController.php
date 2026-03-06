@@ -7,10 +7,13 @@ namespace App\Audit\Presentation\Controller;
 use App\Audit\Application\Query\ListAuditLog\ListAuditLogQuery;
 use App\Organization\Presentation\Security\OrganizationAuthorizer;
 use App\Shared\Application\Bus\QueryBusInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Audit')]
 #[Route('/api/v1/organizations/{organizationId}/audit-log', name: 'api_v1_audit_log_')]
 final readonly class AuditLogController
 {
@@ -20,6 +23,28 @@ final readonly class AuditLogController
     ) {
     }
 
+    #[OA\Get(
+        summary: 'List audit log entries',
+        parameters: [
+            new OA\Parameter(name: 'entity_type', in: 'query', required: false, schema: new OA\Schema(type: 'string'), description: 'Filter by entity type (e.g. task, process)'),
+            new OA\Parameter(name: 'entity_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'actor_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
+            new OA\Parameter(name: 'date_from', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date-time')),
+            new OA\Parameter(name: 'date_to', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'date-time')),
+            new OA\Parameter(name: 'page', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 1)),
+            new OA\Parameter(name: 'limit', in: 'query', required: false, schema: new OA\Schema(type: 'integer', default: 50, maximum: 100)),
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Paginated audit log',
+        content: new OA\JsonContent(properties: [
+            new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: new Model(type: \App\Audit\Application\DTO\AuditLogDTO::class))),
+            new OA\Property(property: 'total', type: 'integer'),
+        ]),
+    )]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(string $organizationId, Request $request): JsonResponse
     {
