@@ -10,7 +10,6 @@ import { useDashboardStore } from '@/modules/dashboard/stores/dashboard.store'
 import KpiCard from '@/modules/dashboard/components/KpiCard.vue'
 import MyTasksWidget from '@/modules/dashboard/components/MyTasksWidget.vue'
 import ChartsWidget from '@/modules/dashboard/components/ChartsWidget.vue'
-import RecentActivityWidget from '@/modules/dashboard/components/RecentActivityWidget.vue'
 import UpcomingDeadlinesWidget from '@/modules/dashboard/components/UpcomingDeadlinesWidget.vue'
 
 const route = useRoute()
@@ -109,20 +108,12 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Row 2: Charts (span-8) + Team Activity (span-4) -->
-      <Card class="span-8 bento-card">
+      <!-- Row 2: Charts (full width) -->
+      <Card class="span-12 bento-card">
         <template #title>{{ t('dashboard.charts') }}</template>
         <template #content>
           <Skeleton v-if="dashboardStore.loading" height="300px" />
           <ChartsWidget v-else :stats="dashboardStore.stats" />
-        </template>
-      </Card>
-
-      <Card class="span-4 bento-card">
-        <template #title>{{ t('dashboard.teamActivity') }}</template>
-        <template #content>
-          <Skeleton v-if="dashboardStore.loading" height="300px" />
-          <RecentActivityWidget v-else :org-id="orgId" />
         </template>
       </Card>
 
@@ -161,16 +152,12 @@ onMounted(() => {
   grid-column: span 3;
 }
 
-.span-4 {
-  grid-column: span 4;
-}
-
 .span-6 {
   grid-column: span 6;
 }
 
-.span-8 {
-  grid-column: span 8;
+.span-12 {
+  grid-column: span 12;
 }
 
 .bento-card {
@@ -197,10 +184,6 @@ onMounted(() => {
     grid-column: span 6;
   }
 
-  .span-8,
-  .span-4 {
-    grid-column: span 12;
-  }
 }
 
 @media (max-width: 768px) {
@@ -209,9 +192,8 @@ onMounted(() => {
   }
 
   .span-3,
-  .span-4,
   .span-6,
-  .span-8 {
+  .span-12 {
     grid-column: span 1;
   }
 }
