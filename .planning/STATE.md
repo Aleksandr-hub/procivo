@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 15 (API Documentation)
-Plan: 4 of 4 (completed, 15-04: API Versioning Strategy)
-Status: Complete
-Last activity: 2026-03-06 — Completed 15-04: API Versioning Strategy
+Phase: 16 (Product Documentation)
+Plan: 1 of 3 (completed, 16-01: Help Center Infrastructure)
+Status: In Progress
+Last activity: 2026-03-06 — Completed 16-01: Help Center Infrastructure
 
-Progress: [████████████] Phase 15 — 4/4 plans complete
+Progress: [████░░░░░░░░] Phase 16 — 1/3 plans complete
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Progress: [████████████] Phase 15 — 4/4 plans complete
 | Phase 15-api-documentation P03 | 15 | 2 tasks | 15 files |
 | Phase 15-api-documentation P02 | 12 | 2 tasks | 15 files |
 | Phase 15-api-documentation P04 | 1 | 1 tasks | 2 files |
+| Phase 16-product-documentation P01 | 6 | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -201,6 +202,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 15-02]: UserController only has search endpoint — profile/avatar are in AuthController under /auth/me route prefix
 - [Phase 15-03]: Model() ref instead of hardcoded #/components/schemas/ strings in DTO cross-references -- fixes NelmioApiDocBundle schema resolution warnings
 - [Phase 15-api-documentation]: URL-based versioning (/api/v1/) documented as formal convention with Sunset header deprecation process
+- [Phase 16-product-documentation]: Custom Vite plugin replaces vite-plugin-markdown (outdated deps); @docs alias for cross-directory glob from frontend/ to repo root docs/
+- [Phase 16-product-documentation]: MiniSearch with boost weights (title x3, keywords x2, description x1.5), fuzzy 0.2, prefix search enabled
 
 ### Pending Todos
 
@@ -218,6 +221,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 15-04-PLAN.md — Phase 15 (API Documentation) fully complete (4/4 plans)
+Stopped at: Completed 16-01-PLAN.md — Help Center infrastructure (1/3 plans)
 Resume file: None
-Next action: Phase 15 complete with versioning gap closure. All API documentation done. Next milestone planning needed.
+Next action: Execute 16-02-PLAN.md (User Guide Articles)
