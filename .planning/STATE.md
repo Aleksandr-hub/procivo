@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 14.1 (UI Refresh — Figma Design System Adaptation)
-Plan: 2 of 3 (completed, 14.1-02: Bento Grid Dashboard with KPI Counters)
-Status: In Progress
-Last activity: 2026-03-06 — Completed 14.1-02: Bento Grid Dashboard
+Plan: 3 of 3 (completed, 14.1-03: Task Board Visual Polish)
+Status: Complete
+Last activity: 2026-03-06 — Completed 14.1-03: Task Board Visual Polish
 
-Progress: [████████░░░░] Phase 14.1 — 2/3 plans complete
+Progress: [████████████] Phase 14.1 — 3/3 plans complete
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [████████░░░░] Phase 14.1 — 2/3 plans comple
 | Phase 14 P05 | 5 | 2 tasks | 12 files |
 | Phase 14.1 P01 | 3 | 2 tasks | 7 files |
 | Phase 14.1 P02 | 6 | 2 tasks | 6 files |
+| Phase 14.1 P03 | 7 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -188,6 +189,8 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 14.1]: KPI card sparkline uses PrimeVue Chart (Chart.js) with hidden axes/legend/tooltip — filled area line at 40px height
 - [Phase 14.1]: ActiveProcessesWidget replaced by KPI counter card in bento layout — full list widget no longer imported
 - [Phase 14.1]: Completion rate computed client-side from tasks_by_status (done / total * 100) — no new API endpoint
+- [Phase 14.1-03]: onAddTask navigates to tasks list — no task-create route exists yet
+- [Phase 14.1-03]: Label chips limited to 3 with +N overflow for card space conservation
 
 ### Pending Todos
 
@@ -205,6 +208,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 14.1-02-PLAN.md — Bento Grid Dashboard with KPI Counters
+Stopped at: Completed 14.1-03-PLAN.md — Task Board Visual Polish (Phase 14.1 complete)
 Resume file: None
-Next action: Execute 14.1-03-PLAN.md (Task Board Polish)
+Next action: /gsd:new-milestone to plan next milestone

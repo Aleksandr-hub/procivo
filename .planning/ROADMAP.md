@@ -281,7 +281,7 @@ Plans:
 
 **Goal:** Frontend matches modern Figma design — collapsible sidebar, bento dashboard with KPI counters, design token CSS variables, task board visual polish, topbar with page title
 **Depends on:** Phase 14
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [ ] 14.1-01-PLAN.md — Design tokens + collapsible sidebar + topbar page title
@@ -333,7 +333,7 @@ Plans:
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
-| 14.1 UI Refresh | 2/3 | In Progress|  | - |
+| 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
