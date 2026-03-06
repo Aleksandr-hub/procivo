@@ -8,17 +8,22 @@ use App\Organization\Application\Command\CreateDepartment\CreateDepartmentComman
 use App\Organization\Application\Command\DeleteDepartment\DeleteDepartmentCommand;
 use App\Organization\Application\Command\MoveDepartment\MoveDepartmentCommand;
 use App\Organization\Application\Command\UpdateDepartment\UpdateDepartmentCommand;
+use App\Organization\Application\DTO\DepartmentDTO;
+use App\Organization\Application\DTO\DepartmentTreeDTO;
 use App\Organization\Application\Query\GetDepartment\GetDepartmentQuery;
 use App\Organization\Application\Query\GetDepartmentTree\GetDepartmentTreeQuery;
 use App\Organization\Domain\ValueObject\DepartmentId;
 use App\Organization\Presentation\Security\OrganizationAuthorizer;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Departments')]
 #[Route('/api/v1/organizations/{organizationId}/departments', name: 'api_v1_departments_')]
 final readonly class DepartmentController
 {
@@ -29,6 +34,26 @@ final readonly class DepartmentController
     ) {
     }
 
+    #[OA\Post(
+        summary: 'Create a department',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name', 'code'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'code', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'parent_id', type: 'string', format: 'uuid', nullable: true),
+                    new OA\Property(property: 'sort_order', type: 'integer', default: 0),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 201, description: 'Department created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(string $organizationId, Request $request): JsonResponse
     {
@@ -50,6 +75,11 @@ final readonly class DepartmentController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Get(summary: 'Get department tree')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Department tree', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: DepartmentTreeDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/tree', name: 'tree', methods: ['GET'])]
     public function tree(string $organizationId): JsonResponse
     {
@@ -60,6 +90,12 @@ final readonly class DepartmentController
         return new JsonResponse($tree);
     }
 
+    #[OA\Get(summary: 'Get department by ID')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'departmentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Department details', content: new OA\JsonContent(ref: new Model(type: DepartmentDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{departmentId}', name: 'show', methods: ['GET'])]
     public function show(string $organizationId, string $departmentId): JsonResponse
     {
@@ -70,6 +106,25 @@ final readonly class DepartmentController
         return new JsonResponse($dto);
     }
 
+    #[OA\Put(
+        summary: 'Update department',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'sort_order', type: 'integer', default: 0),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'departmentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Department updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{departmentId}', name: 'update', methods: ['PUT'])]
     public function update(string $organizationId, string $departmentId, Request $request): JsonResponse
     {
@@ -86,6 +141,22 @@ final readonly class DepartmentController
         return new JsonResponse(['message' => 'Department updated.']);
     }
 
+    #[OA\Post(
+        summary: 'Move department to a new parent',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'new_parent_id', type: 'string', format: 'uuid', nullable: true),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'departmentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Department moved', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{departmentId}/move', name: 'move', methods: ['POST'])]
     public function move(string $organizationId, string $departmentId, Request $request): JsonResponse
     {
@@ -100,6 +171,12 @@ final readonly class DepartmentController
         return new JsonResponse(['message' => 'Department moved.']);
     }
 
+    #[OA\Delete(summary: 'Delete department')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'departmentId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 204, description: 'Department deleted')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/{departmentId}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $organizationId, string $departmentId): JsonResponse
     {

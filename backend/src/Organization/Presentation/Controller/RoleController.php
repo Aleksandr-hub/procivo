@@ -12,6 +12,8 @@ use App\Organization\Application\Command\GrantPermission\GrantPermissionCommand;
 use App\Organization\Application\Command\RevokePermission\RevokePermissionCommand;
 use App\Organization\Application\Command\RevokeRole\RevokeRoleCommand;
 use App\Organization\Application\Command\UpdateRole\UpdateRoleCommand;
+use App\Organization\Application\DTO\PermissionDTO;
+use App\Organization\Application\DTO\RoleDTO;
 use App\Organization\Application\Query\GetEmployeeRoles\GetEmployeeRolesQuery;
 use App\Organization\Application\Query\GetMyPermissions\GetMyPermissionsQuery;
 use App\Organization\Application\Query\GetRole\GetRoleQuery;
@@ -21,6 +23,8 @@ use App\Organization\Domain\ValueObject\RoleId;
 use App\Organization\Presentation\Security\OrganizationAuthorizer;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +32,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[OA\Tag(name: 'Roles')]
 #[Route('/api/v1/organizations/{organizationId}', name: 'api_v1_org_')]
 final readonly class RoleController
 {
@@ -39,6 +44,11 @@ final readonly class RoleController
     ) {
     }
 
+    #[OA\Get(summary: 'List roles in organization')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Role list', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: RoleDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles', name: 'roles_list', methods: ['GET'])]
     public function listRoles(string $organizationId): JsonResponse
     {
@@ -49,6 +59,12 @@ final readonly class RoleController
         return new JsonResponse($roles);
     }
 
+    #[OA\Get(summary: 'Get role by ID')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Role details', content: new OA\JsonContent(ref: new Model(type: RoleDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles/{roleId}', name: 'roles_show', methods: ['GET'])]
     public function showRole(string $organizationId, string $roleId): JsonResponse
     {
@@ -59,6 +75,24 @@ final readonly class RoleController
         return new JsonResponse($role);
     }
 
+    #[OA\Post(
+        summary: 'Create a role',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'hierarchy', type: 'integer', default: 100),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 201, description: 'Role created', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles', name: 'roles_create', methods: ['POST'])]
     public function createRole(string $organizationId, Request $request): JsonResponse
     {
@@ -78,6 +112,25 @@ final readonly class RoleController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Put(
+        summary: 'Update role',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['name'],
+                properties: [
+                    new OA\Property(property: 'name', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string', nullable: true),
+                    new OA\Property(property: 'hierarchy', type: 'integer', default: 100),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Role updated', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles/{roleId}', name: 'roles_update', methods: ['PUT'])]
     public function updateRole(string $organizationId, string $roleId, Request $request): JsonResponse
     {
@@ -94,6 +147,12 @@ final readonly class RoleController
         return new JsonResponse(['message' => 'Role updated.']);
     }
 
+    #[OA\Delete(summary: 'Delete role')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 204, description: 'Role deleted')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles/{roleId}', name: 'roles_delete', methods: ['DELETE'])]
     public function deleteRole(string $organizationId, string $roleId): JsonResponse
     {
@@ -104,6 +163,25 @@ final readonly class RoleController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[OA\Post(
+        summary: 'Grant permission to role',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['resource', 'action', 'scope'],
+                properties: [
+                    new OA\Property(property: 'resource', type: 'string'),
+                    new OA\Property(property: 'action', type: 'string'),
+                    new OA\Property(property: 'scope', type: 'string'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 201, description: 'Permission granted', content: new OA\JsonContent(properties: [new OA\Property(property: 'id', type: 'string', format: 'uuid')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles/{roleId}/permissions', name: 'roles_grant_permission', methods: ['POST'])]
     public function grantPermission(string $organizationId, string $roleId, Request $request): JsonResponse
     {
@@ -124,6 +202,13 @@ final readonly class RoleController
         return new JsonResponse(['id' => $id], Response::HTTP_CREATED);
     }
 
+    #[OA\Delete(summary: 'Revoke permission from role')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'permissionId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 204, description: 'Permission revoked')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/roles/{roleId}/permissions/{permissionId}', name: 'roles_revoke_permission', methods: ['DELETE'])]
     public function revokePermission(string $organizationId, string $roleId, string $permissionId): JsonResponse
     {
@@ -134,6 +219,12 @@ final readonly class RoleController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[OA\Get(summary: 'Get roles assigned to employee')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'employeeId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Employee roles', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: RoleDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/employees/{employeeId}/roles', name: 'employee_roles_list', methods: ['GET'])]
     public function employeeRoles(string $organizationId, string $employeeId): JsonResponse
     {
@@ -144,6 +235,23 @@ final readonly class RoleController
         return new JsonResponse($roles);
     }
 
+    #[OA\Post(
+        summary: 'Assign role to employee',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['role_id'],
+                properties: [
+                    new OA\Property(property: 'role_id', type: 'string', format: 'uuid'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'employeeId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Role assigned', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/employees/{employeeId}/roles', name: 'employee_roles_assign', methods: ['POST'])]
     public function assignRole(string $organizationId, string $employeeId, Request $request): JsonResponse
     {
@@ -159,6 +267,13 @@ final readonly class RoleController
         return new JsonResponse(['message' => 'Role assigned.']);
     }
 
+    #[OA\Delete(summary: 'Revoke role from employee')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'employeeId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Parameter(name: 'roleId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 204, description: 'Role revoked')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/employees/{employeeId}/roles/{roleId}', name: 'employee_roles_revoke', methods: ['DELETE'])]
     public function revokeRole(string $organizationId, string $employeeId, string $roleId): JsonResponse
     {
@@ -172,6 +287,11 @@ final readonly class RoleController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[OA\Get(summary: 'Get current user effective permissions in organization')]
+    #[OA\Parameter(name: 'organizationId', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Effective permissions', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: new Model(type: PermissionDTO::class))))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Forbidden')]
     #[Route('/my-permissions', name: 'my_permissions', methods: ['GET'])]
     public function myPermissions(string $organizationId): JsonResponse
     {
