@@ -41,7 +41,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance (completed 2026-03-06)
 - [x] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete (completed 2026-03-06)
 - [x] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection (completed 2026-03-06)
-- [ ] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base
+- [x] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base (completed 2026-03-06)
 
 ## Phase Details
 
@@ -313,7 +313,7 @@ Plans:
   2. Admin Guide documents system configuration: organization setup, employee management, process designer, permissions, impersonation, notification preferences
   3. Searchable Help Center page in the app with quick navigation, category grouping, and full-text search across all documentation
   4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 16-01-PLAN.md — Help Center infrastructure (Vite markdown plugin, MiniSearch, pages, router, i18n)
 - [ ] 16-02-PLAN.md — User Guide content (~18 articles: tasks, processes, boards, notifications, dashboard, profile)
@@ -344,7 +344,7 @@ Plans:
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
 | 15. API Documentation | 4/4 | Complete    | 2026-03-06 | - |
-| 16. Product Documentation | 2/3 | In Progress|  | - |
+| 16. Product Documentation | 3/3 | Complete   | 2026-03-06 | - |
 
 ---
 

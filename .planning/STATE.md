@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-06T18:18:51.926Z"
+last_updated: "2026-03-06T18:20:15.986Z"
 progress:
   total_phases: 17
-  completed_phases: 16
+  completed_phases: 17
   total_plans: 48
-  completed_plans: 47
+  completed_plans: 48
 ---
 
 # Project State
@@ -91,6 +91,7 @@ Progress: [████████████] Phase 16 — 3/3 plans complete
 | Phase 15-api-documentation P04 | 1 | 1 tasks | 2 files |
 | Phase 16-product-documentation P01 | 6 | 2 tasks | 18 files |
 | Phase 16-product-documentation P03 | 6 | 2 tasks | 15 files |
+| Phase 16 P02 | 6 | 2 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -205,6 +206,7 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 15-api-documentation]: URL-based versioning (/api/v1/) documented as formal convention with Sunset header deprecation process
 - [Phase 16-product-documentation]: Custom Vite plugin replaces vite-plugin-markdown (outdated deps); @docs alias for cross-directory glob from frontend/ to repo root docs/
 - [Phase 16-product-documentation]: MiniSearch with boost weights (title x3, keywords x2, description x1.5), fuzzy 0.2, prefix search enabled
+- [Phase 16]: User Guide: 20 articles in Ukrainian with standardized Ohliad/Kroky/Porady/Poviazani statti structure for RAG parsing
 
 ### Pending Todos
 
