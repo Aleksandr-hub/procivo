@@ -2,7 +2,7 @@ nelmio_api_doc:
     documentation:
         info:
             title: 'Procivo BPM Platform API'
-            description: 'REST API for Procivo — a modular BPM platform with workflow engine, task management, and organization management.'
+            description: "REST API for Procivo — a modular BPM platform with workflow engine, task management, and organization management.\nAll endpoints use URL-based versioning under /api/v1/. See docs/api-versioning.md for the versioning strategy and migration guide."
             version: '1.0.0'
         servers:
             - url: 'http://localhost:8080'
