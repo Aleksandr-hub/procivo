@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Identity\Domain\Entity;
 
 use App\Identity\Domain\Event\PasswordChangedEvent;
+use App\Identity\Domain\Event\TwoFactorDisabledEvent;
+use App\Identity\Domain\Event\TwoFactorEnabledEvent;
 use App\Identity\Domain\Event\UserActivatedEvent;
 use App\Identity\Domain\Event\UserRegisteredEvent;
 use App\Identity\Domain\ValueObject\HashedPassword;
@@ -34,6 +36,10 @@ class User extends AggregateRoot implements SoftDeletableInterface
     private \DateTimeImmutable $createdAt;
     private ?\DateTimeImmutable $updatedAt;
     private ?string $avatarPath = null;
+    private ?string $totpSecret = null;
+    private bool $totpEnabled = false;
+    /** @var list<string>|null */
+    private ?array $backupCodes = null;
 
     private function __construct()
     {
@@ -174,5 +180,72 @@ class User extends AggregateRoot implements SoftDeletableInterface
             $this->roles = array_values(array_unique($this->roles));
             $this->updatedAt = new \DateTimeImmutable();
         }
+    }
+
+    /**
+     * @param list<string> $hashedBackupCodes
+     */
+    public function enableTotp(string $encryptedSecret, array $hashedBackupCodes): void
+    {
+        $this->totpSecret = $encryptedSecret;
+        $this->backupCodes = $hashedBackupCodes;
+        $this->totpEnabled = true;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TwoFactorEnabledEvent($this->id));
+    }
+
+    public function disableTotp(): void
+    {
+        $this->totpSecret = null;
+        $this->backupCodes = null;
+        $this->totpEnabled = false;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        $this->recordEvent(new TwoFactorDisabledEvent($this->id));
+    }
+
+    public function isTotpEnabled(): bool
+    {
+        return $this->totpEnabled;
+    }
+
+    public function totpSecret(): ?string
+    {
+        return $this->totpSecret;
+    }
+
+    /**
+     * @return list<string>|null
+     */
+    public function backupCodes(): ?array
+    {
+        return $this->backupCodes;
+    }
+
+    public function consumeBackupCode(int $index): void
+    {
+        if (null === $this->backupCodes) {
+            return;
+        }
+
+        unset($this->backupCodes[$index]);
+        $this->backupCodes = array_values($this->backupCodes);
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    public function setTotpSecret(string $encryptedSecret): void
+    {
+        $this->totpSecret = $encryptedSecret;
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    /**
+     * @param list<string> $hashedCodes
+     */
+    public function setBackupCodes(array $hashedCodes): void
+    {
+        $this->backupCodes = $hashedCodes;
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

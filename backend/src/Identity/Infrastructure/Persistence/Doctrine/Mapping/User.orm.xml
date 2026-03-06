@@ -18,6 +18,13 @@
         <field name="updatedAt" type="datetime_immutable" column="updated_at" nullable="true"/>
         <field name="avatarPath" type="string" length="500" column="avatar_path" nullable="true"/>
         <field name="deletedAt" type="datetime_immutable" column="deleted_at" nullable="true"/>
+        <field name="totpSecret" type="text" column="totp_secret" nullable="true"/>
+        <field name="totpEnabled" type="boolean" column="totp_enabled">
+            <options>
+                <option name="default">false</option>
+            </options>
+        </field>
+        <field name="backupCodes" type="json" column="backup_codes" nullable="true"/>
 
     </entity>
 
