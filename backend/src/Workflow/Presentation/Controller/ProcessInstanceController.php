@@ -15,9 +15,11 @@ use App\Workflow\Application\Query\GetProcessInstanceGraph\GetProcessInstanceGra
 use App\Workflow\Application\Query\GetProcessInstanceHistory\GetProcessInstanceHistoryQuery;
 use App\Workflow\Application\Query\ListProcessInstances\ListProcessInstancesQuery;
 use App\Workflow\Domain\ValueObject\ProcessInstanceId;
+use App\Workflow\Presentation\Security\ProcessDefinitionAccessChecker;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/v1/organizations/{organizationId}/process-instances', name: 'api_v1_process_instances_')]
@@ -28,6 +30,7 @@ final readonly class ProcessInstanceController
         private QueryBusInterface $queryBus,
         private OrganizationAuthorizer $authorizer,
         private CurrentUserProviderInterface $currentUserProvider,
+        private ProcessDefinitionAccessChecker $accessChecker,
     ) {
     }
 
@@ -37,13 +40,20 @@ final readonly class ProcessInstanceController
         $this->authorizer->authorize($organizationId, 'WORKFLOW_CREATE');
         $data = $this->decodeJson($request);
 
+        $processDefinitionId = (string) ($data['process_definition_id'] ?? '');
+
+        // Check per-definition start access
+        if (!$this->accessChecker->canStartDefinition($organizationId, $processDefinitionId)) {
+            throw new AccessDeniedHttpException('You do not have permission to start this process.');
+        }
+
         /** @var array<string, mixed> $variables */
         $variables = $data['variables'] ?? [];
         $id = ProcessInstanceId::generate()->value();
 
         $this->commandBus->dispatch(new StartProcessCommand(
             id: $id,
-            processDefinitionId: (string) ($data['process_definition_id'] ?? ''),
+            processDefinitionId: $processDefinitionId,
             organizationId: $organizationId,
             startedBy: $this->currentUserProvider->getUserId(),
             variables: $variables,

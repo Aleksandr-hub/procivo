@@ -20,7 +20,9 @@ use App\Workflow\Application\Query\GetProcessDefinitionAccess\GetProcessDefiniti
 use App\Workflow\Application\Query\GetStartFormSchema\GetStartFormSchemaQuery;
 use App\Workflow\Application\Query\ListProcessDefinitions\ListProcessDefinitionsQuery;
 use App\Workflow\Application\Query\ListVersions\ListVersionsQuery;
+use App\Workflow\Domain\ValueObject\AccessType;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionId;
+use App\Workflow\Presentation\Security\ProcessDefinitionAccessChecker;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,6 +36,7 @@ final readonly class ProcessDefinitionController
         private QueryBusInterface $queryBus,
         private OrganizationAuthorizer $authorizer,
         private CurrentUserProviderInterface $currentUserProvider,
+        private ProcessDefinitionAccessChecker $accessChecker,
     ) {
     }
 
@@ -63,10 +66,21 @@ final readonly class ProcessDefinitionController
 
         $status = $request->query->getString('status');
 
+        /** @var list<\App\Workflow\Application\DTO\ProcessDefinitionDTO> $definitions */
         $definitions = $this->queryBus->ask(new ListProcessDefinitionsQuery(
             organizationId: $organizationId,
             status: '' !== $status ? $status : null,
         ));
+
+        // Filter by per-definition view access (null = owner bypass, show all)
+        $accessibleIds = $this->accessChecker->getAccessibleDefinitionIds($organizationId, AccessType::View);
+        if (null !== $accessibleIds) {
+            $accessibleIdSet = array_flip($accessibleIds);
+            $definitions = array_values(array_filter(
+                $definitions,
+                static fn ($d) => isset($accessibleIdSet[$d->id]),
+            ));
+        }
 
         return new JsonResponse($definitions);
     }
