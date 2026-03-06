@@ -277,6 +277,17 @@ Plans:
 - [ ] 14-04-PLAN.md — 2FA TOTP backend (User entity, TotpService, two-step JWT login, rate limiting)
 - [ ] 14-05-PLAN.md — 2FA frontend (TwoFactorVerifyPage, profile setup dialog, backup codes)
 
+### Phase 14.1: UI Refresh — Figma Design System Adaptation (INSERTED)
+
+**Goal:** Frontend matches modern Figma design — collapsible sidebar, bento dashboard with KPI counters, design token CSS variables, task board visual polish, topbar with page title
+**Depends on:** Phase 14
+**Plans:** 3 plans
+
+Plans:
+- [ ] 14.1-01-PLAN.md — Design tokens + collapsible sidebar + topbar page title
+- [ ] 14.1-02-PLAN.md — Bento dashboard (KPI cards, sparklines, deadlines widget, area chart)
+- [ ] 14.1-03-PLAN.md — Task Board polish (hover shadows, tag chips, column badges, add-task button)
+
 ### Phase 15: API Documentation
 **Goal**: All API endpoints are documented with OpenAPI 3.1 spec, browsable via Swagger UI, exportable as Postman collection
 **Depends on**: Phase 14 (stable API surface after security hardening)
@@ -322,6 +333,7 @@ Plans:
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
+| 14.1 UI Refresh | v2.0 | 0/3 | Not started | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
