@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppSidebar from '@/shared/components/AppSidebar.vue'
 import AppTopbar from '@/shared/components/AppTopbar.vue'
@@ -7,12 +7,13 @@ import ImpersonationBanner from '@/shared/components/ImpersonationBanner.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
 import { usePermissionStore } from '@/modules/organization/stores/permission.store'
+import { useCollapsibleSidebar } from '@/shared/composables/useCollapsibleSidebar'
 
 const route = useRoute()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
 const permissionStore = usePermissionStore()
-const sidebarVisible = ref(true)
+const { expanded } = useCollapsibleSidebar()
 
 // Initialize Mercure SSE when user is available, close on logout
 watch(
@@ -40,18 +41,14 @@ watch(
   },
   { immediate: true },
 )
-
-function toggleSidebar() {
-  sidebarVisible.value = !sidebarVisible.value
-}
 </script>
 
 <template>
   <ImpersonationBanner />
   <div class="layout-wrapper" :class="{ 'has-impersonation-banner': authStore.isImpersonating }">
-    <AppSidebar :visible="sidebarVisible" />
-    <div class="layout-content" :class="{ 'sidebar-collapsed': !sidebarVisible }">
-      <AppTopbar @toggle-sidebar="toggleSidebar" />
+    <AppSidebar />
+    <div class="layout-content" :class="{ 'sidebar-collapsed': !expanded }">
+      <AppTopbar />
       <main class="layout-main">
         <RouterView />
       </main>
@@ -69,15 +66,15 @@ function toggleSidebar() {
 }
 
 .layout-content {
-  margin-left: 250px;
+  margin-left: var(--sidebar-width-expanded);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  transition: margin-left 0.3s ease;
+  transition: margin-left var(--transition-base);
 }
 
 .layout-content.sidebar-collapsed {
-  margin-left: 0;
+  margin-left: var(--sidebar-width-collapsed);
 }
 
 .layout-main {

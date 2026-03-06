@@ -1030,6 +1030,8 @@
     "stageCompleted": "Етап завершено"
   },
   "sidebar": {
+    "collapse": "Згорнути бiчну панель",
+    "expand": "Розгорнути бiчну панель",
     "assignment": "Призначення",
     "statusAndPriority": "Статус i прiоритет",
     "dates": "Дати",

@@ -4,17 +4,19 @@ import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useOrganizationStore } from '@/modules/organization/stores/organization.store'
 import { usePermissionStore } from '@/modules/organization/stores/permission.store'
-
-defineProps<{
-  visible: boolean
-}>()
+import { useCollapsibleSidebar } from '@/shared/composables/useCollapsibleSidebar'
 
 const route = useRoute()
 const { t } = useI18n()
 const orgStore = useOrganizationStore()
 const permissionStore = usePermissionStore()
+const { expanded, toggle } = useCollapsibleSidebar()
 
 const orgId = computed(() => (route.params.orgId as string | undefined) ?? orgStore.currentOrgId ?? undefined)
+
+const toggleTooltip = computed(() =>
+  expanded.value ? t('sidebar.collapse') : t('sidebar.expand'),
+)
 
 const menuItems = computed(() => {
   const items = [
@@ -105,10 +107,20 @@ function isActive(to: string): boolean {
 </script>
 
 <template>
-  <aside v-show="visible" class="sidebar">
+  <aside class="sidebar" :class="{ collapsed: !expanded }">
     <div class="sidebar-logo">
-      <span class="logo-text">Procivo</span>
+      <span v-if="expanded" class="logo-text">Procivo</span>
+      <span v-else class="logo-compact">P</span>
     </div>
+
+    <button
+      class="collapse-toggle"
+      :aria-label="toggleTooltip"
+      v-tooltip.right="toggleTooltip"
+      @click="toggle"
+    >
+      <i :class="expanded ? 'pi pi-chevron-left' : 'pi pi-chevron-right'" />
+    </button>
 
     <nav class="sidebar-nav">
       <router-link
@@ -117,6 +129,7 @@ function isActive(to: string): boolean {
         :to="item.to"
         class="nav-item"
         :class="{ active: isActive(item.to) }"
+        v-tooltip.right="!expanded ? item.label : undefined"
       >
         <i :class="item.icon" class="nav-icon" />
         <span class="nav-label">{{ item.label }}</span>
@@ -135,8 +148,8 @@ function isActive(to: string): boolean {
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-accent: #60a5fa;
 
-  width: 250px;
-  min-width: 250px;
+  width: var(--sidebar-width-expanded);
+  min-width: var(--sidebar-width-collapsed);
   height: 100vh;
   position: fixed;
   top: 0;
@@ -144,13 +157,27 @@ function isActive(to: string): boolean {
   z-index: 100;
   background: var(--sidebar-bg);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  transition: width var(--transition-base);
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
 }
 
 .sidebar-logo {
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid var(--sidebar-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 1.25rem 0.5rem;
 }
 
 .logo-text {
@@ -158,6 +185,38 @@ function isActive(to: string): boolean {
   font-weight: 700;
   color: var(--sidebar-text-active);
   letter-spacing: -0.025em;
+}
+
+.logo-compact {
+  background: var(--sidebar-accent);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  transition: color 0.15s, background-color 0.15s;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.collapse-toggle:hover {
+  color: var(--sidebar-text-active);
+  background: var(--sidebar-hover-bg);
 }
 
 .sidebar-nav {
@@ -200,9 +259,30 @@ function isActive(to: string): boolean {
   font-size: 1rem;
   width: 1.25rem;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .nav-label {
   white-space: nowrap;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+.sidebar.collapsed .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  transition-delay: 0s;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0 0.375rem;
+  border-left: none;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0;
 }
 </style>

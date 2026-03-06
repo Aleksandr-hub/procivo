@@ -1030,6 +1030,8 @@
     "stageCompleted": "Stage completed"
   },
   "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
     "assignment": "Assignment",
     "statusAndPriority": "Status & Priority",
     "dates": "Dates",

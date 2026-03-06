@@ -1,21 +1,42 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useTheme } from '@/shared/composables/useTheme'
 import { useLocale } from '@/shared/composables/useLocale'
-import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import NotificationBell from '@/modules/notifications/components/NotificationBell.vue'
 
-const emit = defineEmits<{
-  toggleSidebar: []
-}>()
-
 const { t } = useI18n()
-const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 const { isDark, toggle: toggleTheme } = useTheme()
 const { currentLocale, setLocale } = useLocale()
+
+const routeToI18nKey: Record<string, string> = {
+  dashboard: 'nav.dashboard',
+  organizations: 'nav.organizations',
+  departments: 'nav.departments',
+  employees: 'nav.employees',
+  tasks: 'nav.tasks',
+  boards: 'nav.boards',
+  labels: 'nav.labels',
+  'org-chart': 'nav.orgChart',
+  roles: 'nav.roles',
+  'process-definitions': 'nav.processes',
+  'process-instances': 'nav.instances',
+  permissions: 'nav.permissions',
+  notifications: 'notifications.sidebar',
+  profile: 'auth.profile.title',
+}
+
+const pageTitle = computed(() => {
+  const name = route.name as string | undefined
+  if (!name) return ''
+  const key = routeToI18nKey[name]
+  return key ? t(key) : ''
+})
 
 const initials = computed(() =>
   auth.user ? (auth.user.firstName[0] + auth.user.lastName[0]).toUpperCase() : '',
@@ -34,12 +55,7 @@ async function handleLogout() {
 <template>
   <div class="topbar">
     <div class="topbar-left">
-      <Button
-        icon="pi pi-bars"
-        text
-        rounded
-        @click="emit('toggleSidebar')"
-      />
+      <h1 v-if="pageTitle" class="page-title">{{ pageTitle }}</h1>
     </div>
     <div class="topbar-right">
       <div v-if="auth.user" class="user-info" @click="router.push('/profile')" style="cursor: pointer;">
@@ -84,7 +100,7 @@ async function handleLogout() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 56px;
+  height: var(--topbar-height);
   padding: 0 1.5rem;
   background: var(--p-surface-card);
   border-bottom: 1px solid var(--p-surface-border);
@@ -99,7 +115,14 @@ async function handleLogout() {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
+}
+
+.page-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+  margin: 0;
 }
 
 .user-info {
