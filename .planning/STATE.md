@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 12 (Super Admin Impersonation) -- COMPLETE
-Plan: 2 of 2 (completed, 12-02: frontend impersonation UI)
-Status: Phase 12 complete -- all plans shipped
-Last activity: 2026-03-06 — Completed 12-02: frontend impersonation UI
+Phase: 13 (Granular Permissions RBAC)
+Plan: 2 of 4 (completed, 13-02: per-definition access control)
+Status: Executing Phase 13
+Last activity: 2026-03-06 — Completed 13-02: per-definition access control
 
-Progress: [████████████] Phase 12 — 2/2 plans complete
+Progress: [██████░░░░░░] Phase 13 — 2/4 plans complete
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: [████████████] Phase 12 — 2/2 plans complete
 | Phase 11.3 P02 | 2 | 2 tasks | 7 files |
 | Phase 12-super-admin-impersonation P01 | 5 | 2 tasks | 18 files |
 | Phase 12-super-admin-impersonation P02 | 15 | 3 tasks | 7 files |
+| Phase 13-granular-permissions-rbac P02 | 5 | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -148,6 +149,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 12-02]: impersonationTrigger ref pattern for sessionStorage reactivity — Vue computed cannot track sessionStorage natively
 - [Phase 12-02]: No refresh token during impersonation — 401 triggers exit instead of refresh attempt
 - [Phase 12-02]: sessionStorage (not localStorage) for admin token backup — cleared on tab close for safety
+- [Phase 13-02]: ProcessDefinitionAccessChecker as dedicated Presentation service — avoids cross-module repository injection in controllers
+- [Phase 13-02]: Whitelist ACL model: no rows = open to all, rows = restricted; owner bypass returns null for "show all" semantics
+- [Phase 13-02]: ArrayParameterType::STRING replaces deprecated Connection::PARAM_STR_ARRAY in DBAL
 
 ### Pending Todos
 
@@ -164,6 +168,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 12-02-PLAN.md — frontend impersonation UI (Phase 12 complete)
+Stopped at: Completed 13-02-PLAN.md — per-definition access control
 Resume file: None
-Next action: /gsd:new-milestone to plan next milestone
+Next action: Execute 13-03-PLAN.md

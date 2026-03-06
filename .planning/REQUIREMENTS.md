@@ -86,7 +86,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 - [ ] **PERM-01**: Permission model supports resource-type + action granularity with hierarchical inheritance: Organization -> Department -> Role -> User
 - [ ] **PERM-02**: Effective permissions computed by merging inherited permissions with user-level overrides taking highest priority
-- [ ] **PERM-03**: Per-definition access control — admin can restrict which departments/roles can start or view a specific process
+- [x] **PERM-03**: Per-definition access control — admin can restrict which departments/roles can start or view a specific process
 - [ ] **PERM-04**: Admin UI with permissions management page — permission matrices per role, per department, per user with immediate effect
 - [ ] **PERM-05**: All API endpoints enforce permissions via OrganizationAuthorizer — no endpoint relies solely on "user is in organization"
 - [ ] **PERM-06**: Permission changes logged in audit trail with before/after diff

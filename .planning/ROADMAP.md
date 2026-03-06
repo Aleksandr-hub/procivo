@@ -251,7 +251,7 @@ Plans:
   4. Admin UI provides a permissions management page where org admins can view and edit permission matrices per role, per department, and per user with immediate effect
   5. All API endpoints enforce permissions via the existing OrganizationAuthorizer — no endpoint relies solely on "user is in organization" for access
   6. Permission changes are logged in the audit trail with before/after diff
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 Plans:
 - [ ] 13-01-PLAN.md — Backend permission hierarchy (DepartmentPermission, UserPermissionOverride entities, PermissionResolver hierarchical merge, OrganizationVoter fix, enum fixes)
 - [ ] 13-02-PLAN.md — Per-definition access control (ProcessDefinitionAccess entity, whitelist ACL, controller enforcement)
@@ -323,7 +323,7 @@ Plans:
 | 11.2 Process Polish Gap Closure | 1/1 | Complete    | 2026-03-05 | - |
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
-| 13. Granular Permissions (RBAC) | v2.0 | 0/4 | Planned | - |
+| 13. Granular Permissions (RBAC) | 2/4 | In Progress|  | - |
 | 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
