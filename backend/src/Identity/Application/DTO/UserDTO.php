@@ -18,6 +18,7 @@ final readonly class UserDTO
         public array $roles,
         public string $createdAt,
         public ?string $avatarUrl = null,
+        public bool $totpEnabled = false,
     ) {
     }
 
@@ -32,6 +33,7 @@ final readonly class UserDTO
             roles: $user->roles(),
             createdAt: (string) $user->createdAt(),
             avatarUrl: $avatarUrl,
+            totpEnabled: $user->isTotpEnabled(),
         );
     }
 }

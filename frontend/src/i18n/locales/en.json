@@ -70,6 +70,46 @@
       "passwordPlaceholder": "Create a password",
       "passwordHelp": "Minimum 8 characters.",
       "acceptAndJoin": "Accept & Join"
+    },
+    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "description": "Enter the code from your authenticator app",
+      "codePlaceholder": "Enter 6-digit code",
+      "rememberDevice": "Remember this device for 30 days",
+      "verify": "Verify",
+      "useBackupCode": "Use backup code instead",
+      "useAuthenticator": "Use authenticator code",
+      "backupCodePlaceholder": "Enter backup code",
+      "invalidCode": "Invalid code. Please try again.",
+      "rateLimited": "Too many attempts. Please log in again.",
+      "redirectToLogin": "Redirecting to login...",
+      "setup": {
+        "title": "Set Up Two-Factor Authentication",
+        "scanQr": "Scan the QR code with your authenticator app",
+        "manualEntry": "Or enter the secret key manually:",
+        "copySecret": "Copy",
+        "secretCopied": "Secret key copied",
+        "next": "Next",
+        "confirmCode": "Confirm Code",
+        "confirmDescription": "Enter the code from your authenticator app to complete setup"
+      },
+      "backupCodes": {
+        "title": "Backup Codes",
+        "warning": "Save these codes in a safe place. Each code can only be used once.",
+        "copyAll": "Copy All",
+        "copied": "Codes copied",
+        "download": "Download",
+        "saved": "I've saved my codes"
+      },
+      "profile": {
+        "sectionTitle": "Security",
+        "enabled": "Two-factor authentication is enabled",
+        "notEnabled": "Two-factor authentication is not enabled",
+        "enable": "Enable 2FA",
+        "disable": "Disable 2FA",
+        "disableConfirm": "Enter the code from your authenticator app to disable 2FA",
+        "disableCodePrompt": "Confirmation code"
+      }
     }
   },
   "nav": {

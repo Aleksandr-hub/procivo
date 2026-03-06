@@ -21,7 +21,13 @@ async function onSubmit() {
   if (!email.value || !password.value) return
 
   try {
-    await auth.login(email.value, password.value)
+    const requires2FA = await auth.login(email.value, password.value)
+
+    if (requires2FA) {
+      router.push({ name: 'two-factor-verify', query: { redirect: route.query.redirect } })
+      return
+    }
+
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (error: unknown) {

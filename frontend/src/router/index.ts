@@ -17,6 +17,12 @@ const router = createRouter({
       meta: { guest: true },
     },
     {
+      path: '/auth/2fa/verify',
+      name: 'two-factor-verify',
+      component: () => import('@/modules/auth/pages/TwoFactorVerifyPage.vue'),
+      meta: { guest: true },
+    },
+    {
       path: '/invitation/accept',
       name: 'accept-invitation',
       component: () => import('@/modules/organization/pages/AcceptInvitationPage.vue'),

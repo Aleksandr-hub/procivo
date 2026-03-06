@@ -1,12 +1,18 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { isTwoFactorChallenge } from '@/modules/auth/types/auth.types'
+import type { LoginResponse } from '@/modules/auth/types/auth.types'
 
 export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(localStorage.getItem('access_token'))
   const refreshToken = ref<string | null>(localStorage.getItem('refresh_token'))
-  const user = ref<{ id: string; email: string; firstName: string; lastName: string; avatarUrl?: string } | null>(null)
+  const user = ref<{ id: string; email: string; firstName: string; lastName: string; avatarUrl?: string; roles?: string[]; totpEnabled?: boolean } | null>(null)
   const loading = ref(false)
   const initialized = ref(false)
+
+  // Two-factor authentication state (in-memory only, NOT persisted)
+  const partialToken = ref<string | null>(null)
+  const twoFactorRequired = computed(() => !!partialToken.value)
 
   // Impersonation state
   const impersonationTrigger = ref(0)
@@ -54,12 +60,37 @@ export const useAuthStore = defineStore('auth', () => {
     initialized.value = true
   }
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string): Promise<boolean> {
     loading.value = true
     try {
       const { default: httpClient } = await import('@/shared/api/http-client')
       const response = await httpClient.post('/auth/login', { email, password })
-      setTokens(response.data.access_token, response.data.refresh_token)
+      const data = response.data as LoginResponse
+
+      if (isTwoFactorChallenge(data)) {
+        partialToken.value = data.partial_token
+        return true // indicates 2FA required
+      }
+
+      setTokens(data.access_token, data.refresh_token)
+      await fetchUser()
+      return false // normal login, no 2FA
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function verifyTwoFactor(code: string, rememberDevice: boolean) {
+    if (!partialToken.value) {
+      throw new Error('No partial token available')
+    }
+
+    loading.value = true
+    try {
+      const { userApi } = await import('@/modules/auth/api/user.api')
+      const data = await userApi.verifyTwoFactor(partialToken.value, code, rememberDevice)
+      partialToken.value = null
+      setTokens(data.access_token, data.refresh_token)
       await fetchUser()
     } finally {
       loading.value = false
@@ -209,6 +240,8 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isImpersonating,
     impersonatedUser,
+    partialToken,
+    twoFactorRequired,
     setTokens,
     clearTokens,
     initialize,
@@ -216,6 +249,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchUser,
+    verifyTwoFactor,
     startImpersonation,
     exitImpersonation,
     updateProfile,
