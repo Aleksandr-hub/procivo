@@ -92,7 +92,7 @@ Plans:
   5. GitHub Actions CI pipeline runs CS Fixer, PHPStan, PHPUnit, frontend type-check, and ESLint on every push
   6. Pre-commit hooks block commits that fail CS Fixer (PHP) or ESLint (TypeScript/Vue) on staged files
   7. .env.example and README contain sufficient instructions for a new developer to run the project locally
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 Plans:
 - [ ] 07-01-PLAN.md — Backend profile API (UpdateProfile + UploadAvatar commands, UserDTO extension, migration)
 - [ ] 07-02-PLAN.md — Frontend ProfilePage + avatar display integration (topbar, task sidebar)
@@ -138,7 +138,7 @@ Plans:
   2. Active Processes widget lists processes where the user is a participant with current status badges
   3. Dashboard charts render: tasks by status (donut), tasks completed over time (line), and process completion rate (bar) — all scoped to the user's organization
   4. Recent activity feed shows the last 20 audit log entries for objects in the user's organization with clickable entity links
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 Plans:
 - [x] 10-01-PLAN.md — Backend dashboard stats endpoint + frontend data layer (types, API, store)
 - [x] 10-02-PLAN.md — DashboardPage with 4 widgets (MyTasks, ActiveProcesses, Charts, RecentActivity) + route + sidebar + i18n
@@ -179,7 +179,7 @@ Plans:
   2. A process with a date Timer node waits until the configured absolute datetime, then advances — verified by integration test
   3. Designer timer node configuration panel lets the user set duration (ISO 8601 picker) or fixed date, and the configuration is correctly serialized for the engine
   4. Running process instances with passed deadlines display an overdue indicator on the ProcessInstanceDetailPage
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 Plans:
 - [ ] 11-01-PLAN.md — Backend DB-persistent timer infrastructure (migration, RabbitMqTimerService DB+DelayStamp, idempotent FireTimerHandler, cancellation cleanup, fallback poller command, docker-compose scheduler)
 - [ ] 11-02-PLAN.md — Designer date mode (TimerNodeConfig.vue SelectButton toggle, DatePicker, i18n)
@@ -281,7 +281,7 @@ Plans:
 
 **Goal:** Frontend matches modern Figma design — collapsible sidebar, bento dashboard with KPI counters, design token CSS variables, task board visual polish, topbar with page title
 **Depends on:** Phase 14
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 
 Plans:
 - [ ] 14.1-01-PLAN.md — Design tokens + collapsible sidebar + topbar page title
@@ -297,11 +297,12 @@ Plans:
   2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
   3. Postman collection is auto-generated and downloadable from /api/docs
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 Plans:
 - [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
 - [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
 - [ ] 15-03-PLAN.md — TaskManager, Workflow, Notification, Audit controller OA annotations + final validation
+- [ ] 15-04-PLAN.md — Gap closure: API versioning strategy document + migration guide
 
 ### Phase 16: Product Documentation
 **Goal**: Comprehensive product documentation accessible to all roles — users, admins, testers, support — with structured knowledge base that serves as foundation for future AI Assistant (v3.0)
@@ -317,6 +318,7 @@ Plans:
 - [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
 - [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
 - [ ] 15-03-PLAN.md — TaskManager, Workflow, Notification, Audit controller OA annotations + final validation
+- [ ] 15-04-PLAN.md — Gap closure: API versioning strategy document + migration guide
 
 ## Progress
 
@@ -342,7 +344,7 @@ Plans:
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
-| 15. API Documentation | 3/3 | Complete   | 2026-03-06 | - |
+| 15. API Documentation | 3/4 | In Progress   | 2026-03-06 | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---
