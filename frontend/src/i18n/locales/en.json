@@ -689,7 +689,8 @@
     "swimlaneNone": "No swimlanes",
     "swimlaneAssignee": "By assignee",
     "swimlanePriority": "By priority",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "addTask": "Add task"
   },
   "workflow": {
     "processDefinitions": "Process Definitions",

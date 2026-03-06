@@ -689,7 +689,8 @@
     "swimlaneNone": "Без доріжок",
     "swimlaneAssignee": "За виконавцем",
     "swimlanePriority": "За пріоритетом",
-    "unassigned": "Не призначено"
+    "unassigned": "Не призначено",
+    "addTask": "Додати завдання"
   },
   "workflow": {
     "processDefinitions": "Визначення процесів",

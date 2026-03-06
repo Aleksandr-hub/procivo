@@ -237,6 +237,10 @@ function disconnectMercure() {
   }
 }
 
+function onAddTask() {
+  router.push({ name: 'tasks', params: { orgId: orgId.value } })
+}
+
 function goBack() {
   router.push({ name: 'boards', params: { orgId: orgId.value } })
 }
@@ -285,8 +289,8 @@ function goBack() {
           >
             <div class="column-header">
               <span class="column-name">{{ column.name }}</span>
-              <span class="column-count">
-                {{ getTasksForColumnInLane(column, lane).length }}
+              <span class="column-count-group">
+                <Badge :value="getTasksForColumnInLane(column, lane).length" severity="secondary" />
                 <span v-if="column.wipLimit" class="wip-limit">/ {{ column.wipLimit }}</span>
               </span>
             </div>
@@ -304,6 +308,11 @@ function goBack() {
                 {{ t('kanban.noTasks') }}
               </div>
             </div>
+
+            <button class="add-task-btn" @click="onAddTask()">
+              <i class="pi pi-plus" />
+              <span>{{ t('kanban.addTask') }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -365,7 +374,7 @@ function goBack() {
   min-width: 280px;
   max-width: 320px;
   background: var(--p-surface-ground);
-  border-radius: 8px;
+  border-radius: var(--card-radius);
   border-top: 3px solid var(--p-primary-color);
   display: flex;
   flex-direction: column;
@@ -380,11 +389,11 @@ function goBack() {
   border-top-color: var(--p-red-500);
 }
 
-.kanban-column.wip-warning .column-count {
+.kanban-column.wip-warning .column-count-group {
   color: var(--p-orange-600);
 }
 
-.kanban-column.wip-exceeded .column-count {
+.kanban-column.wip-exceeded .column-count-group {
   color: var(--p-red-600);
 }
 
@@ -397,10 +406,10 @@ function goBack() {
   font-size: 0.875rem;
 }
 
-.column-count {
-  font-weight: 400;
-  color: var(--p-text-muted-color);
-  font-size: 0.8rem;
+.column-count-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .wip-limit {
@@ -422,5 +431,27 @@ function goBack() {
   padding: 2rem 0.5rem;
   color: var(--p-text-muted-color);
   font-size: 0.8rem;
+}
+
+.add-task-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: calc(100% - 1rem);
+  margin: 0.25rem 0.5rem 0.5rem;
+  padding: 0.5rem;
+  border: 2px dashed var(--p-content-border-color);
+  border-radius: var(--card-radius);
+  background: transparent;
+  color: var(--p-text-muted-color);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+
+.add-task-btn:hover {
+  border-color: var(--p-primary-color);
+  color: var(--p-primary-color);
 }
 </style>
