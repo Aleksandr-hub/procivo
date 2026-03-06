@@ -39,7 +39,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 11.3: Avatar Display Extension** — Extend user avatar display to employee lists, comments, and other user contexts (PROF-03 full coverage) (completed 2026-03-05)
 - [x] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions (completed 2026-03-05)
 - [x] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance (completed 2026-03-06)
-- [ ] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete
+- [x] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete (completed 2026-03-06)
 - [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
 - [ ] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base
 
@@ -269,7 +269,7 @@ Plans:
   4. Prometheus metrics are exported (request duration, queue depth, error rates) and Grafana dashboards display system health and business metrics
   5. Soft delete is implemented for Organization, User, ProcessDefinition, and Task — deleted entities are hidden by default via Doctrine filter, admin can restore within 30 days
   6. Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) are set on all responses; CORS is configured per environment
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 Plans:
 - [x] 14-01-PLAN.md — Health check endpoints + Prometheus metrics + Grafana dashboards
 - [x] 14-02-PLAN.md — Soft delete infrastructure + security headers + NelmioCorsBundle
@@ -321,7 +321,7 @@ Plans:
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
-| 14. Infrastructure & Security | 4/5 | In Progress|  | - |
+| 14. Infrastructure & Security | 5/5 | Complete   | 2026-03-06 | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
