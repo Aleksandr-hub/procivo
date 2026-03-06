@@ -40,7 +40,7 @@ Full details: [milestones/v1.0-ROADMAP.md](milestones/v1.0-ROADMAP.md)
 - [x] **Phase 12: Super Admin Impersonation** — Custom JWT impersonation endpoint, impersonation banner, audit trail for admin actions (completed 2026-03-05)
 - [x] **Phase 13: Granular Permissions (RBAC)** — Per-department, per-role, per-user, per-process permissions with flexible admin UI and permission inheritance (completed 2026-03-06)
 - [x] **Phase 14: Infrastructure & Security** — 2FA, DB backups, monitoring (Prometheus+Grafana), security hardening, environments pipeline, soft delete (completed 2026-03-06)
-- [ ] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection
+- [x] **Phase 15: API Documentation** — NelmioApiDocBundle OpenAPI 3.1, Swagger UI, Postman collection (completed 2026-03-06)
 - [ ] **Phase 16: Product Documentation** — User guide, admin guide, feature catalog with screenshots, searchable help center, AI-ready knowledge base
 
 ## Phase Details
@@ -297,7 +297,7 @@ Plans:
   2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
   3. Postman collection is auto-generated and downloadable from /api/docs
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 15-01-PLAN.md — NelmioApiDocBundle setup + DTO schema annotations
 - [ ] 15-02-PLAN.md — Identity, Organization, Shared controller OA annotations
@@ -342,7 +342,7 @@ Plans:
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
-| 15. API Documentation | 2/3 | In Progress|  | - |
+| 15. API Documentation | 3/3 | Complete   | 2026-03-06 | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---
