@@ -1,0 +1,22 @@
+nelmio_cors:
+    defaults:
+        allow_origin: ['http://localhost:5173']
+        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        allow_headers: ['Content-Type', 'Authorization']
+        allow_credentials: true
+        max_age: 86400
+    paths:
+        '^/api/':
+            allow_origin: ['http://localhost:5173']
+        '^/health':
+            allow_origin: ['*']
+        '^/metrics':
+            allow_origin: ['*']
+
+when@prod:
+    nelmio_cors:
+        defaults:
+            allow_origin: ['%env(FRONTEND_URL)%']
+        paths:
+            '^/api/':
+                allow_origin: ['%env(FRONTEND_URL)%']
