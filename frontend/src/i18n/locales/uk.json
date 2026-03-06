@@ -1105,7 +1105,15 @@
     "processes": "Процеси",
     "tasksByStatus": "Завдання за статусом",
     "completionTrend": "Тренд виконання (30 днів)",
-    "processCompletionRate": "Статус процесів"
+    "processCompletionRate": "Статус процесів",
+    "activeProcessesCount": "Активні процеси",
+    "myTasksCount": "Мої завдання",
+    "dueToday_count": "{count} на сьогодні",
+    "upcomingDeadlines": "Найближчі дедлайни",
+    "noDeadlines": "Немає найближчих дедлайнів",
+    "teamActivity": "Активність команди",
+    "completionRate": "Рівень виконання",
+    "processesByStatus": "Процеси"
   },
   "taskStatus": {
     "draft": "Чернетка",

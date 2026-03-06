@@ -1105,7 +1105,15 @@
     "processes": "Processes",
     "tasksByStatus": "Tasks by Status",
     "completionTrend": "Completion Trend (30 days)",
-    "processCompletionRate": "Process Status"
+    "processCompletionRate": "Process Status",
+    "activeProcessesCount": "Active Processes",
+    "myTasksCount": "My Tasks",
+    "dueToday_count": "{count} due today",
+    "upcomingDeadlines": "Upcoming Deadlines",
+    "noDeadlines": "No upcoming deadlines",
+    "teamActivity": "Team Activity",
+    "completionRate": "Completion Rate",
+    "processesByStatus": "Processes"
   },
   "taskStatus": {
     "draft": "Draft",
