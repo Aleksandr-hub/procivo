@@ -17,10 +17,12 @@ use App\Identity\Infrastructure\Security\RememberDeviceService;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Shared\Application\Bus\CommandBusInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use Nelmio\ApiDocBundle\Attribute\Security;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
@@ -29,6 +31,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Contracts\Cache\CacheInterface;
 
+#[OA\Tag(name: 'Auth')]
 #[Route('/api/v1/auth/2fa', name: 'api_v1_auth_2fa_')]
 final readonly class TwoFactorController
 {
@@ -51,6 +54,9 @@ final readonly class TwoFactorController
     /**
      * Start 2FA enrollment: generate secret, store on user, return QR + backup codes.
      */
+    #[OA\Post(summary: 'Start 2FA enrollment — generate secret and QR code')]
+    #[OA\Response(response: 200, description: '2FA setup data with QR code and backup codes', content: new OA\JsonContent(ref: new Model(type: TwoFactorSetupDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
     #[Route('/setup', name: 'setup', methods: ['POST'])]
     public function setup(#[CurrentUser] SecurityUser $securityUser): JsonResponse
     {
@@ -76,6 +82,21 @@ final readonly class TwoFactorController
     /**
      * Confirm 2FA enrollment with a valid TOTP code from authenticator app.
      */
+    #[OA\Post(
+        summary: 'Confirm 2FA enrollment with TOTP code',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['code'],
+                properties: [
+                    new OA\Property(property: 'code', type: 'string', description: 'TOTP code from authenticator app', example: '123456'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 200, description: '2FA enabled', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 400, description: 'Invalid or missing TOTP code')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
     #[Route('/confirm', name: 'confirm', methods: ['POST'])]
     public function confirm(Request $request, #[CurrentUser] SecurityUser $securityUser): JsonResponse
     {
@@ -98,6 +119,34 @@ final readonly class TwoFactorController
      * Verify TOTP code during login (requires partial JWT).
      * PUBLIC_ACCESS — partial JWT is validated manually.
      */
+    #[OA\Post(
+        summary: 'Verify TOTP code during login (requires partial JWT)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['code'],
+                properties: [
+                    new OA\Property(property: 'code', type: 'string', description: 'TOTP code or backup code', example: '123456'),
+                    new OA\Property(property: 'remember_device', type: 'boolean', description: 'Remember this device for 30 days', example: false),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'Full authentication tokens after 2FA verification',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'access_token', type: 'string'),
+                new OA\Property(property: 'refresh_token', type: 'string'),
+                new OA\Property(property: 'token_type', type: 'string', example: 'Bearer'),
+                new OA\Property(property: 'expires_in', type: 'integer', example: 3600),
+            ],
+        ),
+    )]
+    #[OA\Response(response: 401, description: 'Invalid partial token or TOTP code')]
+    #[OA\Response(response: 429, description: 'Too many verification attempts')]
+    #[Security(name: null)]
     #[Route('/verify', name: 'verify', methods: ['POST'])]
     public function verify(Request $request): JsonResponse
     {
@@ -122,16 +171,13 @@ final readonly class TwoFactorController
 
         // Rate limiting: max 5 attempts per token
         $tokenHash = hash('sha256', $partialToken);
-        $cacheKey = 'two_fa_attempts_' . str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '_', $tokenHash);
+        $cacheKey = 'two_fa_attempts_'.str_replace(['{', '}', '(', ')', '/', '\\', '@', ':'], '_', $tokenHash);
 
         /** @var int $attempts */
         $attempts = $this->cache->get($cacheKey, static fn (): int => 0);
 
         if ($attempts >= self::MAX_VERIFY_ATTEMPTS) {
-            throw new TooManyRequestsHttpException(
-                self::VERIFY_ATTEMPTS_TTL,
-                'Too many 2FA verification attempts. Request a new login.',
-            );
+            throw new TooManyRequestsHttpException(self::VERIFY_ATTEMPTS_TTL, 'Too many 2FA verification attempts. Request a new login.');
         }
 
         // Increment attempts (delete and re-set with TTL)
@@ -221,6 +267,21 @@ final readonly class TwoFactorController
     /**
      * Disable 2FA (requires valid TOTP code for confirmation).
      */
+    #[OA\Post(
+        summary: 'Disable 2FA (requires valid TOTP code)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['code'],
+                properties: [
+                    new OA\Property(property: 'code', type: 'string', description: 'TOTP code for confirmation', example: '123456'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Response(response: 200, description: '2FA disabled', content: new OA\JsonContent(properties: [new OA\Property(property: 'message', type: 'string')]))]
+    #[OA\Response(response: 400, description: 'Invalid TOTP code')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
     #[Route('/disable', name: 'disable', methods: ['POST'])]
     public function disable(Request $request, #[CurrentUser] SecurityUser $securityUser): JsonResponse
     {
@@ -274,7 +335,7 @@ final readonly class TwoFactorController
      */
     private function decodeJson(Request $request): array
     {
-        /** @var array<string, mixed> */
+        /* @var array<string, mixed> */
         return json_decode($request->getContent(), true, 512, \JSON_THROW_ON_ERROR) ?? [];
     }
 }

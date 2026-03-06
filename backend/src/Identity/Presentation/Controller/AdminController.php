@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Identity\Presentation\Controller;
 
 use App\Identity\Application\Command\EndImpersonation\EndImpersonationCommand;
+use App\Identity\Application\DTO\ImpersonationDTO;
 use App\Identity\Application\Query\ImpersonateUser\ImpersonateUserQuery;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Shared\Application\Bus\CommandBusInterface;
 use App\Shared\Application\Bus\QueryBusInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +19,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
+#[OA\Tag(name: 'Admin')]
 #[Route('/api/v1/admin', name: 'api_v1_admin_')]
 final readonly class AdminController
 {
@@ -25,6 +29,10 @@ final readonly class AdminController
     ) {
     }
 
+    #[OA\Post(summary: 'End impersonation session')]
+    #[OA\Response(response: 204, description: 'Impersonation ended')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Super admin access required')]
     #[Route('/impersonate/end', name: 'end_impersonate', methods: ['POST'])]
     public function endImpersonation(#[CurrentUser] SecurityUser $user): JsonResponse
     {
@@ -37,6 +45,21 @@ final readonly class AdminController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[OA\Post(
+        summary: 'Impersonate a user (super admin only)',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(property: 'reason', type: 'string', description: 'Reason for impersonation'),
+                ],
+            ),
+        ),
+    )]
+    #[OA\Parameter(name: 'userId', in: 'path', required: true, description: 'Target user UUID', schema: new OA\Schema(type: 'string', format: 'uuid'))]
+    #[OA\Response(response: 200, description: 'Impersonation session created', content: new OA\JsonContent(ref: new Model(type: ImpersonationDTO::class)))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 403, description: 'Super admin access required or chained impersonation detected')]
     #[Route('/impersonate/{userId}', name: 'impersonate', methods: ['POST'])]
     public function impersonate(
         string $userId,
