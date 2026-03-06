@@ -8,12 +8,15 @@ use App\Organization\Domain\Entity\UserPermissionOverride;
 use App\Organization\Domain\ValueObject\EmployeeId;
 use App\Organization\Domain\ValueObject\PermissionAction;
 use App\Organization\Domain\ValueObject\PermissionResource;
+use App\Organization\Domain\ValueObject\UserPermissionOverrideId;
 
 interface UserPermissionOverrideRepositoryInterface
 {
     public function save(UserPermissionOverride $override): void;
 
     public function remove(UserPermissionOverride $override): void;
+
+    public function findById(UserPermissionOverrideId $id): ?UserPermissionOverride;
 
     /**
      * @return list<UserPermissionOverride>

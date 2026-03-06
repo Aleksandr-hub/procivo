@@ -9,6 +9,7 @@ use App\Organization\Domain\Repository\UserPermissionOverrideRepositoryInterface
 use App\Organization\Domain\ValueObject\EmployeeId;
 use App\Organization\Domain\ValueObject\PermissionAction;
 use App\Organization\Domain\ValueObject\PermissionResource;
+use App\Organization\Domain\ValueObject\UserPermissionOverrideId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineUserPermissionOverrideRepository implements UserPermissionOverrideRepositoryInterface
@@ -28,6 +29,11 @@ final readonly class DoctrineUserPermissionOverrideRepository implements UserPer
     {
         $this->entityManager->remove($override);
         $this->entityManager->flush();
+    }
+
+    public function findById(UserPermissionOverrideId $id): ?UserPermissionOverride
+    {
+        return $this->entityManager->find(UserPermissionOverride::class, $id->value());
     }
 
     /**

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: Production-Ready BPM
 status: unknown
-last_updated: "2026-03-05T22:07:33.182Z"
+last_updated: "2026-03-06T02:06:58.050Z"
 progress:
-  total_phases: 12
+  total_phases: 13
   completed_phases: 12
-  total_plans: 29
-  completed_plans: 29
+  total_plans: 33
+  completed_plans: 31
 ---
 
 # Project State
@@ -75,6 +75,7 @@ Progress: [██████░░░░░░] Phase 13 — 2/4 plans complete
 | Phase 12-super-admin-impersonation P01 | 5 | 2 tasks | 18 files |
 | Phase 12-super-admin-impersonation P02 | 15 | 3 tasks | 7 files |
 | Phase 13-granular-permissions-rbac P02 | 5 | 2 tasks | 15 files |
+| Phase 13 P01 | 6 | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 13-02]: ProcessDefinitionAccessChecker as dedicated Presentation service — avoids cross-module repository injection in controllers
 - [Phase 13-02]: Whitelist ACL model: no rows = open to all, rows = restricted; owner bypass returns null for "show all" semantics
 - [Phase 13-02]: ArrayParameterType::STRING replaces deprecated Connection::PARAM_STR_ARRAY in DBAL
+- [Phase 13]: Migration uses VARCHAR(36) not UUID type for consistency with existing Doctrine mappings
+- [Phase 13]: Hierarchical permission merge: UserOverride deny blocks immediately; allow overrides scope; Role and Department scopes use wider-wins
+- [Phase 13]: Department permission tree inheritance walks parentId chain; child department explicit permission overrides parent
 
 ### Pending Todos
 
