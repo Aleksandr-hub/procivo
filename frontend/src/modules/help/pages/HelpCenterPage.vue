@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import HelpSearchBar from '../components/HelpSearchBar.vue'
@@ -30,6 +30,8 @@ function groupBySubcategory(articles: HelpArticle[]): Map<string, HelpArticle[]>
 
 const userGuideGroups = computed(() => groupBySubcategory(userGuideArticles.value))
 const adminGuideGroups = computed(() => groupBySubcategory(adminGuideArticles.value))
+
+const selectedCategory = ref<string | null>(null)
 
 function navigateToArticle(article: HelpArticle) {
   router.push({ name: 'help-article', params: { slug: article.slug.split('/') } })
