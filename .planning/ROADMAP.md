@@ -313,7 +313,7 @@ Plans:
   2. Admin Guide documents system configuration: organization setup, employee management, process designer, permissions, impersonation, notification preferences
   3. Searchable Help Center page in the app with quick navigation, category grouping, and full-text search across all documentation
   4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 16-01-PLAN.md — Help Center infrastructure (Vite markdown plugin, MiniSearch, pages, router, i18n)
 - [ ] 16-02-PLAN.md — User Guide content (~18 articles: tasks, processes, boards, notifications, dashboard, profile)
@@ -344,49 +344,63 @@ Plans:
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
 | 15. API Documentation | 4/4 | Complete    | 2026-03-06 | - |
-| 16. Product Documentation | 1/3 | In Progress|  | - |
+| 16. Product Documentation | 2/3 | In Progress|  | - |
 
 ---
 
 ## Future Milestones (high-level, detailed planning when we get there)
 
-### v3.0 Configurable Platform + AI
+> Reprioritized 2026-03-06 based on BPM market analysis (Creatio, Prozorro, Monday.com, Bitrix24, Odoo).
+> See `.planning/research/BPM-MARKET-ANALYSIS.md` for full analysis.
+> Key insight: infrastructure is strong (RBAC, audit, versioning, monitoring), but core business features
+> (AND gateway, approvals, directories, integrations) must come before AI/enterprise phases.
 
-**Milestone Goal:** Universal directory system (Custom Objects), AI Assistant as configuration tool, module toggling per-org, process templates, import/export with competitor migration.
+### v3.0 Business Core
 
-Phases:
-- **Phase 16: Module Toggling & Menu Customization** — Per-org module flags, sidebar config per role, feature flags, custom landing pages
-- **Phase 17: Directory System** — Dynamic catalogs with configurable fields (text, number, date, select, file, relation), hierarchical items, per-directory RBAC
-- **Phase 18: Entity Passport** — Dynamic detail pages (PassportTemplate config → universal renderer with tabs, sections, field groups)
-- **Phase 19: Directory-Workflow Integration** — Directory items as process context, task references, directory_item form field type
-- **Phase 20: Process Templates** — 10-15 pre-built process templates (HR, Finance, IT, General), template marketplace, AI-suggested templates
-- **Phase 21: AI Assistant — Read-Only** — Multi-provider (Claude/OpenAI/Gemini), org-scoped context isolation, RBAC-enforced tools, streaming via Mercure
-- **Phase 22: AI Assistant — Write Tools + Modes** — Quick Mode (execute immediately) vs Design Mode (iterative clarification like GSD), Preview+Confirm pattern, usage limits per org
-- **Phase 23: Import/Export + Migration** — CSV/Excel import with AI column mapping, competitor migration adapters (Creatio, 1C/BAS, Jira, Monday), MigrationWizard, rollback capability
-
-### v4.0 Integrations + Growth
-
-**Milestone Goal:** Integration framework with Ukrainian B2B connectors, reporting engine, full-text search, internal chat, calendar/SLA, mobile PWA.
+**Milestone Goal:** Complete BPMN 2.0 engine (parallel/inclusive gateways, sub-processes), approval workflows with SLA, universal directory system (Custom Objects), document management, business rules, and ready-made process templates — so the platform can handle real business processes like procurement, HR, and contract approval.
 
 Phases:
-- **Phase 24: Integration Framework** — Webhook in/out, ConnectorInterface, API keys, OAuth2 client flow, delivery log
-- **Phase 25: Ukrainian Business Integrations** — Nova Poshta, PrivatBank, Monobank, Vchasno EDI, Diia.Sign (KEP), Checkbox PRRO, 1C/BAS sync, OpenDataBot, Telegram Bot, IP telephony (Binotel)
-- **Phase 26: Report Builder** — Configurable reports (chart, table, number card), ReportAccess sharing, AI report tools, PDF/Excel export
-- **Phase 27: Full-Text Search** — Elasticsearch indexing (tasks, employees, directories, processes), global search bar, faceted results, RBAC-scoped
-- **Phase 28: Chat & Discussions** — Task/process thread-based chat, direct messages, @mentions, file sharing, real-time via Mercure
-- **Phase 29: Calendar & Timeline** — Calendar view for deadlines, Gantt for processes, SLA management, escalation rules
-- **Phase 30: Mobile / PWA** — Service worker, responsive design, push notifications, camera integration, QR code scanning
+- **Phase 17: Advanced Workflow Engine** — Parallel Gateway (AND), Inclusive Gateway (OR), Sub-Process node (nested execution with own start/end), Signal/Message events (inter-process communication), Script Task, multi-instance tasks (sequential/parallel over collection)
+- **Phase 18: Approval Workflows + SLA Engine** — Approval node type (sequential/parallel chain, delegation, escalation, substitution), SLA definitions per process/task (deadline + escalation rules), auto-escalation notifications, approval history UI, working-days calendar
+- **Phase 19: Directory System (Custom Objects)** — Dynamic catalogs with configurable fields (text, number, date, select, file, relation), hierarchical items, per-directory RBAC, list + detail pages auto-generation, Directory-Workflow integration (directory items as process context, directory_item form field type)
+- **Phase 20: Process Files + Document Management** — File attachments at process instance level (not just task), document templates with variable substitution, document approval workflow, version history for documents
+- **Phase 21: Conditional Forms + Business Rules** — Conditional field visibility/required based on other field values, field dependency chains, UI-level business rules (show/hide/filter/validate), form field types expansion (rich text, file upload, directory lookup, user picker)
+- **Phase 22: Process Templates** — 5-7 ready-made process templates (HR leave request, procurement approval, employee onboarding, contract approval, IT support request, document review), template import/clone, template gallery page
 
-### v5.0 Enterprise & Scale
+### v4.0 Integrations + Analytics
+
+**Milestone Goal:** Integration framework with external system calls from processes, reporting engine with process analytics, full-text search, Ukrainian B2B connectors, calendar/SLA timeline, and team discussions.
+
+Phases:
+- **Phase 23: Integration Framework** — Webhook in/out, "Call Web Service" process node (REST/SOAP from process without code), ConnectorInterface, API keys, OAuth2 client flow, delivery log, retry with backoff
+- **Phase 24: Report Builder** — Configurable reports (chart, table, pivot, number card, gauge), process analytics (cycle time, bottleneck detection, throughput), ReportAccess sharing, PDF/Excel export
+- **Phase 25: Full-Text Search** — Elasticsearch indexing (tasks, employees, directories, processes), global search bar with Cmd+K, faceted results, RBAC-scoped, search suggestions
+- **Phase 26: Ukrainian Business Integrations** — Vchasno EDO (electronic document exchange), Diia.Sign KEP (qualified electronic signature), Nova Poshta (shipment tracking), PrivatBank/Monobank (payment status), OpenDataBot (company registry), Checkbox PRRO (fiscal receipts)
+- **Phase 27: Calendar + SLA Timeline** — Calendar view for task deadlines and process milestones, Gantt chart for process instances, SLA violation tracking dashboard, escalation rules configuration
+- **Phase 28: Chat & Discussions** — Task/process thread-based chat, @mentions with notification, file sharing in threads, real-time via Mercure
+
+### v5.0 AI + Platform
+
+**Milestone Goal:** AI Assistant for process configuration and data queries, module toggling per organization, import/export with competitor migration, Entity Passport for dynamic detail pages.
+
+Phases:
+- **Phase 29: AI Assistant — Read-Only** — Multi-provider (Claude/OpenAI/Gemini), org-scoped context isolation, RBAC-enforced tools, streaming via Mercure, natural language queries over processes/tasks/directories
+- **Phase 30: AI Assistant — Write Tools + Modes** — Quick Mode (execute immediately) vs Design Mode (iterative clarification), Preview+Confirm pattern, AI-suggested process templates, usage limits per org
+- **Phase 31: Module Toggling & Menu Customization** — Per-org module flags, sidebar config per role, feature flags, custom landing pages
+- **Phase 32: Entity Passport** — Dynamic detail pages (PassportTemplate config with universal renderer, tabs, sections, field groups)
+- **Phase 33: Import/Export + Migration** — CSV/Excel import with AI column mapping, competitor migration adapters (Creatio, 1C/BAS, Jira, Monday), MigrationWizard, rollback capability
+- **Phase 34: Mobile / PWA** — Service worker, responsive design, push notifications, camera integration, QR code scanning
+
+### v6.0 Enterprise & Scale
 
 **Milestone Goal:** Enterprise features for large organizations — SSO, self-hosted packaging, billing, compliance, microservices extraction.
 
 Phases:
-- **Phase 31: SSO & Advanced Auth** — SAML 2.0, OIDC, LDAP/AD sync, 2FA enforcement per org, session management, OAuth2 provider
-- **Phase 32: Self-Hosted Packaging** — Helm chart, Docker Compose prod template, install wizard, upgrade path, air-gapped support, license key validation
-- **Phase 33: Billing & Subscriptions** — Plan tiers (Free/Starter/Pro/Enterprise), per-module pricing, Stripe + LiqPay/Fondy, usage metering, trial period
-- **Phase 34: Compliance & Data Protection** — GDPR (consent, right to erasure, data export), data retention policies, DPA template, SAF-T compliance
-- **Phase 35: GraphQL API** — Schema for core entities, DataLoader, subscriptions, rate limiting
-- **Phase 36: gRPC Inter-service** — Proto definitions, server/client implementation, service mesh prep
-- **Phase 37: Microservices Extraction** — Notification + Search as separate services, Traefik gateway, distributed tracing
-- **Phase 38: Advanced Workflow** — SubProcess node, multi-instance tasks, process mining/analytics, DMN decision tables, simulation, plugin marketplace
+- **Phase 35: SSO & Advanced Auth** — SAML 2.0, OIDC, LDAP/AD sync, 2FA enforcement per org, session management, OAuth2 provider
+- **Phase 36: Self-Hosted Packaging** — Helm chart, Docker Compose prod template, install wizard, upgrade path, air-gapped support, license key validation
+- **Phase 37: Billing & Subscriptions** — Plan tiers (Free/Starter/Pro/Enterprise), per-module pricing, Stripe + LiqPay/Fondy, usage metering, trial period
+- **Phase 38: Compliance & Data Protection** — GDPR (consent, right to erasure, data export), data retention policies, DPA template, SAF-T compliance
+- **Phase 39: GraphQL API** — Schema for core entities, DataLoader, subscriptions, rate limiting
+- **Phase 40: gRPC Inter-service** — Proto definitions, server/client implementation, service mesh prep
+- **Phase 41: Microservices Extraction** — Notification + Search as separate services, Traefik gateway, distributed tracing
+- **Phase 42: Process Mining & Advanced Analytics** — Process mining from audit log, conformance checking, simulation, DMN decision tables, plugin marketplace
