@@ -7,6 +7,9 @@ namespace App\Organization\Infrastructure\Security;
 use App\Identity\Infrastructure\Security\SecurityUser;
 use App\Organization\Domain\Entity\Organization;
 use App\Organization\Domain\Repository\EmployeeRepositoryInterface;
+use App\Organization\Domain\ValueObject\PermissionAction;
+use App\Organization\Domain\ValueObject\PermissionResource;
+use App\Organization\Infrastructure\Security\Service\PermissionResolverInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -21,6 +24,7 @@ final class OrganizationVoter extends Voter
 
     public function __construct(
         private readonly EmployeeRepositoryInterface $employeeRepository,
+        private readonly PermissionResolverInterface $permissionResolver,
     ) {
     }
 
@@ -49,29 +53,64 @@ final class OrganizationVoter extends Voter
 
     private function canManage(SecurityUser $user, Organization $organization): bool
     {
+        // Owner always has full access
         if ($organization->isOwner($user->getId())) {
             return true;
         }
 
+        // Check if employee is active (prerequisite for any permission check)
         $employee = $this->employeeRepository->findByUserIdAndOrganizationId(
             $user->getId(),
             $organization->id(),
         );
 
-        return null !== $employee && $employee->isActive();
+        if (null === $employee || !$employee->isActive()) {
+            return false;
+        }
+
+        // Delegate to PermissionResolver for hierarchical permission check
+        // Manage action covers all organization management
+        if ($this->permissionResolver->hasPermission(
+            $user->getId(),
+            $organization->id()->value(),
+            PermissionResource::Organization,
+            PermissionAction::Manage,
+        )) {
+            return true;
+        }
+
+        // Fall back to Update action for ORGANIZATION_MANAGE
+        return $this->permissionResolver->hasPermission(
+            $user->getId(),
+            $organization->id()->value(),
+            PermissionResource::Organization,
+            PermissionAction::Update,
+        );
     }
 
     private function canView(SecurityUser $user, Organization $organization): bool
     {
+        // Owner always has full access
         if ($organization->isOwner($user->getId())) {
             return true;
         }
 
+        // Check if employee is active (prerequisite for any permission check)
         $employee = $this->employeeRepository->findByUserIdAndOrganizationId(
             $user->getId(),
             $organization->id(),
         );
 
-        return null !== $employee && $employee->isActive();
+        if (null === $employee || !$employee->isActive()) {
+            return false;
+        }
+
+        // Delegate to PermissionResolver for hierarchical permission check
+        return $this->permissionResolver->hasPermission(
+            $user->getId(),
+            $organization->id()->value(),
+            PermissionResource::Organization,
+            PermissionAction::View,
+        );
     }
 }

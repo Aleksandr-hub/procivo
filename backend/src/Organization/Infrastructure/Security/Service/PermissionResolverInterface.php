@@ -33,4 +33,14 @@ interface PermissionResolverInterface
         PermissionResource $resource,
         PermissionAction $action,
     ): array;
+
+    /**
+     * Returns merged effective permissions for a user in an organization.
+     *
+     * Merges role permissions, department permissions, and user overrides
+     * using the hierarchy: User Override > Role > Department.
+     *
+     * @return list<array{resource: string, action: string, scope: string}>
+     */
+    public function resolveEffectivePermissions(string $userId, string $organizationId): array;
 }
