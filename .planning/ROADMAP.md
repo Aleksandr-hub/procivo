@@ -344,7 +344,7 @@ Plans:
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
 | 14. Infrastructure & Security | 5/5 | Complete    | 2026-03-06 | - |
 | 14.1 UI Refresh | 3/3 | Complete   | 2026-03-06 | - |
-| 15. API Documentation | 4/4 | Complete   | 2026-03-06 | - |
+| 15. API Documentation | 4/4 | Complete    | 2026-03-06 | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
 ---
