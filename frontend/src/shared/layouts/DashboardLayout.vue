@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AppSidebar from '@/shared/components/AppSidebar.vue'
 import AppTopbar from '@/shared/components/AppTopbar.vue'
 import ImpersonationBanner from '@/shared/components/ImpersonationBanner.vue'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
+import { usePermissionStore } from '@/modules/organization/stores/permission.store'
 
+const route = useRoute()
 const authStore = useAuthStore()
 const notificationStore = useNotificationStore()
+const permissionStore = usePermissionStore()
 const sidebarVisible = ref(true)
 
 // Initialize Mercure SSE when user is available, close on logout
@@ -18,6 +22,20 @@ watch(
       notificationStore.initMercure(user.id)
     } else {
       notificationStore.closeMercure()
+      permissionStore.reset()
+    }
+  },
+  { immediate: true },
+)
+
+// Fetch permissions when org context changes
+watch(
+  () => route.params.orgId as string | undefined,
+  (orgId, oldOrgId) => {
+    if (orgId && orgId !== oldOrgId && authStore.user) {
+      permissionStore.fetchMyPermissions(orgId)
+    } else if (!orgId) {
+      permissionStore.reset()
     }
   },
   { immediate: true },

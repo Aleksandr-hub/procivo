@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import type { PermissionResource, PermissionAction } from '@/modules/organization/types/organization.types'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -148,6 +149,34 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+// Navigation guard for permission-based route protection
+router.beforeEach(async (to) => {
+  const permMeta = to.meta.permission as
+    | { resource: PermissionResource; action: PermissionAction }
+    | undefined
+
+  if (permMeta) {
+    const { usePermissionStore } = await import(
+      '@/modules/organization/stores/permission.store'
+    )
+    const permissionStore = usePermissionStore()
+
+    // If permissions not loaded yet, allow navigation (will be checked after fetch)
+    if (!permissionStore.loaded) return true
+
+    if (!permissionStore.can(permMeta.resource, permMeta.action)) {
+      // Redirect to dashboard or org detail page
+      const orgId = to.params.orgId as string | undefined
+      if (orgId) {
+        return { name: 'dashboard', params: { orgId } }
+      }
+      return { name: 'organizations' }
+    }
+  }
+
+  return true
 })
 
 export default router

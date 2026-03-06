@@ -12,9 +12,13 @@ import type {
   DepartmentTreeDTO,
 } from '@/modules/organization/types/organization.types'
 import InviteDialog from '@/modules/organization/components/InviteDialog.vue'
+import { useAuthStore } from '@/modules/auth/stores/auth.store'
+import { usePermissionStore } from '@/modules/organization/stores/permission.store'
 import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
+const auth = useAuthStore()
+const permissionStore = usePermissionStore()
 const toast = useToast()
 const confirm = useConfirm()
 const empStore = useEmployeeStore()
@@ -144,13 +148,35 @@ function getInvitationSeverity(status: string) {
 const pendingCount = computed(
   () => invStore.invitations.filter((i) => i.status === 'pending').length,
 )
+
+const isSuperAdmin = computed(() => auth.user?.roles?.includes('ROLE_SUPER_ADMIN') ?? false)
+
+async function onImpersonate(emp: EmployeeDTO) {
+  try {
+    await auth.startImpersonation(emp.userId, `Impersonation from employees page`)
+    toast.add({
+      severity: 'info',
+      summary: t('employees.impersonation'),
+      detail: t('employees.impersonationStarted', { name: emp.userFullName || emp.userId }),
+      life: 3000,
+    })
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { error?: string } } }
+    toast.add({
+      severity: 'error',
+      summary: t('common.error'),
+      detail: axiosError.response?.data?.error || t('employees.impersonationFailed'),
+      life: 5000,
+    })
+  }
+}
 </script>
 
 <template>
   <div class="employees-page">
     <div class="page-header">
       <h3>{{ t('employees.title') }}</h3>
-      <Button :label="t('employees.inviteEmployee')" icon="pi pi-envelope" @click="showInviteDialog = true" />
+      <Button v-if="permissionStore.can('invitation', 'create')" :label="t('employees.inviteEmployee')" icon="pi pi-envelope" @click="showInviteDialog = true" />
     </div>
 
     <TabView v-model:activeIndex="activeTab">
@@ -215,18 +241,30 @@ const pendingCount = computed(
               <Tag :value="data.status" :severity="getStatusSeverity(data.status)" />
             </template>
           </Column>
-          <Column style="width: 80px">
+          <Column style="width: 120px">
             <template #body="{ data }">
-              <Button
-                v-if="data.status === 'active'"
-                icon="pi pi-user-minus"
-                text
-                rounded
-                size="small"
-                severity="danger"
-                @click="confirmDismiss(data)"
-                v-tooltip="t('employees.dismiss')"
-              />
+              <div style="display: flex; gap: 0.25rem;">
+                <Button
+                  v-if="isSuperAdmin && data.status === 'active' && data.userId !== auth.user?.id"
+                  icon="pi pi-eye"
+                  text
+                  rounded
+                  size="small"
+                  severity="info"
+                  @click="onImpersonate(data)"
+                  v-tooltip="t('employees.impersonate')"
+                />
+                <Button
+                  v-if="data.status === 'active'"
+                  icon="pi pi-user-minus"
+                  text
+                  rounded
+                  size="small"
+                  severity="danger"
+                  @click="confirmDismiss(data)"
+                  v-tooltip="t('employees.dismiss')"
+                />
+              </div>
             </template>
           </Column>
         </DataTable>

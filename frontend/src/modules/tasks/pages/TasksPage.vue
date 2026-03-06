@@ -7,6 +7,7 @@ import { useTaskStore } from '@/modules/tasks/stores/task.store'
 import { useEmployeeStore } from '@/modules/organization/stores/employee.store'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useProcessDefinitionStore } from '@/modules/workflow/stores/process-definition.store'
+import { usePermissionStore } from '@/modules/organization/stores/permission.store'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 import { isOverdue } from '@/shared/utils/date-format'
 import type { TaskDTO, TaskPriority } from '@/modules/tasks/types/task.types'
@@ -22,6 +23,7 @@ const taskStore = useTaskStore()
 const empStore = useEmployeeStore()
 const authStore = useAuthStore()
 const defStore = useProcessDefinitionStore()
+const permissionStore = usePermissionStore()
 
 const orgId = computed(() => route.params.orgId as string)
 
@@ -149,6 +151,7 @@ watch(
         </div>
         <div class="tasks-header-right">
           <Button
+            v-if="permissionStore.can('task', 'create')"
             :label="t('tasks.createTask')"
             icon="pi pi-plus"
             @click="showCreateDialog = true"

@@ -12,6 +12,7 @@ export const usePermissionStore = defineStore('permission', () => {
   const loading = ref(false)
 
   const isOwner = computed(() => data.value?.isOwner ?? false)
+  const loaded = computed(() => data.value !== null)
 
   async function fetchMyPermissions(orgId: string) {
     loading.value = true
@@ -58,5 +59,5 @@ export const usePermissionStore = defineStore('permission', () => {
     data.value = null
   }
 
-  return { data, loading, isOwner, fetchMyPermissions, can, getScope, reset }
+  return { data, loading, loaded, isOwner, fetchMyPermissions, can, getScope, reset }
 })

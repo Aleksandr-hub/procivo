@@ -13,6 +13,7 @@ import { definitionStatusSeverity } from '@/shared/utils/status-severity'
 import { getApiErrorMessage } from '@/shared/utils/api-error'
 import { processDefinitionApi } from '@/modules/workflow/api/process-definition.api'
 import ProcessTemplateGallery from '@/modules/workflow/components/ProcessTemplateGallery.vue'
+import { usePermissionStore } from '@/modules/organization/stores/permission.store'
 import type { ProcessTemplate } from '@/modules/workflow/data/process-templates'
 
 const route = useRoute()
@@ -20,6 +21,7 @@ const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
 const store = useProcessDefinitionStore()
+const permissionStore = usePermissionStore()
 const { t } = useI18n()
 
 const orgId = computed(() => route.params.orgId as string)
@@ -151,8 +153,8 @@ function confirmDelete(def: ProcessDefinitionDTO) {
     <div class="page-header">
       <h3>{{ t('workflow.processDefinitions') }}</h3>
       <div class="header-actions">
-        <Button :label="t('workflow.createFromTemplate')" icon="pi pi-th-large" severity="secondary" outlined @click="showTemplateDialog = true" />
-        <Button :label="t('workflow.createDefinition')" icon="pi pi-plus" @click="openCreate" />
+        <Button v-if="permissionStore.can('workflow', 'create')" :label="t('workflow.createFromTemplate')" icon="pi pi-th-large" severity="secondary" outlined @click="showTemplateDialog = true" />
+        <Button v-if="permissionStore.can('workflow', 'create')" :label="t('workflow.createDefinition')" icon="pi pi-plus" @click="openCreate" />
       </div>
     </div>
 
