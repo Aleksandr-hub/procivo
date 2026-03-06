@@ -140,6 +140,12 @@ services:
     App\Organization\Domain\Repository\InvitationRepositoryInterface:
         alias: App\Organization\Infrastructure\Repository\DoctrineInvitationRepository
 
+    App\Organization\Domain\Repository\DepartmentPermissionRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineDepartmentPermissionRepository
+
+    App\Organization\Domain\Repository\UserPermissionOverrideRepositoryInterface:
+        alias: App\Organization\Infrastructure\Repository\DoctrineUserPermissionOverrideRepository
+
     App\Organization\Application\Port\InvitationMailerInterface:
         alias: App\Organization\Infrastructure\Service\SymfonyInvitationMailer
 

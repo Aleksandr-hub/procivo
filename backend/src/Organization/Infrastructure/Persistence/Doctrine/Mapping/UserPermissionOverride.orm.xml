@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Organization\Domain\Entity\UserPermissionOverride" table="organization_user_permission_overrides">
+
+        <id name="id" type="string" length="36" column="id"/>
+
+        <field name="employeeId" type="string" length="36" column="employee_id"/>
+        <field name="organizationId" type="string" length="36" column="organization_id"/>
+        <field name="resource" type="string" length="50" column="resource"/>
+        <field name="action" type="string" length="50" column="action"/>
+        <field name="effect" type="string" length="10" column="effect"/>
+        <field name="scope" type="string" length="50" column="scope"/>
+        <field name="createdAt" type="datetime_immutable" column="created_at"/>
+
+        <indexes>
+            <index name="idx_user_perm_override_emp_id" columns="employee_id"/>
+            <index name="idx_user_perm_override_org_id" columns="organization_id"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint name="uniq_user_perm_override_emp_resource_action" columns="employee_id,resource,action"/>
+        </unique-constraints>
+
+    </entity>
+
+</doctrine-mapping>

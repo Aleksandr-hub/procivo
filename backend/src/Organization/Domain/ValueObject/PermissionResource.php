@@ -32,4 +32,7 @@ enum PermissionResource: string
 
     /** Workflow — управління бізнес-процесами */
     case Workflow = 'workflow';
+
+    /** Аудит — перегляд журналу дій */
+    case Audit = 'audit';
 }
