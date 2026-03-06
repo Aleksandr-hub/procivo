@@ -94,7 +94,7 @@ const lineData = computed(() => {
         borderColor: colors.value.primaryColor,
         backgroundColor: colors.value.primaryColor + '33',
         tension: 0.4,
-        fill: false,
+        fill: true,
         pointRadius: 3,
       },
     ],
@@ -213,7 +213,6 @@ const barOptions = computed(() => ({
   flex-direction: column;
   gap: 1rem;
   overflow-y: auto;
-  max-height: 400px;
 }
 
 .empty-state {
