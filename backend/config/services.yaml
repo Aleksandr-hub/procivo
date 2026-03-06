@@ -17,6 +17,17 @@ services:
         arguments:
             $checks: !tagged_iterator app.health_check
 
+    # === Prometheus Metrics ===
+    Prometheus\Storage\Redis:
+        arguments:
+            $options:
+                host: '%env(REDIS_HOST)%'
+                port: '%env(int:REDIS_PORT)%'
+
+    Prometheus\CollectorRegistry:
+        arguments:
+            $storageAdapter: '@Prometheus\Storage\Redis'
+
     # === Bounded Contexts ===
     App\Identity\:
         resource: '../src/Identity/'

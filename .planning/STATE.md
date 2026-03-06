@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 
 ## Current Position
 
-Phase: 13 (Granular Permissions RBAC)
-Plan: 4 of 4 (completed, 13-04: frontend permissions UI)
-Status: Phase 13 Complete
-Last activity: 2026-03-06 — Completed 13-04: frontend permissions UI
+Phase: 14 (Infrastructure & Security)
+Plan: 3 of 5 (completed, 14-03: PostgreSQL backup infrastructure)
+Status: Phase 14 In Progress
+Last activity: 2026-03-06 — Completed 14-03: PostgreSQL backup infrastructure
 
-Progress: [████████████] Phase 13 — 4/4 plans complete
+Progress: [██████------] Phase 14 — 3/5 plans complete
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Progress: [████████████] Phase 13 — 4/4 plans complete
 | Phase 13 P01 | 6 | 2 tasks | 19 files |
 | Phase 13 P03 | 8 | 2 tasks | 25 files |
 | Phase 13 P04 | 8 | 2 tasks | 18 files |
+| Phase 14-infrastructure-security P03 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -161,6 +162,9 @@ Key architectural constraints for v2.0 (from research):
 - [Phase 13]: Migration uses VARCHAR(36) not UUID type for consistency with existing Doctrine mappings
 - [Phase 13]: Hierarchical permission merge: UserOverride deny blocks immediately; allow overrides scope; Role and Department scopes use wider-wins
 - [Phase 13]: Department permission tree inheritance walks parentId chain; child department explicit permission overrides parent
+- [Phase 14-03]: postgres:18-alpine as base image for backup container — includes pg_dump natively, no version mismatch
+- [Phase 14-03]: Daily/weekly/monthly prefix rotation based on day-of-month and day-of-week for S3 lifecycle retention
+- [Phase 14-03]: Initial backup on container startup for dev/testing verification
 
 ### Pending Todos
 
@@ -177,6 +181,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-06
-Stopped at: Completed 13-04-PLAN.md — frontend permissions UI (Phase 13 complete)
+Stopped at: Completed 14-03-PLAN.md — PostgreSQL backup infrastructure
 Resume file: None
-Next action: /gsd:new-milestone to plan next milestone
+Next action: Continue Phase 14 execution (plans 04-05 remaining)

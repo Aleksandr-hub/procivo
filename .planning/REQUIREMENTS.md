@@ -93,7 +93,7 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 
 ### Infrastructure & Security (Phase 14)
 
-- [ ] **INFRA-01**: PostgreSQL daily backups with S3 storage, retention policy (30d daily, 3mo weekly, 1yr monthly), restore test
+- [x] **INFRA-01**: PostgreSQL daily backups with S3 storage, retention policy (30d daily, 3mo weekly, 1yr monthly), restore test
 - [ ] **INFRA-02**: 2FA (TOTP) — enroll via QR code, two-step JWT login, backup codes, remember device 30d
 - [ ] **INFRA-03**: Health check endpoints (/health, /health/db, /health/redis, /health/rabbitmq) — public, no JWT
 - [ ] **INFRA-04**: Prometheus metrics export (request duration, error rates) + Grafana dashboards
