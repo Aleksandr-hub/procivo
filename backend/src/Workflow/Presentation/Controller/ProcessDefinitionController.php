@@ -13,8 +13,10 @@ use App\Workflow\Application\Command\DeleteProcessDefinition\DeleteProcessDefini
 use App\Workflow\Application\Command\MigrateProcessInstances\MigrateProcessInstancesCommand;
 use App\Workflow\Application\Command\PublishProcessDefinition\PublishProcessDefinitionCommand;
 use App\Workflow\Application\Command\RevertProcessDefinitionToDraft\RevertProcessDefinitionToDraftCommand;
+use App\Workflow\Application\Command\SetProcessDefinitionAccess\SetProcessDefinitionAccessCommand;
 use App\Workflow\Application\Command\UpdateProcessDefinition\UpdateProcessDefinitionCommand;
 use App\Workflow\Application\Query\GetProcessDefinition\GetProcessDefinitionQuery;
+use App\Workflow\Application\Query\GetProcessDefinitionAccess\GetProcessDefinitionAccessQuery;
 use App\Workflow\Application\Query\GetStartFormSchema\GetStartFormSchemaQuery;
 use App\Workflow\Application\Query\ListProcessDefinitions\ListProcessDefinitionsQuery;
 use App\Workflow\Application\Query\ListVersions\ListVersionsQuery;
@@ -163,6 +165,46 @@ final readonly class ProcessDefinitionController
         ));
 
         return new JsonResponse(['message' => 'Running instances migrated to target version.']);
+    }
+
+    #[Route('/{definitionId}/access', name: 'get_access', methods: ['GET'])]
+    public function getAccess(string $organizationId, string $definitionId): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_UPDATE');
+
+        $accessRules = $this->queryBus->ask(new GetProcessDefinitionAccessQuery($definitionId));
+
+        return new JsonResponse($accessRules);
+    }
+
+    #[Route('/{definitionId}/access', name: 'set_access', methods: ['PUT'])]
+    public function setAccess(string $organizationId, string $definitionId, Request $request): JsonResponse
+    {
+        $this->authorizer->authorize($organizationId, 'WORKFLOW_UPDATE');
+        $data = $this->decodeJson($request);
+
+        /** @var string $accessType */
+        $accessType = $data['accessType'] ?? '';
+        /** @var list<array{departmentId?: ?string, roleId?: ?string}> $rawEntries */
+        $rawEntries = $data['entries'] ?? [];
+
+        $entries = array_map(
+            static fn (array $entry): array => [
+                'departmentId' => $entry['departmentId'] ?? null,
+                'roleId' => $entry['roleId'] ?? null,
+            ],
+            $rawEntries,
+        );
+
+        $this->commandBus->dispatch(new SetProcessDefinitionAccessCommand(
+            processDefinitionId: $definitionId,
+            organizationId: $organizationId,
+            accessType: $accessType,
+            entries: $entries,
+            actorId: $this->currentUserProvider->getUserId(),
+        ));
+
+        return new JsonResponse(['message' => 'Access rules updated.']);
     }
 
     /**
