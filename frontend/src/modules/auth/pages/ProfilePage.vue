@@ -4,6 +4,10 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'primevue/usetoast'
 import { useAuthStore } from '@/modules/auth/stores/auth.store'
 import { useNotificationStore } from '@/modules/notifications/stores/notification.store'
+import { userApi } from '@/modules/auth/api/user.api'
+import TwoFactorSetupDialog from '@/modules/auth/components/TwoFactorSetupDialog.vue'
+import BackupCodesDialog from '@/modules/auth/components/BackupCodesDialog.vue'
+import InputOtp from 'primevue/inputotp'
 import type { NotificationPreferences } from '@/modules/notifications/types/notification.types'
 
 const { t } = useI18n()
@@ -131,6 +135,49 @@ const currentPassword = ref('')
 const newPassword = ref('')
 const passwordLoading = ref(false)
 
+// Two-Factor Authentication section
+const showSetupDialog = ref(false)
+const showBackupCodes = ref(false)
+const backupCodes = ref<string[]>([])
+const showDisableDialog = ref(false)
+const disableCode = ref('')
+const disableLoading = ref(false)
+
+function onTwoFactorConfirmed(codes: string[]) {
+  backupCodes.value = codes
+  showBackupCodes.value = true
+  auth.fetchUser()
+}
+
+function onBackupCodesClosed() {
+  showBackupCodes.value = false
+  backupCodes.value = []
+}
+
+async function disableTwoFactor() {
+  if (!disableCode.value || disableCode.value.length < 6) return
+
+  disableLoading.value = true
+  try {
+    await userApi.disableTwoFactor(disableCode.value)
+    toast.add({ severity: 'success', summary: t('common.success'), life: 3000 })
+    showDisableDialog.value = false
+    disableCode.value = ''
+    await auth.fetchUser()
+  } catch (err: unknown) {
+    const axiosError = err as { response?: { data?: { error?: string } } }
+    const msg = axiosError.response?.data?.error || t('auth.twoFactor.invalidCode')
+    toast.add({ severity: 'error', summary: t('common.error'), detail: msg, life: 4000 })
+  } finally {
+    disableLoading.value = false
+  }
+}
+
+function onDisableOtpComplete(value: string) {
+  disableCode.value = value
+  disableTwoFactor()
+}
+
 async function changePassword() {
   if (!currentPassword.value || !newPassword.value) return
 
@@ -255,6 +302,80 @@ async function changePassword() {
         </div>
       </template>
     </Card>
+
+    <!-- Security / Two-Factor Authentication Section -->
+    <Card class="profile-card">
+      <template #title>{{ t('auth.twoFactor.profile.sectionTitle') }}</template>
+      <template #content>
+        <div class="two-factor-section">
+          <!-- 2FA Enabled -->
+          <div v-if="auth.user?.totpEnabled" class="two-factor-status">
+            <div class="status-row">
+              <i class="pi pi-check-circle status-enabled-icon" />
+              <span class="status-text">{{ t('auth.twoFactor.profile.enabled') }}</span>
+            </div>
+            <Button
+              :label="t('auth.twoFactor.profile.disable')"
+              severity="danger"
+              text
+              @click="showDisableDialog = true"
+            />
+          </div>
+
+          <!-- 2FA Not Enabled -->
+          <div v-else class="two-factor-status">
+            <span class="status-text status-not-enabled">{{ t('auth.twoFactor.profile.notEnabled') }}</span>
+            <Button
+              :label="t('auth.twoFactor.profile.enable')"
+              @click="showSetupDialog = true"
+            />
+          </div>
+        </div>
+      </template>
+    </Card>
+
+    <!-- 2FA Setup Dialog -->
+    <TwoFactorSetupDialog
+      v-model:visible="showSetupDialog"
+      @confirmed="onTwoFactorConfirmed"
+    />
+
+    <!-- Backup Codes Dialog -->
+    <BackupCodesDialog
+      v-model:visible="showBackupCodes"
+      :codes="backupCodes"
+      @update:visible="!$event && onBackupCodesClosed()"
+    />
+
+    <!-- Disable 2FA Confirmation Dialog -->
+    <Dialog
+      v-model:visible="showDisableDialog"
+      :header="t('auth.twoFactor.profile.disable')"
+      modal
+      :style="{ width: '400px' }"
+    >
+      <p>{{ t('auth.twoFactor.profile.disableConfirm') }}</p>
+      <div class="disable-otp-section">
+        <label>{{ t('auth.twoFactor.profile.disableCodePrompt') }}</label>
+        <InputOtp
+          v-model="disableCode"
+          :length="6"
+          integerOnly
+          @complete="onDisableOtpComplete"
+          class="disable-otp-input"
+        />
+      </div>
+      <template #footer>
+        <Button :label="t('common.cancel')" text @click="showDisableDialog = false; disableCode = ''" />
+        <Button
+          :label="t('auth.twoFactor.profile.disable')"
+          severity="danger"
+          :loading="disableLoading"
+          :disabled="disableCode.length < 6"
+          @click="disableTwoFactor"
+        />
+      </template>
+    </Dialog>
 
     <!-- Notification Preferences Section -->
     <Card class="profile-card">
@@ -410,5 +531,55 @@ async function changePassword() {
 .pref-channel-cell {
   text-align: center;
   padding: 0.75rem;
+}
+
+.two-factor-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.two-factor-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-enabled-icon {
+  color: var(--p-green-500);
+  font-size: 1.25rem;
+}
+
+.status-text {
+  font-size: 0.875rem;
+  color: var(--p-text-color);
+}
+
+.status-not-enabled {
+  color: var(--p-text-muted-color);
+}
+
+.disable-otp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.disable-otp-section label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--p-text-color);
+}
+
+.disable-otp-input {
+  gap: 0.5rem;
 }
 </style>
