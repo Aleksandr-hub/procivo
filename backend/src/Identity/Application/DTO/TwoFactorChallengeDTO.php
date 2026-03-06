@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Identity\Application\DTO;
 
+use OpenApi\Attributes as OA;
+
+#[OA\Schema(description: 'Two-factor authentication challenge requiring TOTP verification')]
 final readonly class TwoFactorChallengeDTO implements \JsonSerializable
 {
     public function __construct(
+        #[OA\Property(description: 'Partial JWT token for 2FA verification')]
         public string $partialToken,
+        #[OA\Property(description: 'Whether 2FA verification is required')]
         public bool $twoFactorRequired = true,
     ) {
     }

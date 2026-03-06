@@ -5,14 +5,21 @@ declare(strict_types=1);
 namespace App\Workflow\Application\DTO;
 
 use App\Workflow\Domain\Entity\ProcessDefinitionVersion;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(description: 'Published version of a process definition')]
 final readonly class ProcessDefinitionVersionDTO implements \JsonSerializable
 {
     public function __construct(
+        #[OA\Property(description: 'Version UUID', format: 'uuid')]
         public string $id,
+        #[OA\Property(description: 'Version number (auto-increment)')]
         public int $versionNumber,
+        #[OA\Property(description: 'Publish timestamp', format: 'date-time')]
         public string $publishedAt,
+        #[OA\Property(description: 'Publisher user UUID', format: 'uuid')]
         public string $publishedBy,
+        #[OA\Property(description: 'Running instances on this version')]
         public int $runningInstanceCount = 0,
     ) {
     }

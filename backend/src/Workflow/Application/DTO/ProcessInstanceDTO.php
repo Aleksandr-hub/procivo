@@ -4,30 +4,45 @@ declare(strict_types=1);
 
 namespace App\Workflow\Application\DTO;
 
+use OpenApi\Attributes as OA;
+
+#[OA\Schema(description: 'Running or completed process instance')]
 final readonly class ProcessInstanceDTO implements \JsonSerializable
 {
     /**
-     * @param array<string, mixed> $variables
+     * @param array<string, mixed>                $variables
      * @param array<string, array<string, mixed>> $tokens
      */
     public function __construct(
+        #[OA\Property(description: 'Process instance UUID', format: 'uuid')]
         public string $id,
+        #[OA\Property(description: 'Process definition UUID', format: 'uuid')]
         public string $definitionId,
+        #[OA\Property(description: 'Process definition name')]
         public string $definitionName,
+        #[OA\Property(description: 'Definition version UUID', format: 'uuid')]
         public string $versionId,
+        #[OA\Property(description: 'Organization UUID', format: 'uuid')]
         public string $organizationId,
+        #[OA\Property(description: 'Instance status', enum: ['running', 'completed', 'cancelled'])]
         public string $status,
+        #[OA\Property(description: 'Starter user UUID', format: 'uuid')]
         public string $startedBy,
+        #[OA\Property(description: 'Process variables', type: 'object')]
         public array $variables,
+        #[OA\Property(description: 'Execution tokens', type: 'object')]
         public array $tokens,
+        #[OA\Property(description: 'Start timestamp', format: 'date-time')]
         public string $startedAt,
+        #[OA\Property(description: 'Completion timestamp', format: 'date-time', nullable: true)]
         public ?string $completedAt,
+        #[OA\Property(description: 'Cancellation timestamp', format: 'date-time', nullable: true)]
         public ?string $cancelledAt,
     ) {
     }
 
     /**
-     * @param array<string, mixed> $row
+     * @param array<string, mixed>  $row
      * @param array<string, string> $timerFireAtMap token_id => fire_at for pending timers
      */
     public static function fromRow(array $row, array $timerFireAtMap = []): self

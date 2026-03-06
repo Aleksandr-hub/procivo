@@ -5,21 +5,32 @@ declare(strict_types=1);
 namespace App\Organization\Application\DTO;
 
 use App\Organization\Domain\Entity\Department;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(description: 'Department tree node with nested children')]
 final readonly class DepartmentTreeDTO implements \JsonSerializable
 {
     /**
      * @param list<DepartmentTreeDTO> $children
      */
     public function __construct(
+        #[OA\Property(description: 'Department UUID', format: 'uuid')]
         public string $id,
+        #[OA\Property(description: 'Parent department UUID', format: 'uuid', nullable: true)]
         public ?string $parentId,
+        #[OA\Property(description: 'Department name')]
         public string $name,
+        #[OA\Property(description: 'Unique department code')]
         public string $code,
+        #[OA\Property(description: 'Department description', nullable: true)]
         public ?string $description,
+        #[OA\Property(description: 'Sort order within parent')]
         public int $sortOrder,
+        #[OA\Property(description: 'Nesting level in hierarchy')]
         public int $level,
+        #[OA\Property(description: 'Department status', enum: ['active', 'archived'])]
         public string $status,
+        #[OA\Property(description: 'Child departments', type: 'array', items: new OA\Items(ref: '#/components/schemas/DepartmentTreeDTO'))]
         public array $children,
     ) {
     }

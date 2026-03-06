@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Workflow\Application\DTO;
 
+use OpenApi\Attributes as OA;
+
+#[OA\Schema(description: 'Process definition with full graph (nodes and transitions)')]
 final readonly class ProcessDefinitionDetailDTO implements \JsonSerializable
 {
     /**
@@ -11,8 +14,11 @@ final readonly class ProcessDefinitionDetailDTO implements \JsonSerializable
      * @param list<TransitionDTO> $transitions
      */
     public function __construct(
+        #[OA\Property(description: 'Process definition')]
         public ProcessDefinitionDTO $definition,
+        #[OA\Property(description: 'Workflow nodes', type: 'array', items: new OA\Items(ref: '#/components/schemas/NodeDTO'))]
         public array $nodes,
+        #[OA\Property(description: 'Workflow transitions', type: 'array', items: new OA\Items(ref: '#/components/schemas/TransitionDTO'))]
         public array $transitions,
     ) {
     }

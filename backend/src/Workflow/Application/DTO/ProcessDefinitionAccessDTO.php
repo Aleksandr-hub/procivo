@@ -5,16 +5,25 @@ declare(strict_types=1);
 namespace App\Workflow\Application\DTO;
 
 use App\Workflow\Domain\Entity\ProcessDefinitionAccess;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(description: 'Access control entry for a process definition')]
 final readonly class ProcessDefinitionAccessDTO implements \JsonSerializable
 {
     public function __construct(
+        #[OA\Property(description: 'Access entry UUID', format: 'uuid')]
         public string $id,
+        #[OA\Property(description: 'Process definition UUID', format: 'uuid')]
         public string $processDefinitionId,
+        #[OA\Property(description: 'Department UUID', format: 'uuid', nullable: true)]
         public ?string $departmentId,
+        #[OA\Property(description: 'Department name', nullable: true)]
         public ?string $departmentName,
+        #[OA\Property(description: 'Role UUID', format: 'uuid', nullable: true)]
         public ?string $roleId,
+        #[OA\Property(description: 'Role name', nullable: true)]
         public ?string $roleName,
+        #[OA\Property(description: 'Access type', enum: ['starter', 'viewer'])]
         public string $accessType,
     ) {
     }

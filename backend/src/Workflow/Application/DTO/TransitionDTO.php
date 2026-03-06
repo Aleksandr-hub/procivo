@@ -5,21 +5,32 @@ declare(strict_types=1);
 namespace App\Workflow\Application\DTO;
 
 use App\Workflow\Domain\Entity\Transition;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(description: 'Workflow transition connecting two nodes')]
 final readonly class TransitionDTO implements \JsonSerializable
 {
     /**
      * @param array<int, array<string, mixed>>|null $formFields
      */
     public function __construct(
+        #[OA\Property(description: 'Transition UUID', format: 'uuid')]
         public string $id,
+        #[OA\Property(description: 'Process definition UUID', format: 'uuid')]
         public string $processDefinitionId,
+        #[OA\Property(description: 'Source node UUID', format: 'uuid')]
         public string $sourceNodeId,
+        #[OA\Property(description: 'Target node UUID', format: 'uuid')]
         public string $targetNodeId,
+        #[OA\Property(description: 'Transition display name', nullable: true)]
         public ?string $name,
+        #[OA\Property(description: 'Action key for user task transitions', nullable: true)]
         public ?string $actionKey,
+        #[OA\Property(description: 'Condition expression for XOR gateways', nullable: true)]
         public ?string $conditionExpression,
+        #[OA\Property(description: 'Form field definitions for this transition', type: 'array', items: new OA\Items(type: 'object'), nullable: true)]
         public ?array $formFields,
+        #[OA\Property(description: 'Sort order for transition evaluation')]
         public int $sortOrder,
     ) {
     }
