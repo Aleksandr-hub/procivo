@@ -90,6 +90,16 @@ Requirements for production-ready milestone. Each maps to roadmap phases.
 - [x] **PERM-04**: Admin UI with permissions management page — permission matrices per role, per department, per user with immediate effect
 - [x] **PERM-05**: All API endpoints enforce permissions via OrganizationAuthorizer — no endpoint relies solely on "user is in organization"
 - [ ] **PERM-06**: Permission changes logged in audit trail with before/after diff
+
+### Infrastructure & Security (Phase 14)
+
+- [ ] **INFRA-01**: PostgreSQL daily backups with S3 storage, retention policy (30d daily, 3mo weekly, 1yr monthly), restore test
+- [ ] **INFRA-02**: 2FA (TOTP) — enroll via QR code, two-step JWT login, backup codes, remember device 30d
+- [ ] **INFRA-03**: Health check endpoints (/health, /health/db, /health/redis, /health/rabbitmq) — public, no JWT
+- [ ] **INFRA-04**: Prometheus metrics export (request duration, error rates) + Grafana dashboards
+- [ ] **INFRA-05**: Soft delete for Organization, User, ProcessDefinition, Task — Doctrine filter, admin restore within 30d
+- [ ] **INFRA-06**: Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy) + NelmioCorsBundle per-env CORS
+
 ## Future Requirements
 
 Deferred to v3.0+. Tracked but not in current roadmap.
@@ -187,13 +197,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERM-04 | Phase 13 | Planned |
 | PERM-05 | Phase 13 | Planned |
 | PERM-06 | Phase 13 | Planned |
+| INFRA-01 | Phase 14 | Planned |
+| INFRA-02 | Phase 14 | Planned |
+| INFRA-03 | Phase 14 | Planned |
+| INFRA-04 | Phase 14 | Planned |
+| INFRA-05 | Phase 14 | Planned |
+| INFRA-06 | Phase 14 | Planned |
 
 **Coverage:**
-- v2.0 requirements: 47 total
+- v2.0 requirements: 53 total
 - Satisfied: 40 (checkboxes [x])
 - Pending: 7 (PLSH-01, PLSH-02, PLSH-03, BRD-07, PROF-03, ADMN-01, ADMN-02)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 — Phase 06.1 VER requirements added*
+*Last updated: 2026-03-06 — Phase 14 INFRA requirements added*

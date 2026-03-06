@@ -269,10 +269,13 @@ Plans:
   4. Prometheus metrics are exported (request duration, queue depth, error rates) and Grafana dashboards display system health and business metrics
   5. Soft delete is implemented for Organization, User, ProcessDefinition, and Task — deleted entities are hidden by default via Doctrine filter, admin can restore within 30 days
   6. Security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options) are set on all responses; CORS is configured per environment
-**Plans:** 2 plans
+**Plans:** 5 plans
 Plans:
-- [ ] 12-01-PLAN.md — Backend impersonation infrastructure (JWT extension, CQRS commands, audit handlers, AdminController, security config, promote-user CLI)
-- [ ] 12-02-PLAN.md — Frontend impersonation UX (auth store token swap, ImpersonationBanner, http-client refresh guard, i18n)
+- [ ] 14-01-PLAN.md — Health check endpoints + Prometheus metrics + Grafana dashboards
+- [ ] 14-02-PLAN.md — Soft delete infrastructure + security headers + NelmioCorsBundle
+- [ ] 14-03-PLAN.md — PostgreSQL backup Docker service + S3 retention + restore test
+- [ ] 14-04-PLAN.md — 2FA TOTP backend (User entity, TotpService, two-step JWT login, rate limiting)
+- [ ] 14-05-PLAN.md — 2FA frontend (TwoFactorVerifyPage, profile setup dialog, backup codes)
 
 ### Phase 15: API Documentation
 **Goal**: All API endpoints are documented with OpenAPI 3.1 spec, browsable via Swagger UI, exportable as Postman collection
@@ -283,10 +286,7 @@ Plans:
   2. Swagger UI is accessible at /api/docs in dev/staging (auth-protected in production) and accurately reflects the live API
   3. Postman collection is auto-generated and downloadable from /api/docs
   4. API versioning strategy is documented with migration guide for v1 → v2 breaking changes
-**Plans:** 2 plans
-Plans:
-- [ ] 12-01-PLAN.md — Backend impersonation infrastructure (JWT extension, CQRS commands, audit handlers, AdminController, security config, promote-user CLI)
-- [ ] 12-02-PLAN.md — Frontend impersonation UX (auth store token swap, ImpersonationBanner, http-client refresh guard, i18n)
+**Plans**: TBD
 
 ### Phase 16: Product Documentation
 **Goal**: Comprehensive product documentation accessible to all roles — users, admins, testers, support — with structured knowledge base that serves as foundation for future AI Assistant (v3.0)
@@ -297,10 +297,7 @@ Plans:
   2. Admin Guide documents system configuration: organization setup, employee management, process designer, permissions, impersonation, notification preferences
   3. Searchable Help Center page in the app with quick navigation, category grouping, and full-text search across all documentation
   4. Knowledge base is structured in machine-readable format (Markdown + frontmatter metadata) suitable for RAG indexing by future AI Assistant — each article tagged with module, role, and feature
-**Plans:** 2 plans
-Plans:
-- [ ] 12-01-PLAN.md — Backend impersonation infrastructure (JWT extension, CQRS commands, audit handlers, AdminController, security config, promote-user CLI)
-- [ ] 12-02-PLAN.md — Frontend impersonation UX (auth store token swap, ImpersonationBanner, http-client refresh guard, i18n)
+**Plans**: TBD
 
 ## Progress
 
@@ -324,7 +321,7 @@ Plans:
 | 11.3 Avatar Display Extension | 2/2 | Complete    | 2026-03-05 | - |
 | 12. Super Admin Impersonation | 2/2 | Complete    | 2026-03-05 | - |
 | 13. Granular Permissions (RBAC) | 4/4 | Complete    | 2026-03-06 | - |
-| 14. Infrastructure & Security | v2.0 | 0/TBD | Not started | - |
+| 14. Infrastructure & Security | v2.0 | 0/5 | In progress | - |
 | 15. API Documentation | v2.0 | 0/TBD | Not started | - |
 | 16. Product Documentation | v2.0 | 0/TBD | Not started | - |
 
