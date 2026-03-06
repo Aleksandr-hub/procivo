@@ -48,8 +48,12 @@ framework:
             # Identity events → async (RabbitMQ) for audit processing
             App\Identity\Domain\Event\UserRegisteredEvent: async
             App\Identity\Domain\Event\PasswordChangedEvent: async
-            # Organization events → async (RabbitMQ) for notification processing
+            # Organization events → async (RabbitMQ) for notification and audit processing
             App\Organization\Domain\Event\InvitationCreatedEvent: async
+            App\Organization\Domain\Event\PermissionGrantedEvent: async
+            App\Organization\Domain\Event\PermissionRevokedEvent: async
+            App\Organization\Domain\Event\DepartmentPermissionChangedEvent: async
+            App\Organization\Domain\Event\UserPermissionOverrideChangedEvent: async
 
 when@test:
     framework:
