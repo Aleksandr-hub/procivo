@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\TaskManager\Domain\Entity;
 
 use App\Shared\Domain\AggregateRoot;
+use App\Shared\Domain\SoftDeletableInterface;
+use App\Shared\Domain\SoftDeletableTrait;
 use App\TaskManager\Domain\Event\TaskAssignedEvent;
 use App\TaskManager\Domain\Event\TaskClaimedEvent;
 use App\TaskManager\Domain\Event\TaskCreatedEvent;
@@ -17,8 +19,9 @@ use App\TaskManager\Domain\ValueObject\TaskId;
 use App\TaskManager\Domain\ValueObject\TaskPriority;
 use App\TaskManager\Domain\ValueObject\TaskStatus;
 
-class Task extends AggregateRoot
+class Task extends AggregateRoot implements SoftDeletableInterface
 {
+    use SoftDeletableTrait;
     private string $id;
     private string $organizationId;
     private string $title;

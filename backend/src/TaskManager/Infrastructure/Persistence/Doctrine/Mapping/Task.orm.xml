@@ -24,6 +24,7 @@
         <field name="creatorId" type="string" length="36" column="creator_id"/>
         <field name="createdAt" type="datetime_immutable" column="created_at"/>
         <field name="updatedAt" type="datetime_immutable" nullable="true" column="updated_at"/>
+        <field name="deletedAt" type="datetime_immutable" column="deleted_at" nullable="true"/>
 
         <indexes>
             <index name="idx_task_organization" columns="organization_id"/>

@@ -18,6 +18,7 @@
         <field name="createdBy" column="created_by" type="string" length="36"/>
         <field name="createdAt" column="created_at" type="datetime_immutable"/>
         <field name="updatedAt" column="updated_at" type="datetime_immutable" nullable="true"/>
+        <field name="deletedAt" type="datetime_immutable" column="deleted_at" nullable="true"/>
 
         <indexes>
             <index name="idx_wf_def_organization" columns="organization_id"/>

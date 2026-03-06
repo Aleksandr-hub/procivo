@@ -11,11 +11,14 @@ use App\Identity\Domain\ValueObject\HashedPassword;
 use App\Identity\Domain\ValueObject\UserId;
 use App\Identity\Domain\ValueObject\UserStatus;
 use App\Shared\Domain\AggregateRoot;
+use App\Shared\Domain\SoftDeletableInterface;
+use App\Shared\Domain\SoftDeletableTrait;
 use App\Shared\Domain\ValueObject\CreatedAt;
 use App\Shared\Domain\ValueObject\Email;
 
-class User extends AggregateRoot
+class User extends AggregateRoot implements SoftDeletableInterface
 {
+    use SoftDeletableTrait;
     /** @var string Doctrine-mapped field */
     private string $id;
     /** @var string Doctrine-mapped field */

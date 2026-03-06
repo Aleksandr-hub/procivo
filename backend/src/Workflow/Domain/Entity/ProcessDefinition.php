@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Workflow\Domain\Entity;
 
 use App\Shared\Domain\AggregateRoot;
+use App\Shared\Domain\SoftDeletableInterface;
+use App\Shared\Domain\SoftDeletableTrait;
 use App\Workflow\Domain\Event\ProcessDefinitionCreatedEvent;
 use App\Workflow\Domain\Event\ProcessDefinitionPublishedEvent;
 use App\Workflow\Domain\Event\ProcessDefinitionRevertedToDraftEvent;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionId;
 use App\Workflow\Domain\ValueObject\ProcessDefinitionStatus;
 
-class ProcessDefinition extends AggregateRoot
+class ProcessDefinition extends AggregateRoot implements SoftDeletableInterface
 {
+    use SoftDeletableTrait;
     private string $id;
     private string $organizationId;
     private string $name;

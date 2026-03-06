@@ -10,10 +10,13 @@ use App\Organization\Domain\ValueObject\OrganizationName;
 use App\Organization\Domain\ValueObject\OrganizationSlug;
 use App\Organization\Domain\ValueObject\OrganizationStatus;
 use App\Shared\Domain\AggregateRoot;
+use App\Shared\Domain\SoftDeletableInterface;
+use App\Shared\Domain\SoftDeletableTrait;
 use App\Shared\Domain\ValueObject\CreatedAt;
 
-class Organization extends AggregateRoot
+class Organization extends AggregateRoot implements SoftDeletableInterface
 {
+    use SoftDeletableTrait;
     private string $id;
     private string $name;
     private string $slug;
