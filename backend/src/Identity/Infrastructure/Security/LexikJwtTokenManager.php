@@ -46,4 +46,18 @@ final readonly class LexikJwtTokenManager implements JwtTokenManagerInterface
             'exp' => $now + $ttl,
         ]);
     }
+
+    public function createPartial(string $userId, string $email, int $ttl = 300): string
+    {
+        $now = time();
+
+        return $this->jwtEncoder->encode([
+            'user_id' => $userId,
+            'username' => $email,
+            'roles' => [],
+            '2fa_required' => true,
+            'iat' => $now,
+            'exp' => $now + $ttl,
+        ]);
+    }
 }

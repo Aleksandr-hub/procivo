@@ -23,4 +23,10 @@ interface JwtTokenManagerInterface
         string $impersonatedBy,
         int $ttl = 900,
     ): string;
+
+    /**
+     * Create a short-lived partial JWT for 2FA challenge.
+     * Token contains 2fa_required claim and grants access only to /2fa/verify.
+     */
+    public function createPartial(string $userId, string $email, int $ttl = 300): string;
 }

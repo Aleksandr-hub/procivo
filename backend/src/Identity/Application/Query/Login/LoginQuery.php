@@ -13,6 +13,7 @@ final readonly class LoginQuery implements QueryInterface
         public string $password,
         public ?string $ip = null,
         public ?string $userAgent = null,
+        public ?string $rememberDeviceToken = null,
     ) {
     }
 }

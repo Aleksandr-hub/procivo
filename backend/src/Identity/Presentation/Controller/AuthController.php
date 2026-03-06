@@ -73,6 +73,7 @@ final readonly class AuthController
             password: $data['password'] ?? '',
             ip: $request->getClientIp(),
             userAgent: $request->headers->get('User-Agent'),
+            rememberDeviceToken: $request->cookies->get('remember_2fa'),
         ));
 
         return new JsonResponse($dto);
